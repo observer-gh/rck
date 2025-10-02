@@ -26,6 +26,7 @@ class Club:
     status: str = 'Matched'  # Matched | Active
     chat_link: Optional[str] = None
     match_score_breakdown: Dict[str, int] = field(default_factory=dict)
+    match_run_id: Optional[str] = None
     created_at: str = field(default_factory=_now_iso)
     updated_at: str = field(default_factory=_now_iso)
 
@@ -41,3 +42,13 @@ class ActivityReport:
     status: str = 'Pending'  # Pending | Verified
     verified_at: Optional[str] = None
     created_at: str = field(default_factory=_now_iso)
+
+
+@dataclass
+class MatchRun:
+    id: str
+    created_at: str
+    target_size: int
+    user_count: int
+    club_count: int
+    superseded: bool = False

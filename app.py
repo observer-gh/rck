@@ -1,11 +1,13 @@
 import streamlit as st
 from services import persistence
-from domain.models import User
+from domain.models import User, MatchRun
 from utils.ids import create_id_with_prefix
 from services.matching import compute_matches
 from services.sample_data import make_users
+from services import activity
 from dataclasses import asdict
 import datetime as dt
+import time
 
 st.set_page_config(page_title="AI Club Matching Demo", layout="wide")
 
@@ -28,7 +30,7 @@ def save_clubs(clubs):
 
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Go to", [
-                        "User Signup", "Matching (Admin)", "Results", "Seed Sample Users"], index=0)
+                        "User Signup", "Matching (Admin)", "Results", "Activity Reports", "Verification (Admin)", "Match Runs", "Seed Sample Users"], index=0)
 
 
 if page == "User Signup":
@@ -64,28 +66,135 @@ elif page == "Matching (Admin)":
         st.write(f"총 사용자: {len(users_raw)}")
         target_size = st.number_input(
             "그룹 인원 (기본 5)", min_value=3, max_value=10, value=5)
-        if st.button("매칭 실행"):
+        if st.button("매칭 실행 / 새 버전"):
             # Convert to User objects
             user_objs = [User(**u) for u in users_raw]
-            clubs = compute_matches(user_objs, target_size=target_size)
+            run_id = create_id_with_prefix('run')
+            clubs = compute_matches(
+                user_objs, target_size=target_size, run_id=run_id)
             clubs_dicts = [asdict(c) for c in clubs]
-            save_clubs(clubs_dicts)
-            st.success(f"생성된 클럽 수: {len(clubs_dicts)}")
+            existing = load_clubs()
+            existing.extend(clubs_dicts)
+            save_clubs(existing)
+            runs = persistence.load_list('match_runs')
+            run_meta = MatchRun(id=run_id, created_at=dt.datetime.now(dt.timezone.utc).isoformat().replace(
+                '+00:00', 'Z'), target_size=target_size, user_count=len(users_raw), club_count=len(clubs_dicts))
+            runs.append(asdict(run_meta))
+            persistence.replace_all('match_runs', runs)
+            st.success(f"새 매칭 실행 완료. Run: {run_id} | 클럽 {len(clubs_dicts)}")
     st.divider()
     st.subheader("매칭 이전 사용자 미리보기")
     st.dataframe(load_users(), use_container_width=True)
 
 elif page == "Results":
     st.header("클럽 결과")
-    clubs = load_clubs()
-    if not clubs:
+    clubs_all = load_clubs()
+    if not clubs_all:
         st.info("아직 생성된 클럽이 없습니다.")
     else:
+        run_ids = sorted({c.get('match_run_id', '')
+                         for c in clubs_all if c.get('match_run_id')}, reverse=True)
+        if not run_ids:
+            st.warning("Run ID 없는 클럽만 존재.")
+            clubs = clubs_all
+        else:
+            selected_run = st.selectbox("Match Run 선택", options=run_ids)
+            clubs = [c for c in clubs_all if c.get(
+                'match_run_id') == selected_run]
+        st.caption(f"클럽 수: {len(clubs)}")
+        modified = False
         for c in clubs:
-            with st.expander(f"클럽 {c['id']} | 인원 {len(c['member_ids'])}"):
+            with st.expander(f"클럽 {c['id']} | 인원 {len(c['member_ids'])} | 상태 {c.get('status','?')}"):
                 st.write("리더:", c['leader_id'])
                 st.write("멤버:", ', '.join(c['member_ids']))
                 st.json(c['match_score_breakdown'])
+                leader_input = st.text_input(
+                    f"리더 ID 확인 ({c['id']})", key=f"leader_check_{c['id']}")
+                if leader_input == c['leader_id'] and c.get('status') == 'Matched':
+                    chat_url = st.text_input(
+                        f"채팅 링크 입력 ({c['id']})", key=f"chat_{c['id']}")
+                    if chat_url and st.button(f"활성화 ({c['id']})"):
+                        c['chat_link'] = chat_url
+                        c['status'] = 'Active'
+                        c['updated_at'] = dt.datetime.now(
+                            dt.timezone.utc).isoformat().replace('+00:00', 'Z')
+                        modified = True
+        if modified:
+            save_clubs(clubs_all)
+            st.success("업데이트 저장됨")
+
+elif page == "Activity Reports":
+    st.header("활동 보고서 제출")
+    clubs_all = load_clubs()
+    if not clubs_all:
+        st.info("클럽이 없습니다.")
+    else:
+        club_options = [f"{c['id']} ({c.get('status')})" for c in clubs_all if c.get(
+            'status') == 'Active']
+        if not club_options:
+            st.warning("활성화된 (Active) 클럽이 없습니다.")
+        else:
+            choice = st.selectbox("클럽 선택", options=club_options)
+            club_id = choice.split()[0]
+            date = st.date_input("활동 날짜")
+            raw_text = st.text_area("활동 내용")
+            photo = st.file_uploader("사진 업로드 (시뮬레이션)")
+            part_count = st.number_input(
+                "참여 인원(선택)", min_value=0, max_value=100, value=0)
+            if st.button("보고서 제출", disabled=not raw_text):
+                photo_name = photo.name if photo is not None else 'no_photo'
+                rep = activity.create_activity_report(club_id=club_id, date=str(
+                    date), photo_name=photo_name, raw_text=raw_text, participant_override=part_count if part_count > 0 else None)
+                st.success(f"보고서 생성: {rep.id}")
+        st.divider()
+        st.subheader("제출된 보고서")
+        reports = activity.list_reports()
+        if reports:
+            st.dataframe(reports, use_container_width=True)
+        else:
+            st.caption("아직 없음")
+
+elif page == "Verification (Admin)":
+    st.header("보고서 검증 (시뮬레이션)")
+    reports = activity.list_reports()
+    pending = [r for r in reports if r['status'] == 'Pending']
+    if not pending:
+        st.info("대기중 보고서 없음")
+    else:
+        for r in pending:
+            with st.expander(f"Report {r['id']} | Club {r['club_id']}"):
+                st.write(r['formatted_report'])
+                if st.button(f"AI 검증 실행 ({r['id']})"):
+                    with st.spinner("AI 검증 중..."):
+                        time.sleep(2)
+                    activity.verify_report(r['id'])
+                    st.success("검증 완료")
+                    st.rerun()
+    st.divider()
+    st.subheader("전체 보고서")
+    all_reports = activity.list_reports()
+    if all_reports:
+        st.dataframe(all_reports, use_container_width=True)
+    else:
+        st.caption("없음")
+
+elif page == "Match Runs":
+    st.header("매칭 실행 기록")
+    runs = persistence.load_list('match_runs')
+    if not runs:
+        st.info("실행 기록 없음")
+    else:
+        runs_sorted = sorted(runs, key=lambda r: r['created_at'], reverse=True)
+        st.dataframe(runs_sorted, use_container_width=True)
+        run_ids = [r['id'] for r in runs_sorted]
+        sel = st.selectbox("Supersede Run 선택", options=[''] + run_ids)
+        if sel and st.button("Supersede 표시"):
+            for r in runs:
+                if r['id'] == sel:
+                    r['superseded'] = True
+            persistence.replace_all('match_runs', runs)
+            st.success("표시 완료")
+            st.rerun()
 
 elif page == "Seed Sample Users":
     st.header("샘플 사용자 생성")

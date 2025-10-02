@@ -11,7 +11,8 @@ DATA_DIR = os.path.normpath(DATA_DIR)
 FILES = {
     'users': 'users.json',
     'clubs': 'clubs.json',
-    'activity_reports': 'activity_reports.json'
+    'activity_reports': 'activity_reports.json',
+    'match_runs': 'match_runs.json'
 }
 
 

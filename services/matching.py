@@ -15,7 +15,10 @@ def score(u1: User, u2: User) -> int:
     return s
 
 
-def compute_matches(users: List[User], target_size: int = 5) -> List[Club]:
+from typing import Optional
+
+
+def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[str] = None) -> List[Club]:
     if not users:
         return []
     # Precompute pair scores
@@ -71,5 +74,5 @@ def compute_matches(users: List[User], target_size: int = 5) -> List[Club]:
             for user_b in group[i+1:]:
                 breakdown[f"{user_a}:{user_b}"] = pair(user_a, user_b)
         clubs.append(Club(id=create_id_with_prefix('club'), member_ids=group, leader_id=leader,
-                     match_score_breakdown=breakdown, created_at=now, updated_at=now))
+                     match_score_breakdown=breakdown, match_run_id=run_id, created_at=now, updated_at=now))
     return clubs
