@@ -1,3 +1,4 @@
+from typing import Optional
 import streamlit as st
 from services import persistence
 from domain.models import User, MatchRun
@@ -9,7 +10,24 @@ from dataclasses import asdict
 import datetime as dt
 import time
 
+
+def utc_now_iso():
+    """Return current UTC time in ISO format with 'Z' suffix."""
+    return dt.datetime.now(dt.timezone.utc).isoformat().replace('+00:00', 'Z')
+
+
 st.set_page_config(page_title="AI Club Matching Demo", layout="wide")
+
+    for user in users:
+        if exclude_id and user['id'] == exclude_id:
+            continue
+        if user['name'].strip().lower() == name_norm and user['region'].strip().lower() == region_norm:
+            return True
+        if exclude_id and u['id'] == exclude_id:
+            continue
+        if u['name'].strip().lower() == name_norm and u['region'].strip().lower() == region_norm:
+            return True
+    return False
 
 
 def load_users():
@@ -43,12 +61,15 @@ if page == "User Signup":
     atmosphere = st.selectbox("선호 분위기", ["외향", "내향", "밸런스"])
     if st.button("저장", disabled=not (name and interests)):
         users = load_users()
-        uid = create_id_with_prefix('u')
-        user = User(id=uid, name=name, region=region, rank=rank,
-                    interests=interests, preferred_atmosphere=atmosphere)
-        users.append(asdict(user))
-        save_users(users)
-        st.success(f"저장 완료: {name}")
+        if is_duplicate_user(name, region, users):
+            st.error("중복 사용자 (이름+지역) 존재. 저장 취소.")
+        else:
+            uid = create_id_with_prefix('u')
+            user = User(id=uid, name=name, region=region, rank=rank,
+                        interests=interests, preferred_atmosphere=atmosphere)
+            users.append(asdict(user))
+            save_users(users)
+            st.success(f"저장 완료: {name}")
     st.divider()
     st.subheader("현재 사용자 (편집/삭제)")
     users = load_users()
@@ -74,16 +95,19 @@ if page == "User Signup":
                     col1, col2 = st.columns(2)
                     with col1:
                         if st.button("저장 변경", key=f"save_user_{sel}"):
-                            u.update({
-                                'name': new_name,
-                                'region': new_region,
-                                'rank': new_rank,
-                                'interests': new_interests,
-                                'preferred_atmosphere': new_atmos
-                            })
-                            save_users(users)
-                            st.success("업데이트 완료")
-                            st.rerun()
+                            if is_duplicate_user(new_name, new_region, users, exclude_id=sel):
+                                st.error("중복 사용자 (이름+지역) 존재. 변경 취소.")
+                            else:
+                                u.update({
+                                    'name': new_name,
+                                    'region': new_region,
+                                    'rank': new_rank,
+                                    'interests': new_interests,
+                                    'preferred_atmosphere': new_atmos
+                                })
+                                save_users(users)
+                                st.success("업데이트 완료")
+                                st.rerun()
                     with col2:
                         if st.button("삭제", key=f"del_user_{sel}"):
                             users = [x for x in users if x['id'] != sel]
@@ -94,36 +118,55 @@ if page == "User Signup":
     else:
         st.info("아직 등록된 사용자가 없습니다.")
 
+
+def run_matching(users_raw, target_size):
+    user_objs = [User(**u) for u in users_raw]
+    run_id = create_id_with_prefix('run')
+    clubs = compute_matches(
+        user_objs, target_size=target_size, run_id=run_id)
+    clubs_dicts = [asdict(c) for c in clubs]
+    existing = load_clubs()
+    existing.extend(clubs_dicts)
+    save_clubs(existing)
+    runs = persistence.load_list('match_runs')
+    run_meta = MatchRun(id=run_id, created_at=dt.datetime.now(dt.timezone.utc).isoformat().replace(
+        '+00:00', 'Z'), target_size=target_size, user_count=len(users_raw), club_count=len(clubs_dicts))
+    runs.append(asdict(run_meta))
+    persistence.replace_all('match_runs', runs)
+    return run_id, len(clubs_dicts)
+
+
 elif page == "Matching (Admin)":
     st.header("매칭 실행 (Admin)")
     users_raw = load_users()
     if not users_raw:
-        st.warning("사용자가 없습니다.")
-    else:
-        st.write(f"총 사용자: {len(users_raw)}")
-        target_size = st.number_input(
-            "그룹 인원 (기본 5)", min_value=3, max_value=10, value=5)
-        if st.button("매칭 실행 / 새 버전"):
-            # Convert to User objects
-            user_objs = [User(**u) for u in users_raw]
-            run_id = create_id_with_prefix('run')
-            clubs = compute_matches(
-                user_objs, target_size=target_size, run_id=run_id)
-            clubs_dicts = [asdict(c) for c in clubs]
-            existing = load_clubs()
-            existing.extend(clubs_dicts)
-            save_clubs(existing)
-            runs = persistence.load_list('match_runs')
-            run_meta = MatchRun(id=run_id, created_at=dt.datetime.now(dt.timezone.utc).isoformat().replace(
-                '+00:00', 'Z'), target_size=target_size, user_count=len(users_raw), club_count=len(clubs_dicts))
+            run_meta = MatchRun(id=run_id, created_at=utc_now_iso(),
+                target_size=target_size, user_count=len(users_raw), club_count=len(clubs_dicts))
             runs.append(asdict(run_meta))
             persistence.replace_all('match_runs', runs)
             st.success(f"새 매칭 실행 완료. Run: {run_id} | 클럽 {len(clubs_dicts)}")
-    st.divider()
-    st.subheader("매칭 이전 사용자 미리보기")
-    st.dataframe(load_users(), use_container_width=True)
-
-elif page == "Results":
+        if st.button("매칭 실행 / 새 버전"):
+            run_id, club_count = run_matching(users_raw, target_size)
+            st.success(f"새 매칭 실행 완료. Run: {run_id} | 클럽 {club_count}")
+        # Re-run latest button (use last run target_size)
+        runs = persistence.load_list('match_runs')
+        if runs:
+            runs_sorted = sorted(runs, key=lambda r: r['created_at'])
+            last = runs_sorted[-1]
+            col_rerun1, col_rerun2 = st.columns([1, 3])
+            with col_rerun1:
+                if st.button("마지막 설정 재실행"):
+                    run_id, club_count = run_matching(users_raw, last['target_size'])
+                    st.success(
+                        f"재실행 완료. Run: {run_id} | 클럽 {club_count}")
+            with col_rerun2:
+                st.caption(
+                    run_meta = MatchRun(id=run_id, created_at=utc_now_iso(),
+                        target_size=last['target_size'], user_count=len(users_raw), club_count=len(clubs_dicts))
+                    runs.append(asdict(run_meta))
+                    persistence.replace_all('match_runs', runs)
+                    st.success(
+                        f"재실행 완료. Run: {run_id} | 클럽 {len(clubs_dicts)}")
     st.header("클럽 결과")
     clubs_all = load_clubs()
     if not clubs_all:
@@ -174,9 +217,8 @@ elif page == "Results":
             st.success("업데이트 저장됨")
 
 elif page == "Activity Reports":
-    st.header("활동 보고서 제출")
-    clubs_all = load_clubs()
-    if not clubs_all:
+                        c['updated_at'] = utc_now_iso()
+                        modified = True
         st.info("클럽이 없습니다.")
     else:
         club_options = [f"{c['id']} ({c.get('status')})" for c in clubs_all if c.get(

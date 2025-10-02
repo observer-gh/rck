@@ -1,5 +1,5 @@
-from services.matching import score, compute_matches
 from domain.models import User
+from services.matching import score, compute_matches
 import sys
 import os
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
