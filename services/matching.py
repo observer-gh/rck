@@ -1,3 +1,4 @@
+from typing import Optional
 from typing import List, Dict, Tuple
 from domain.models import User, Club
 from utils.ids import create_id_with_prefix
@@ -13,9 +14,6 @@ def score(u1: User, u2: User) -> int:
     if u1.preferred_atmosphere == u2.preferred_atmosphere:
         s += 2
     return s
-
-
-from typing import Optional
 
 
 def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[str] = None) -> List[Club]:

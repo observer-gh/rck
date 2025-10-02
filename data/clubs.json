@@ -37,8 +37,8 @@
       "u_1759368930004_4o9s"
     ],
     "leader_id": "u_1759368930004_exhn",
-    "status": "Matched",
-    "chat_link": null,
+    "status": "Active",
+    "chat_link": "hi.com",
     "match_score_breakdown": {
       "u_1759368930004_exhn:u_1759368930003_e4dy": 25,
       "u_1759368930004_exhn:u_1759368930002_mklb": 25,
@@ -53,7 +53,7 @@
     },
     "match_run_id": "run_1759369463454_fa11",
     "created_at": "2025-10-02T01:44:23.455180Z",
-    "updated_at": "2025-10-02T01:44:23.455180Z"
+    "updated_at": "2025-10-02T02:26:12.771822Z"
   },
   {
     "id": "club_1759369463455_p8j6",

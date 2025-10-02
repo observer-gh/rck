@@ -50,9 +50,46 @@ if page == "User Signup":
         save_users(users)
         st.success(f"저장 완료: {name}")
     st.divider()
-    st.subheader("현재 사용자")
+    st.subheader("현재 사용자 (편집/삭제)")
     users = load_users()
     if users:
+        # Editable selection
+        user_ids = [u['id'] for u in users]
+        sel = st.selectbox("사용자 선택", options=["-"] + user_ids)
+        if sel != "-":
+            # Find user
+            u = next((x for x in users if x['id'] == sel), None)
+            if u:
+                with st.expander(f"편집 {sel}", expanded=True):
+                    new_name = st.text_input(
+                        "이름", value=u['name'], key=f"edit_name_{sel}")
+                    new_region = st.selectbox("지역", ["서울", "부산", "대전", "대구"], index=[
+                                              "서울", "부산", "대전", "대구"].index(u['region']), key=f"edit_region_{sel}")
+                    new_rank = st.selectbox("직급", ["사원", "주임", "대리", "과장"], index=[
+                                            "사원", "주임", "대리", "과장"].index(u['rank']), key=f"edit_rank_{sel}")
+                    new_interests = st.multiselect("관심사", [
+                                                   "축구", "영화보기", "보드게임", "러닝", "독서", "헬스", "요리", "사진", "등산"], default=u['interests'], key=f"edit_interests_{sel}")
+                    new_atmos = st.selectbox("선호 분위기", ["외향", "내향", "밸런스"], index=[
+                                             "외향", "내향", "밸런스"].index(u['preferred_atmosphere']), key=f"edit_atmos_{sel}")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("저장 변경", key=f"save_user_{sel}"):
+                            u.update({
+                                'name': new_name,
+                                'region': new_region,
+                                'rank': new_rank,
+                                'interests': new_interests,
+                                'preferred_atmosphere': new_atmos
+                            })
+                            save_users(users)
+                            st.success("업데이트 완료")
+                            st.rerun()
+                    with col2:
+                        if st.button("삭제", key=f"del_user_{sel}"):
+                            users = [x for x in users if x['id'] != sel]
+                            save_users(users)
+                            st.warning("삭제됨 (매칭 재실행 필요)")
+                            st.rerun()
         st.dataframe(users, use_container_width=True)
     else:
         st.info("아직 등록된 사용자가 없습니다.")
@@ -102,9 +139,22 @@ elif page == "Results":
             clubs = [c for c in clubs_all if c.get(
                 'match_run_id') == selected_run]
         st.caption(f"클럽 수: {len(clubs)}")
+        # CSV export of selected run clubs
+        import csv
+        import io
+        if st.button("클럽 CSV 다운로드"):
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(
+                ["club_id", "member_ids", "leader_id", "status", "run_id"])
+            for c in clubs:
+                writer.writerow([c['id'], '|'.join(c['member_ids']), c['leader_id'], c.get(
+                    'status', ''), c.get('match_run_id', '')])
+            st.download_button("다운로드", output.getvalue(),
+                               file_name="clubs.csv", mime="text/csv")
         modified = False
         for c in clubs:
-            with st.expander(f"클럽 {c['id']} | 인원 {len(c['member_ids'])} | 상태 {c.get('status','?')}"):
+            with st.expander(f"클럽 {c['id']} | 인원 {len(c['member_ids'])} | 상태 {c.get('status', '?')}"):
                 st.write("리더:", c['leader_id'])
                 st.write("멤버:", ', '.join(c['member_ids']))
                 st.json(c['match_score_breakdown'])
@@ -186,6 +236,19 @@ elif page == "Match Runs":
     else:
         runs_sorted = sorted(runs, key=lambda r: r['created_at'], reverse=True)
         st.dataframe(runs_sorted, use_container_width=True)
+        # Export runs
+        import csv
+        import io
+        if st.button("Run CSV"):
+            out = io.StringIO()
+            w = csv.writer(out)
+            w.writerow(["run_id", "created_at", "target_size",
+                       "user_count", "club_count", "superseded"])
+            for r in runs_sorted:
+                w.writerow([r['id'], r['created_at'], r['target_size'],
+                           r['user_count'], r['club_count'], r.get('superseded', False)])
+            st.download_button("다운로드 Run CSV", out.getvalue(
+            ), file_name="match_runs.csv", mime="text/csv")
         run_ids = [r['id'] for r in runs_sorted]
         sel = st.selectbox("Supersede Run 선택", options=[''] + run_ids)
         if sel and st.button("Supersede 표시"):
