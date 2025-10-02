@@ -1,0 +1,113 @@
+# --------------------------------------------------
+# Python project .gitignore
+# Generated to cover: Python bytecode, venvs, packaging, tests, IDE junk,
+# OS artifacts, and optional local data. Adjust as needed.
+# --------------------------------------------------
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+.env.*
+pip-wheel-metadata/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+*.manifest
+*.spec
+*.whl
+*.patch
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+
+# Unit test / coverage reports
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.nox/
+.tox/
+coverage.xml
+*.cover
+*.py,cover
+tests/__pycache__/
+
+# Type checker / static analysis caches
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.ruff_cache/
+
+# C extensions
+*.so
+
+# Logs & runtime artifacts
+logs/
+*.log
+*.pid
+*.pid.lock
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Icon?
+._*
+Thumbs.db
+
+# Local data scratch / backups (safe to ignore)
+data/*.tmp
+data/*.bak
+data/*~
+
+# If you have large or sensitive data you do NOT want committed, uncomment below:
+# data/activity_reports.json
+# data/clubs.json
+# data/users.json
+
+# Cache / temp
+tmp/
+temp/
+.cache/
+cache/
+
+# Lock / state files (uncomment if they appear and are local-only)
+# poetry.lock
+# Pipfile.lock
+
+# Environment specific override files
+*.local
+
+# Security: never commit secrets (add patterns here as needed)
+secrets*.json
+*.key
+*.pem
+
+# Optional: comment these out if you intentionally track them
+.python-version
+
+# End of file
