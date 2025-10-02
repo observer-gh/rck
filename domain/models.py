@@ -26,6 +26,8 @@ class Club:
     status: str = 'Matched'  # Matched | Active
     chat_link: Optional[str] = None
     match_score_breakdown: Dict[str, int] = field(default_factory=dict)
+    explanations: Dict[str, Dict[str, str]] = field(
+        default_factory=dict)  # user_id -> other_user_id -> reason string
     match_run_id: Optional[str] = None
     created_at: str = field(default_factory=_now_iso)
     updated_at: str = field(default_factory=_now_iso)
@@ -41,6 +43,7 @@ class ActivityReport:
     formatted_report: str
     status: str = 'Pending'  # Pending | Verified
     verified_at: Optional[str] = None
+    points_awarded: int = 0
     created_at: str = field(default_factory=_now_iso)
 
 

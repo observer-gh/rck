@@ -31,7 +31,7 @@ def list_reports() -> List[Dict[str, Any]]:
     return persistence.load_list('activity_reports')
 
 
-def verify_report(report_id: str):
+def verify_report(report_id: str, points: int = 10):
     reports = persistence.load_list('activity_reports')
     changed = False
     now = dt.datetime.now(dt.timezone.utc).isoformat().replace('+00:00', 'Z')
@@ -39,6 +39,7 @@ def verify_report(report_id: str):
         if r['id'] == report_id:
             r['status'] = 'Verified'
             r['verified_at'] = now
+            r['points_awarded'] = points
             changed = True
             break
     if changed:

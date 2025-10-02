@@ -68,9 +68,30 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
     for group in clubs_raw:
         leader = group[0]
         breakdown = {}
+        explanations: dict[str, dict[str, str]] = {}
         for i, user_a in enumerate(group):
             for user_b in group[i+1:]:
                 breakdown[f"{user_a}:{user_b}"] = pair(user_a, user_b)
+        # Build simple explanation per user
+        for uid in group:
+            explanations[uid] = {}
+        for i, a in enumerate(group):
+            for b in group[i+1:]:
+                sc = pair(a, b)
+                reason_bits = []
+                ua = next(u for u in users if u.id == a)
+                ub = next(u for u in users if u.id == b)
+                common = set(ua.interests) & set(ub.interests)
+                if common:
+                    reason_bits.append(f"공통관심:{'/'.join(sorted(common))}")
+                if ua.region == ub.region:
+                    reason_bits.append("지역")
+                if ua.rank == ub.rank:
+                    reason_bits.append("직급")
+                if ua.preferred_atmosphere == ub.preferred_atmosphere:
+                    reason_bits.append("분위기")
+                explanations[a][b] = ','.join(reason_bits) or '기준없음'
+                explanations[b][a] = explanations[a][b]
         clubs.append(Club(id=create_id_with_prefix('club'), member_ids=group, leader_id=leader,
-                     match_score_breakdown=breakdown, match_run_id=run_id, created_at=now, updated_at=now))
+                     match_score_breakdown=breakdown, explanations=explanations, match_run_id=run_id, created_at=now, updated_at=now))
     return clubs
