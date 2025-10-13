@@ -110,4 +110,8 @@ secrets*.json
 # Optional: comment these out if you intentionally track them
 .python-version
 
-# End of file
+
+data/activity_reports.json
+data/clubs.json
+data/match_runs.json
+data/users.json
