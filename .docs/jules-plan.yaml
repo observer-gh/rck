@@ -1,318 +1,161 @@
 version: 1
-project: ai-club-matching
-owner: core-team
-generated: 2025-10-15
-description: >-
-  Consolidated Jules execution plan derived from phase docs (01–05) and agreed
-  decisions. Each task is atomic (<1 day), with clear dependencies and
-  verification criteria. Thresholds & constants surfaced for future tuning.
+project: multi-page-demo-split
+generated: 2025-10-16
+description: Focused plan to implement ONLY a multi-page separation (user vs admin) inside the existing Streamlit app for demo purposes. All prior phases removed intentionally.
 
-globals:
-  club:
-    min_size: 5
-    max_size: 10
-    name_template: "{region} {primary_interest} {personality_trait} 팀"
-  personality:
-    labels: ["외향", "내향", "중간"]
-    survey_questions: 5
-    classify_thresholds:
-      extrovert_min: 18   # sum >= 18 => 외향
-      introvert_max: 10   # sum <= 10 => 내향
-  verification:
-    points_pass: 10
-    thresholds:
-      participants: 0.75
-      interest: 0.70
-      diversity: 0.60
-    logic: AND
-
-phases:
-  - id: 1
-    key: user-model-foundation
-    goal: Ensure data supports new constraints (ranks, personality, employee number)
-  - id: 2
-    key: personality-survey
-    goal: Collect & classify personality via 5-question survey
-  - id: 3
-    key: matching-algorithm
-    goal: Hard constraints (region/personality/common-interest) + rank diversity
-  - id: 4
-    key: report-verification
-    goal: Simulated multi-metric verification w/ thresholds
-  - id: 5
-    key: polish
-    goal: Enhancements, partial rematch, cleanup
+phase:
+  id: 1
+  key: multi-page-split
+  goal: Separate user and admin flows with a dynamic page registry & admin toggle (no real auth).
 
 tasks:
-  # Phase 1 ---------------------------------------------------------------
-  - id: phase1.backup_snapshot
-    phase: 1
-    desc: Create JSON data backup before migrations.
+  - id: p1.audit_current_app
+    desc: Inventory existing app.py sections and label user/admin/mixed.
     exec:
       type: manual
       steps:
-        - copy data/*.json to backups/{date}_pre_phase1/
+        - list functions & UI blocks
     verify:
-      - files_exist: backups/{date}_pre_phase1/*
-    outputs: [backup_snapshot]
+      - notes_created: docs/app_audit.md
+    tags: [analysis]
+
+  - id: p1.router_scaffold
+    desc: Add page registry + sidebar selectbox router.
+    depends_on: [p1.audit_current_app]
+    exec:
+      type: code
+      steps:
+        - create registry {key:{label,fn,admin}}
+    verify:
+      - test: registry_excludes_admin_when_false
+    tags: [structure]
+
+  - id: p1.extract_pages
+    desc: Extract page functions (profile,my_club,activity,how_it_works,demo_script,admin_dashboard).
+    depends_on: [p1.router_scaffold]
+    exec:
+      type: code
+      steps:
+        - move code blocks into discrete fns
+    verify:
+      - test: import_pages_no_errors
+    tags: [refactor]
+
+  - id: p1.admin_toggle
+    desc: Add admin_mode checkbox controlling registry filtering.
+    depends_on: [p1.extract_pages]
+    exec:
+      type: code
+      steps:
+        - add st.sidebar.checkbox -> session_state.admin_mode
+    verify:
+      - test: admin_page_hidden_when_off
+    tags: [ui]
+
+  - id: p1.banner
+    desc: Show top banner when admin_mode true.
+    depends_on: [p1.admin_toggle]
+    exec:
+      type: code
+      steps:
+        - conditional st.markdown banner
+    verify:
+      - test: banner_only_admin
+    tags: [ux]
+
+  - id: p1.admin_dashboard_tabs
+    desc: Convert admin functions into tabbed dashboard (matching, clubs, reports, data, analytics).
+    depends_on: [p1.extract_pages]
+    exec:
+      type: code
+      steps:
+        - implement st.tabs
+    verify:
+      - test: tabs_render_admin_only
+    tags: [ui]
+
+  - id: p1.placeholder_my_club
+    desc: Placeholder message when no club assigned.
+    depends_on: [p1.extract_pages]
+    exec:
+      type: code
+      steps:
+        - conditional render
+    verify:
+      - test: placeholder_when_none
+    tags: [ux]
+
+  - id: p1.components_module
+    desc: Create ui/components.py (user_badge, club_card, metric_chip).
+    depends_on: [p1.extract_pages]
+    exec:
+      type: code
+      steps:
+        - new module + usages
+    verify:
+      - test: components_import
+    tags: [structure]
+
+  - id: p1.danger_zone_guard
+    desc: Second confirm checkbox around destructive reset.
+    depends_on: [p1.admin_dashboard_tabs]
+    exec:
+      type: code
+      steps:
+        - require confirm2 True
+    verify:
+      - test: cannot_reset_without_confirm2
     tags: [safety]
 
-  - id: phase1.migrate_ranks
-    phase: 1
-    desc: Normalize rank list and remove legacy "주임".
-    depends_on: [phase1.backup_snapshot]
+  - id: p1.basic_analytics
+    desc: Minimal counts (users, clubs, verified_reports) tab section.
+    depends_on: [p1.admin_dashboard_tabs]
     exec:
       type: code
       steps:
-        - update constants in app & any rank references
-        - add test ensuring rank list == ["사원","대리","과장","차장","부장"]
+        - aggregate + display
     verify:
-      - tests_pass: true
-      - assert: rank_list_length == 5
-    outputs: [updated_constants]
-    tags: [migration, model]
-
-  - id: phase1.add_employee_number
-    phase: 1
-    desc: Add employee_number field, required on signup.
-    depends_on: [phase1.migrate_ranks]
-    exec:
-      type: code
-      steps:
-        - modify User dataclass
-        - add UI field + validation
-        - optional uniqueness check (deferred)
-    verify:
-      - create_user: employee_number persisted
-    outputs: [user_schema_v2]
-    tags: [model, ui]
-
-  - id: phase1.personality_migration
-    phase: 1
-    desc: Map preferred_atmosphere to personality_trait (외향/내향/중간).
-    depends_on: [phase1.add_employee_number]
-    exec:
-      type: code
-      steps:
-        - load users, add personality_trait if missing
-        - write back updated JSON
-    verify:
-      - all_users_have: personality_trait
-    outputs: [user_schema_v3]
-    tags: [migration]
-
-  - id: phase1.min_group_guard
-    phase: 1
-    desc: Enforce min club size (5) in UI and backend.
-    depends_on: [phase1.personality_migration]
-    exec:
-      type: code
-      steps:
-        - update matching trigger validation
-        - add backend assert
-        - tests for <5 users scenario
-    verify:
-      - test: cannot_match_with_4_users
-    outputs: [matching_guard]
-    tags: [constraint]
-
-  - id: phase1.interest_intersection_helper
-    phase: 1
-    desc: Add helper to compute group-wide interest intersection.
-    depends_on: [phase1.min_group_guard]
-    exec:
-      type: code
-      steps:
-        - add function services/matching.py:get_common_interests(list[User])
-    verify:
-      - test: intersection_of_sample_group >=1
-    outputs: [interest_helper]
-    tags: [prep]
-
-  # Phase 2 ---------------------------------------------------------------
-  - id: phase2.survey_ui
-    phase: 2
-    desc: Implement 5-question Likert survey replacing direct personality selection.
-    depends_on: [phase1.interest_intersection_helper]
-    exec:
-      type: code
-      steps:
-        - add survey component
-        - store raw answers
-    verify:
-      - test: answers_persisted
-    outputs: [survey_ui]
-    tags: [ui]
-
-  - id: phase2.classify_trait
-    phase: 2
-    desc: Classify personality via thresholds (>=18 외향, <=10 내향, else 중간).
-    depends_on: [phase2.survey_ui]
-    exec:
-      type: code
-      steps:
-        - implement scoring util
-        - boundary tests
-    verify:
-      - test: score18==외향
-      - test: score10==내향
-    outputs: [classification_logic]
-    tags: [logic]
-
-  - id: phase2.migrate_legacy_answers_optional
-    phase: 2
-    desc: Allow legacy users to keep mapped trait until they take survey.
-    depends_on: [phase2.classify_trait]
-    exec:
-      type: code
-      steps:
-        - flag users w/out answers
-    verify:
-      - test: legacy_user_has_trait
-    outputs: [legacy_bridge]
-    tags: [compat]
-
-  # Phase 3 ---------------------------------------------------------------
-  - id: phase3.match_core
-    phase: 3
-    desc: Hard constraints (region, personality, common-interest) + greedy grouping.
-    depends_on: [phase2.migrate_legacy_answers_optional]
-    exec:
-      type: code
-      steps:
-        - implement filtering buckets
-        - greedy rank-diversity selection
-    verify:
-      - test: all_clubs_common_interest
-      - test: all_clubs_same_region_and_personality
-    outputs: [match_engine_v2]
-    tags: [core]
-
-  - id: phase3.primary_interest
-    phase: 3
-    desc: Derive primary_interest (highest global freq; tiebreak lexicographic).
-    depends_on: [phase3.match_core]
-    exec:
-      type: code
-      steps:
-        - implement frequency calc
-    verify:
-      - test: tiebreak_lexi
-    outputs: [primary_interest]
-    tags: [logic]
-
-  - id: phase3.club_naming
-    phase: 3
-    desc: Generate club name + summary string.
-    depends_on: [phase3.primary_interest]
-    exec:
-      type: code
-      steps:
-        - templating function
-    verify:
-      - test: name_contains_region_interest_trait
-    outputs: [club_name]
-    tags: [ui]
-
-  - id: phase3.explanations_update
-    phase: 3
-    desc: Add concise explanation line w/ diversity count.
-    depends_on: [phase3.club_naming]
-    exec:
-      type: code
-      steps:
-        - compute distinct ranks count
-    verify:
-      - test: explanation_includes_rank_diversity
-    outputs: [explanations_v2]
-    tags: [explainability]
-
-  # Phase 4 ---------------------------------------------------------------
-  - id: phase4.verification_metrics
-    phase: 4
-    desc: Simulate P/I/D scores & apply thresholds (AND logic).
-    depends_on: [phase3.explanations_update]
-    exec:
-      type: code
-      steps:
-        - scoring helper deterministic
-    verify:
-      - test: fail_if_any_below_threshold
-      - test: pass_if_all_above_threshold
-    outputs: [verification_engine]
-    tags: [verification]
-
-  - id: phase4.verification_ui
-    phase: 4
-    desc: Modal/alert summarizing metric results (green/red indicators).
-    depends_on: [phase4.verification_metrics]
-    exec:
-      type: code
-      steps:
-        - integrate into Verification page
-    verify:
-      - manual: ui_shows_three_scores
-    outputs: [verification_ui]
-    tags: [ui]
-
-  # Phase 5 ---------------------------------------------------------------
-  - id: phase5.partial_rematch
-    phase: 5
-    desc: Allow selecting subset of users to regenerate only their club.
-    depends_on: [phase4.verification_ui]
-    exec:
-      type: code
-      steps:
-        - implement extraction + reassign logic
-    verify:
-      - test: unaffected_clubs_stable
-    outputs: [partial_rematch]
-    tags: [enhancement]
-
-  - id: phase5.export_import_extended
-    phase: 5
-    desc: Extend CSV export/import to include employee_number & personality answers.
-    depends_on: [phase5.partial_rematch]
-    exec:
-      type: code
-      steps:
-        - update columns & docs
-    verify:
-      - test: roundtrip_extended_fields
-    outputs: [extended_csv]
-    tags: [data]
-
-  - id: phase5.cleanup_legacy
-    phase: 5
-    desc: Remove preferred_atmosphere references post-migration.
-    depends_on: [phase5.export_import_extended]
-    exec:
-      type: code
-      steps:
-        - search & remove legacy field usage
-    verify:
-      - grep: no_preferred_atmosphere_usages
-    outputs: [legacy_cleanup]
-    tags: [cleanup]
-
-  - id: phase5.analytics_basics
-    phase: 5
-    desc: Add simple dashboard metrics (avg rank diversity, interest variety).
-    depends_on: [phase5.cleanup_legacy]
-    exec:
-      type: code
-      steps:
-        - compute derived metrics
-    verify:
-      - manual: metrics_rendered
-    outputs: [analytics_v1]
+      - test: analytics_counts_positive
     tags: [analytics]
+
+  - id: p1.demo_script_page
+    desc: User-visible Demo Script static page.
+    depends_on: [p1.extract_pages]
+    exec:
+      type: content
+      steps:
+        - add markdown instructions
+    verify:
+      - manual: page_renders
+    tags: [docs, ux]
+
+  - id: p1.smoke_tests
+    desc: Smoke tests for router & admin visibility.
+    depends_on: [p1.admin_toggle]
+    exec:
+      type: code
+      steps:
+        - create tests/test_view_split_smoke.py
+    verify:
+      - test: view_split_smoke
+    tags: [testing]
+
+  - id: p1.readme_refresh
+    desc: Rewrite .docs/README.md to match new scope only.
+    depends_on: [p1.smoke_tests]
+    exec:
+      type: doc
+      steps:
+        - update summary
+    verify:
+      - file_contains: multi-page split
+    tags: [documentation]
 
 status_placeholders:
   default: pending
   allowed: [pending, in_progress, blocked, done, failed]
 
 notes:
-  - Modify thresholds in one place (globals.verification.thresholds) to adjust demo narrative.
-  - Each test reference should map to an actual pytest function name for traceability.
-  - Consider adding a metrics/ folder for JSON snapshots consumed by Jules.
+  - Starting over: prior phases intentionally removed for focus.
+  - Add real auth later by replacing admin_mode gate.
+  - Keep tasks atomic (<1 day) for rapid iteration.

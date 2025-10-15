@@ -1,23 +1,42 @@
-## Project Evolution Plan
+## Demo View Split Plan (Narrow Scope)
 
-This folder contains the structured phase plan for evolving the current Streamlit MVP into the next iteration that incorporates:
+This `.docs` folder now contains ONLY the focused plan to introduce a multi-page separation between end-user and admin flows inside the existing Streamlit app for demo purposes. All previous multi-phase roadmap documents were intentionally removed to reduce cognitive load and keep the narrative tight.
 
-- Hard constraints & improved matching logic
-- Personality (외향/내향/중간) survey & classification
-- Report (activity) verification simulation with per-metric thresholds (AND logic)
-- Data model extensions (employee number, unified ranks, club naming)
-- Progressive polish & optional AI-like affordances (templated, not real model calls)
+### Objective
 
-Approved decisions (confirmed by stakeholder):
+Deliver a clean demo where:
 
-1. Common Interest: Every member in a club must share at least one identical interest (global intersection size ≥ 1).
-2. Personality Survey: 5 Likert (1–5) questions → aggregated to classify 외향 / 내향 / 중간.
-3. Rank Diversity Objective: Only maximize the count of distinct ranks in each club (no distribution balancing).
-4. Club Size: Minimum 5; existing upper bound (10) kept.
-5. Report Verification: All three metrics must each pass individual thresholds (AND) to award points.
-6. Club Name: Simple template first ("{지역} {대표관심사} {성향} 팀").
-7. Personality Labels: 외향 / 내향 / 중간 (중간 replaces ‘밸런스’).
-8. Migration: Map existing preferred_atmosphere values into personality_trait.
-9. Points: Fixed 10 on pass, 0 on fail.
+1. A user can sign up, view (or await) their club, submit an activity report, and read a demo script guidance page.
+2. An admin (via a simple checkbox toggle) can access a dashboard with matching, clubs overview, reports verification, data tools, and minimal analytics.
+3. No production authentication is implemented; separation is purely a presentation + safety device.
 
-See individual phase documents for breakdown. A separate `jules-tasks.md` file sketches how each item can be represented as executable task units for a Jules-style workflow/orchestration system.
+### Key Elements
+
+- Dynamic page registry with sidebar selection.
+- `admin_mode` checkbox controlling which pages appear.
+- Tabbed Admin Dashboard (matching | clubs | reports | data | analytics).
+- Shared UI components module for reusable cards/badges.
+- Double-confirm Danger Zone protections.
+- Placeholder message when a user has no club assigned yet.
+- User-visible Demo Script page to guide observers through the flow.
+
+### Source of Truth
+
+`jules-plan.yaml` defines a single Phase (Phase 1) containing atomic tasks (audit, router scaffold, extraction, toggle, banner, dashboard tabs, placeholder, components, guard, analytics, demo script, smoke tests, README refresh).
+
+### Out of Scope (Explicitly Deferred)
+
+- Personality survey mechanics
+- Advanced matching rework / hard constraints re-introduction
+- Verification metric simulation logic changes
+- Extended data exports/imports
+- Partial rematch feature
+- Real authentication & role persistence
+
+### Next Step
+
+Implement tasks in order. Begin with `p1.audit_current_app` to capture the existing UI segments before refactor.
+
+---
+
+This narrowed plan can be expanded later by reintroducing phased documents if strategic scope returns. For now, lean focus maximizes demo readiness speed.
