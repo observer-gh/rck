@@ -1,5 +1,5 @@
 from domain.models import User
-from services.matching import score, compute_matches
+from services.matching import compute_matches
 import sys
 import os
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -8,15 +8,7 @@ if PROJECT_ROOT not in sys.path:
 
 
 def make_user(i, interests, region='서울', rank='사원', atmos='외향'):
-    return User(id=f'u{i}', name=f'U{i}', region=region, rank=rank, interests=interests, preferred_atmosphere=atmos)
-
-
-def test_score_components():
-    u1 = make_user(1, ['A', 'B'], region='R1', rank='R', atmos='X')
-    u2 = make_user(2, ['B', 'C'], region='R1', rank='R', atmos='X')
-    s = score(u1, u2)
-    # common interests=1 ->10, region +5, rank +3, atmos +2 =20
-    assert s == 20
+    return User(id=f'u{i}', name=f'U{i}', employee_number=f"E-TEST-{i}", region=region, rank=rank, interests=interests, personality_trait=atmos)
 
 
 def test_grouping_no_duplicate_and_size():
@@ -33,6 +25,5 @@ def test_grouping_no_duplicate_and_size():
 def test_grouping_leftover_redistribution():
     users = [make_user(i, ['X', 'Y']) for i in range(7)]
     clubs = compute_matches(users, target_size=5)
-    sizes = sorted([len(c.member_ids) for c in clubs])
-    # Current algorithm may produce one group of 5 and redistribute leftover 2 into existing (yield [7]) or two full groups of 5 if logic changes.
-    assert sizes in ([7], [5, 5])
+    assert len(clubs) == 1
+    assert len(clubs[0].member_ids) == 5

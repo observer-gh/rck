@@ -10,8 +10,11 @@ if PROJECT_ROOT not in sys.path:
 
 
 def make_user(i, interests, region='서울', rank='사원', atmos='외향'):
-    return User(id=f'tu{i}', name=f'TU{i}', region=region, rank=rank, interests=interests, preferred_atmosphere=atmos)
+    return User(id=f'tu{i}', name=f'TU{i}', employee_number=f"E-TEST-{i}", region=region, rank=rank, interests=interests, personality_trait=atmos)
 
+
+from domain.models import Club
+from dataclasses import asdict
 
 def test_match_explanations_present(tmp_path, monkeypatch):
     # Redirect data dir for isolation
@@ -22,24 +25,38 @@ def test_match_explanations_present(tmp_path, monkeypatch):
     clubs = compute_matches(users, target_size=5, run_id='testrun')
     assert clubs, 'Expected at least one club'
     club = clubs[0]
-    # For each member explanations dict should have entries for other members
+    # For each member, an explanation should exist.
     for uid in club.member_ids:
         assert uid in club.explanations
-        peers = club.explanations[uid]
-        # each other user should appear
-        assert all(other in peers for other in club.member_ids if other != uid)
+        explanation = club.explanations[uid]
+        assert "그룹" in explanation
+        assert "공통 관심사" in explanation["그룹"]
+        assert "직급 다양성" in explanation["그룹"]
 
 
 def test_verify_report_points(tmp_path, monkeypatch):
     data_dir = tmp_path / 'data'
     data_dir.mkdir()
     monkeypatch.setattr('services.persistence.DATA_DIR', str(data_dir))
-    # Create a fake report
+
+    # Create a dummy club and users for the report to be verified against
+    test_users = [make_user(i, ['축구', '영화보기']) for i in range(5)]
+    test_club = Club(id='clubX', member_ids=[u.id for u in test_users], leader_id=test_users[0].id)
+    persistence.replace_all('users', [asdict(u) for u in test_users])
+    persistence.replace_all('clubs', [asdict(test_club)])
+
+    # Create a fake report that mentions an interest
     rep = activity.create_activity_report(club_id='clubX', date=str(
-        dt.date.today()), photo_name='p', raw_text='내용', participant_override=3)
+        dt.date.today()), photo_name='p', raw_text='축구도 보고 영화보기도 하고 재밌었다', participant_override=4)
     reports = persistence.load_list('activity_reports')
     assert reports[0]['status'] == 'Pending'
+
     activity.verify_report(rep.id, points=15)
+
     reports2 = persistence.load_list('activity_reports')
-    assert reports2[0]['status'] == 'Verified'
-    assert reports2[0]['points_awarded'] == 15
+    verified_report = reports2[0]
+    assert verified_report['status'] == 'Verified'
+    # Check if points are awarded based on the simulation logic
+    assert verified_report['points_awarded'] > 0
+    assert 'verification_metrics' in verified_report
+    assert verified_report['verification_metrics']['interest'] > 0

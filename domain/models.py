@@ -7,14 +7,18 @@ def _now_iso():
     return _dt.datetime.now(_dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
 
 
+from typing import List, Dict, Optional
+
 @dataclass
 class User:
     id: str
     name: str
+    employee_number: str
     region: str
     rank: str
     interests: List[str]
-    preferred_atmosphere: str
+    personality_trait: str  # 외향, 내향, 중간
+    survey_answers: Optional[List[int]] = None
     created_at: str = field(default_factory=_now_iso)
 
 
@@ -23,6 +27,8 @@ class Club:
     id: str
     member_ids: List[str]
     leader_id: str
+    name: Optional[str] = None
+    primary_interest: Optional[str] = None
     status: str = 'Matched'  # Matched | Active
     chat_link: Optional[str] = None
     match_score_breakdown: Dict[str, int] = field(default_factory=dict)
@@ -41,6 +47,8 @@ class ActivityReport:
     photo_filename: str
     raw_text: str
     formatted_report: str
+    participant_override: Optional[int] = None
+    verification_metrics: Optional[Dict[str, float]] = None
     status: str = 'Pending'  # Pending | Verified
     verified_at: Optional[str] = None
     points_awarded: int = 0

@@ -6,6 +6,7 @@ from utils.ids import create_id_with_prefix
 from services.matching import compute_matches
 from services.sample_data import make_users
 from services import activity
+from services.survey import QUESTIONS, classify_personality
 from dataclasses import asdict
 import datetime as dt
 import time
@@ -13,9 +14,9 @@ import time
 
 # ---------------- Constants ---------------- #
 REGION_OPTIONS = ["서울", "부산", "대전", "대구"]
-RANK_OPTIONS = ["사원", "주임", "대리", "과장"]
+RANK_OPTIONS = ["사원", "대리", "과장", "차장", "부장"]
 INTEREST_OPTIONS = ["축구", "영화보기", "보드게임", "러닝", "독서", "헬스", "요리", "사진", "등산"]
-ATMOS_OPTIONS = ["외향", "내향", "밸런스"]
+PERSONALITY_OPTIONS = ["외향", "내향", "중간"]
 
 # ---------------- Utility ---------------- #
 
@@ -122,6 +123,25 @@ with st.sidebar.expander("Health / Metrics", expanded=False):
             leader_name = _user_name(
                 leader_id, user_map_local) if leader_id else '?'
             st.write(f"{leader_name} 팀: {pts}")
+
+    with st.sidebar.expander("Analytics", expanded=False):
+        if clubs_all_tmp:
+            rank_diversities = []
+            interest_varieties = []
+            for club in clubs_all_tmp:
+                members = [u for u in users_all if u['id'] in club['member_ids']]
+                if members:
+                    rank_diversities.append(len({m['rank'] for m in members}))
+                    all_interests = {i for m in members for i in m['interests']}
+                    interest_varieties.append(len(all_interests))
+
+            avg_rank_diversity = sum(rank_diversities) / len(rank_diversities) if rank_diversities else 0
+            avg_interest_variety = sum(interest_varieties) / len(interest_varieties) if interest_varieties else 0
+
+            st.metric("Avg Rank Diversity", f"{avg_rank_diversity:.2f}")
+            st.metric("Avg Interest Variety", f"{avg_interest_variety:.2f}")
+        else:
+            st.caption("No clubs for analytics.")
 page = st.sidebar.radio(
     "Go to",
     [
@@ -186,21 +206,29 @@ with st.sidebar.expander("Demo Guide", expanded=True):
 if page == "User Signup":
     st.header("사용자 등록")
     name = st.text_input("이름")
+    employee_number = st.text_input("사번")
     region = st.selectbox("지역", REGION_OPTIONS)
     rank = st.selectbox("직급", RANK_OPTIONS)
     interests = st.multiselect("관심사", INTEREST_OPTIONS)
-    atmosphere = st.selectbox("선호 분위기", ATMOS_OPTIONS)
-    if st.button("저장", disabled=not (name and interests)):
+
+    st.subheader("성향 설문")
+    answers = []
+    for i, q in enumerate(QUESTIONS):
+        answer = st.slider(q, 1, 5, 3, key=f"q_{i}")
+        answers.append(answer)
+
+    if st.button("저장", disabled=not (name and interests and employee_number)):
         users = load_users()
         if is_duplicate_user(name, region, users):
             st.error("중복 사용자 (이름+지역) 존재. 저장 취소.")
         else:
+            personality_trait = classify_personality(answers)
             uid = create_id_with_prefix('u')
-            user = User(id=uid, name=name, region=region, rank=rank,
-                        interests=interests, preferred_atmosphere=atmosphere)
+            user = User(id=uid, name=name, employee_number=employee_number, region=region, rank=rank,
+                        interests=interests, personality_trait=personality_trait, survey_answers=answers)
             users.append(asdict(user))
             save_users(users)
-            st.success(f"저장 완료: {name}")
+            st.success(f"저장 완료: {name} (성향: {personality_trait})")
     st.divider()
     st.subheader("현재 사용자 (편집/삭제)")
     users = load_users()
@@ -215,29 +243,40 @@ if page == "User Signup":
                 with st.expander(f"편집: {u['name']} ({u['region']})", expanded=True):
                     new_name = st.text_input(
                         "이름", value=u['name'], key=f"edit_name_{sel_id}")
+                    new_employee_number = st.text_input(
+                        "사번", value=u.get('employee_number', ''), key=f"edit_employee_number_{sel_id}")
                     new_region = st.selectbox("지역", REGION_OPTIONS, index=REGION_OPTIONS.index(
                         u['region']), key=f"edit_region_{sel_id}")
                     new_rank = st.selectbox("직급", RANK_OPTIONS, index=RANK_OPTIONS.index(
                         u['rank']), key=f"edit_rank_{sel_id}")
                     new_interests = st.multiselect(
                         "관심사", INTEREST_OPTIONS, default=u['interests'], key=f"edit_interests_{sel_id}")
-                    new_atmos = st.selectbox("선호 분위기", ATMOS_OPTIONS, index=ATMOS_OPTIONS.index(
-                        u['preferred_atmosphere']), key=f"edit_atmos_{sel_id}")
+
+                    st.subheader("성향 설문 (재실시)")
+                    new_answers = []
+                    existing_answers = u.get('survey_answers') or [3] * len(QUESTIONS)
+                    for i, q in enumerate(QUESTIONS):
+                        answer = st.slider(q, 1, 5, existing_answers[i], key=f"edit_q_{sel_id}_{i}")
+                        new_answers.append(answer)
+
                     col1, col2 = st.columns(2)
                     with col1:
                         if st.button("저장 변경", key=f"save_user_{sel_id}"):
                             if is_duplicate_user(new_name, new_region, users, exclude_id=sel_id):
                                 st.error("중복 사용자 (이름+지역) 존재. 변경 취소.")
                             else:
+                                new_personality_trait = classify_personality(new_answers)
                                 u.update({
                                     'name': new_name,
+                                    'employee_number': new_employee_number,
                                     'region': new_region,
                                     'rank': new_rank,
                                     'interests': new_interests,
-                                    'preferred_atmosphere': new_atmos
+                                    'personality_trait': new_personality_trait,
+                                    'survey_answers': new_answers
                                 })
                                 save_users(users)
-                                st.success("업데이트 완료")
+                                st.success(f"업데이트 완료 (성향: {new_personality_trait})")
                                 st.rerun()
                     with col2:
                         if st.button("삭제", key=f"del_user_{sel_id}"):
@@ -254,6 +293,9 @@ if page == "User Signup":
 elif page == "Matching (Admin)":
     def run_matching(users_raw, target_size: int):
         """Execute a matching run and persist clubs + run metadata."""
+        if len(users_raw) < 5:
+            st.error("매칭을 실행하려면 최소 5명의 사용자가 필요합니다.")
+            return None, 0
         user_objs = [User(**u) for u in users_raw]
         run_id = create_id_with_prefix('run')
         clubs = compute_matches(
@@ -282,22 +324,52 @@ elif page == "Matching (Admin)":
         st.caption(f"총 사용자: {len(users_raw)}")
         target_size = st.number_input(
             "그룹 인원 (기본 5)", min_value=3, max_value=10, value=5)
-        col_new, col_rerun = st.columns(2)
-        with col_new:
-            if st.button("매칭 실행 / 새 버전"):
-                run_id, club_count = run_matching(users_raw, target_size)
+
+        st.subheader("전체 재매칭")
+        if st.button("매칭 실행 / 새 버전"):
+            run_id, club_count = run_matching(users_raw, target_size)
+            if run_id:
                 st.success(f"새 매칭 실행 완료. Run: {run_id} | 클럽 {club_count}")
-        with col_rerun:
-            runs = persistence.load_list('match_runs')
-            if runs:
-                runs_sorted = sorted(runs, key=lambda r: r['created_at'])
-                last = runs_sorted[-1]
-                if st.button("마지막 설정 재실행"):
-                    run_id, club_count = run_matching(
-                        users_raw, last['target_size'])
-                    st.success(f"재실행 완료. Run: {run_id} | 클럽 {club_count}")
+
+        st.subheader("부분 재매칭")
+        user_names = {u['name']: u['id'] for u in users_raw}
+        users_to_rematch = st.multiselect("재매칭할 사용자 선택", options=list(user_names.keys()))
+        if st.button("선택한 사용자 재매칭"):
+            if not users_to_rematch:
+                st.warning("재매칭할 사용자를 선택하세요.")
             else:
-                st.caption("이전 실행 없음")
+                rematch_user_ids = [user_names[name] for name in users_to_rematch]
+
+                # Find all clubs containing any of the selected users
+                clubs_all = load_clubs()
+                affected_club_ids = set()
+                for club in clubs_all:
+                    if any(uid in club['member_ids'] for uid in rematch_user_ids):
+                        affected_club_ids.add(club['id'])
+
+                # Collect all users from affected clubs
+                users_for_rematch_ids = set(rematch_user_ids)
+                for club in clubs_all:
+                    if club['id'] in affected_club_ids:
+                        users_for_rematch_ids.update(club['member_ids'])
+
+                users_for_rematch = [u for u in users_raw if u['id'] in users_for_rematch_ids]
+
+                # Filter out the affected clubs
+                unaffected_clubs = [c for c in clubs_all if c['id'] not in affected_club_ids]
+
+                # Run matching on the collected users
+                newly_created_clubs_objs = compute_matches(
+                    [User(**u) for u in users_for_rematch], target_size=target_size, run_id=create_id_with_prefix('run')
+                )
+                newly_created_clubs = [asdict(c) for c in newly_created_clubs_objs]
+
+                # Combine unaffected and newly created clubs
+                final_clubs = unaffected_clubs + newly_created_clubs
+                save_clubs(final_clubs)
+                st.success(f"부분 재매칭 완료. {len(users_for_rematch)}명 재구성, {len(newly_created_clubs)}개 클럽 생성.")
+                st.rerun()
+
 
     st.subheader("클럽 결과 (Run 별 필터)")
     clubs_all = load_clubs()
@@ -473,10 +545,28 @@ elif page == "Verification (Admin)":
                 st.write(r['formatted_report'])
                 if st.button(f"AI 검증 실행 ({r['id']})"):
                     with st.spinner("AI 검증 중..."):
-                        time.sleep(2)
-                    activity.verify_report(r['id'])
+                        time.sleep(1)  # Simulate processing
+                        activity.verify_report(r['id'])
                     st.success("검증 완료")
                     st.rerun()
+
+    st.divider()
+    st.subheader("검증된 보고서 상세")
+    verified = [r for r in reports if r['status'] == 'Verified']
+    if not verified:
+        st.info("검증된 보고서 없음")
+    else:
+        for r in verified:
+            with st.expander(f"Report {r['id']} | Club {r['club_id']} | 최종 점수: {r['points_awarded']}"):
+                st.write(r['formatted_report'])
+                metrics = r.get('verification_metrics', {})
+                if metrics:
+                    st.write("검증 결과:")
+                    thresholds = {"participants": 0.75, "interest": 0.70, "diversity": 0.60}
+                    for key, val in metrics.items():
+                        passed = val >= thresholds[key]
+                        st.metric(label=key.capitalize(), value=val, delta="Pass" if passed else "Fail")
+
     st.divider()
     st.subheader("전체 보고서")
     all_reports = activity.list_reports()
@@ -535,11 +625,13 @@ elif page == "Seed Sample Users":
         if st.button("사용자 CSV 다운로드"):
             out = io.StringIO()
             w = csv.writer(out)
-            w.writerow(["id", "name", "region", "rank", "interests",
-                       "preferred_atmosphere", "created_at"])
+            w.writerow(["id", "name", "employee_number", "region", "rank", "interests",
+                       "personality_trait", "survey_answers", "created_at"])
             for u in users_now:
-                w.writerow([u['id'], u['name'], u['region'], u['rank'], '|'.join(u.get(
-                    'interests', [])), u.get('preferred_atmosphere', ''), u.get('created_at', '')])
+                answers = u.get('survey_answers', [])
+                answers_str = '|'.join(map(str, answers))
+                w.writerow([u['id'], u['name'], u.get('employee_number', ''), u['region'], u['rank'], '|'.join(u.get(
+                    'interests', [])), u.get('personality_trait', ''), answers_str, u.get('created_at', '')])
             st.download_button("다운로드 Users", out.getvalue(),
                                file_name="users.csv", mime="text/csv")
     with col2:
@@ -560,10 +652,12 @@ elif page == "Seed Sample Users":
                 users_now.append({
                     'id': row.get('id') or create_id_with_prefix('u'),
                     'name': row['name'],
+                    'employee_number': row.get('employee_number', ''),
                     'region': row['region'],
                     'rank': row.get('rank', ''),
                     'interests': interests_list,
-                    'preferred_atmosphere': row.get('preferred_atmosphere', ''),
+                    'personality_trait': row.get('personality_trait', ''),
+                    'survey_answers': [int(a) for a in row.get('survey_answers', '').split('|') if a],
                     'created_at': row.get('created_at') or utc_now_iso()
                 })
                 added += 1
