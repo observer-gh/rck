@@ -276,5 +276,357 @@
     ],
     "personality_trait": "중간",
     "created_at": "2025-10-15T05:27:53Z"
+  },
+  {
+    "id": "u_1760573953460_2h31",
+    "name": "홍홍홍",
+    "employee_number": "123123",
+    "region": "서울",
+    "rank": "사원",
+    "interests": [
+      "영화보기",
+      "독서",
+      "러닝"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "created_at": "2025-10-16T00:19:13Z"
+  },
+  {
+    "id": "u_1760574138119_k3gf",
+    "name": "사용자1",
+    "employee_number": "E2024001",
+    "region": "대구",
+    "rank": "대리",
+    "interests": [
+      "보드게임",
+      "영화보기"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      4,
+      2,
+      2,
+      3,
+      5
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_w4r4",
+    "name": "사용자2",
+    "employee_number": "E2024002",
+    "region": "부산",
+    "rank": "차장",
+    "interests": [
+      "사진",
+      "독서",
+      "영화보기"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      3,
+      2,
+      3,
+      4,
+      1
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_d74l",
+    "name": "사용자3",
+    "employee_number": "E2024003",
+    "region": "부산",
+    "rank": "과장",
+    "interests": [
+      "요리",
+      "등산"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      4,
+      2,
+      5,
+      2,
+      3
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_qdi9",
+    "name": "사용자4",
+    "employee_number": "E2024004",
+    "region": "부산",
+    "rank": "부장",
+    "interests": [
+      "독서",
+      "사진"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      3,
+      1,
+      5,
+      5
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_w5ma",
+    "name": "사용자5",
+    "employee_number": "E2024005",
+    "region": "대전",
+    "rank": "차장",
+    "interests": [
+      "요리",
+      "사진"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      4,
+      1,
+      3,
+      3,
+      4
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_s1zr",
+    "name": "사용자6",
+    "employee_number": "E2024006",
+    "region": "대구",
+    "rank": "사원",
+    "interests": [
+      "러닝",
+      "등산",
+      "독서"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      2,
+      2,
+      4,
+      3,
+      5
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_6cig",
+    "name": "사용자7",
+    "employee_number": "E2024007",
+    "region": "대전",
+    "rank": "부장",
+    "interests": [
+      "사진",
+      "요리"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      4,
+      5,
+      3,
+      1,
+      5
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_q6ci",
+    "name": "사용자8",
+    "employee_number": "E2024008",
+    "region": "대전",
+    "rank": "차장",
+    "interests": [
+      "요리",
+      "독서",
+      "사진"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      1,
+      2,
+      5,
+      5,
+      4
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_u8om",
+    "name": "사용자9",
+    "employee_number": "E2024009",
+    "region": "대구",
+    "rank": "사원",
+    "interests": [
+      "등산",
+      "요리"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      2,
+      5,
+      3,
+      5,
+      1
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_ljd4",
+    "name": "사용자10",
+    "employee_number": "E2024010",
+    "region": "서울",
+    "rank": "대리",
+    "interests": [
+      "영화보기",
+      "축구"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      3,
+      4,
+      5,
+      3,
+      4
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_hzcu",
+    "name": "사용자11",
+    "employee_number": "E2024011",
+    "region": "서울",
+    "rank": "부장",
+    "interests": [
+      "보드게임",
+      "축구",
+      "사진"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      4,
+      5,
+      5,
+      5,
+      1
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_6nut",
+    "name": "사용자12",
+    "employee_number": "E2024012",
+    "region": "대구",
+    "rank": "대리",
+    "interests": [
+      "독서",
+      "러닝",
+      "헬스",
+      "보드게임"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      5,
+      5,
+      3,
+      5
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_rzd5",
+    "name": "사용자13",
+    "employee_number": "E2024013",
+    "region": "서울",
+    "rank": "과장",
+    "interests": [
+      "영화보기",
+      "등산",
+      "사진"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      3,
+      1,
+      3,
+      5
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_697n",
+    "name": "사용자14",
+    "employee_number": "E2024014",
+    "region": "대구",
+    "rank": "부장",
+    "interests": [
+      "요리",
+      "러닝",
+      "영화보기",
+      "헬스"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      2,
+      4,
+      3,
+      3
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760574138119_pzel",
+    "name": "사용자15",
+    "employee_number": "E2024015",
+    "region": "부산",
+    "rank": "부장",
+    "interests": [
+      "독서",
+      "헬스",
+      "보드게임",
+      "요리"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      4,
+      5,
+      2,
+      3
+    ],
+    "created_at": "2025-10-16T00:22:18Z"
+  },
+  {
+    "id": "u_1760577401823_zb0c",
+    "name": "홍홍홍",
+    "employee_number": "123213",
+    "region": "부산",
+    "rank": "사원",
+    "interests": [
+      "영화보기",
+      "보드게임"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "created_at": "2025-10-16T01:16:41Z"
   }
 ]

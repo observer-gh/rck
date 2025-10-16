@@ -1,18 +1,18 @@
 import streamlit as st
 from services import activity, persistence
-from typing import Dict, Any
 
-def _club_options():
-    """Returns a list of active clubs for the selectbox."""
+
+def _club_options(current_user_id: str | None):
     clubs_all = persistence.load_list('clubs')
     active_clubs = [c for c in clubs_all if c.get('status') == 'Active']
     if not active_clubs:
         return []
-
-    # Create a user map to get leader names for display
     users = persistence.load_list('users')
     user_map = {u['id']: u for u in users}
-
+    # If user context exists, limit to their clubs
+    if current_user_id:
+        active_clubs = [
+            c for c in active_clubs if current_user_id in c.get('member_ids', [])]
     options = []
     for c in active_clubs:
         leader_id = c.get('leader_id')
@@ -20,23 +20,24 @@ def _club_options():
         options.append(f"{c['id']} - {leader_name} 팀")
     return options
 
-def view():
-    """Renders the activity report submission page."""
-    st.header("활동 보고서 제출")
 
-    club_options = _club_options()
+def view():
+    st.header("활동 보고서 제출")
+    current_user_id = getattr(st.session_state, 'current_user_id', None)
+    club_options = _club_options(current_user_id)
     if not club_options:
-        st.warning("활동 보고서를 제출할 수 있는 'Active' 상태의 클럽이 없습니다. 어드민에게 문의하세요.")
+        st.warning("활동 보고서를 제출할 수 있는 'Active' 상태의 (내) 클럽이 없습니다.")
     else:
         choice = st.selectbox("클럽 선택", options=club_options)
-        club_id = choice.split()[0]
-
+        if not choice:
+            st.stop()
+        club_id = str(choice).split()[0]
         with st.form("activity_report_form", clear_on_submit=True):
             date = st.date_input("활동 날짜")
             raw_text = st.text_area("활동 내용")
             photo = st.file_uploader("사진 업로드 (시뮬레이션)")
-            part_count = st.number_input("참여 인원(선택)", min_value=0, max_value=100, value=0)
-
+            part_count = st.number_input(
+                "참여 인원(선택)", min_value=0, max_value=100, value=0)
             submitted = st.form_submit_button("보고서 제출")
             if submitted:
                 if not raw_text:
@@ -51,12 +52,15 @@ def view():
                         participant_override=part_count if part_count > 0 else None,
                     )
                     st.success(f"보고서 생성 완료. ID: {rep.id}")
-
     st.divider()
     st.subheader("내가 제출한 보고서")
     reports = activity.list_reports()
     if reports:
-        # A simple filter could be added here later if a user login system is implemented
+        # Filter to reports from user's clubs if user context exists
+        if current_user_id:
+            user_club_ids = {c['id'] for c in persistence.load_list(
+                'clubs') if current_user_id in c.get('member_ids', [])}
+            reports = [r for r in reports if r['club_id'] in user_club_ids]
         st.dataframe(reports, use_container_width=True)
     else:
         st.caption("아직 제출한 보고서가 없습니다.")

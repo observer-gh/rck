@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "id": "run_1760574131022_zbsr",
+    "created_at": "2025-10-16T00:22:11.025416Z",
+    "target_size": 5,
+    "user_count": 21,
+    "club_count": 0,
+    "superseded": false
+  },
+  {
+    "id": "run_1760574148103_zmor",
+    "created_at": "2025-10-16T00:22:28.106304Z",
+    "target_size": 5,
+    "user_count": 36,
+    "club_count": 0,
+    "superseded": false
+  },
+  {
+    "id": "run_1760577425031_czrt",
+    "created_at": "2025-10-16T01:17:05.033298Z",
+    "target_size": 5,
+    "user_count": 37,
+    "club_count": 1,
+    "superseded": false
+  }
+]

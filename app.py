@@ -2,7 +2,7 @@ import streamlit as st
 import datetime as dt
 
 # Import the page rendering functions from the new modules
-from pages import user_signup, my_club, activity_report, demo_script, admin_dashboard
+from views import user_signup, my_club, activity_report, demo_script, admin_dashboard
 
 # --- Page Registry ---
 # Maps a page key to its label, rendering function from the imported module, and admin status.
@@ -34,6 +34,7 @@ PAGE_REGISTRY = {
     },
 }
 
+
 def main():
     """
     Main application router.
@@ -58,7 +59,8 @@ def main():
         st.info("관리자 모드가 활성화되었습니다. 모든 관리자 전용 메뉴를 볼 수 있습니다.", icon="👑")
         visible_pages = PAGE_REGISTRY
     else:
-        visible_pages = {k: v for k, v in PAGE_REGISTRY.items() if not v["admin"]}
+        visible_pages = {k: v for k,
+                         v in PAGE_REGISTRY.items() if not v["admin"]}
 
     page_keys = list(visible_pages.keys())
     page_labels = [v["label"] for v in visible_pages.values()]
@@ -71,7 +73,8 @@ def main():
     selected_page_label = st.sidebar.radio(
         "메뉴 이동",
         page_labels,
-        index=page_labels.index(st.session_state.current_page) if st.session_state.current_page in page_labels else 0,
+        index=page_labels.index(
+            st.session_state.current_page) if st.session_state.current_page in page_labels else 0,
         key="navigation_radio"
     )
     st.session_state.current_page = selected_page_label
@@ -89,6 +92,7 @@ def main():
     st.sidebar.caption(
         f"Data dir: data | {dt.datetime.now(dt.timezone.utc).strftime('%H:%M:%S')}Z"
     )
+
 
 if __name__ == "__main__":
     main()
