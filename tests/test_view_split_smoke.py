@@ -3,11 +3,10 @@ from unittest.mock import patch, MagicMock
 
 # Mock streamlit before importing the app
 st_mock = MagicMock()
-with patch.dict("sys.modules", {"streamlit": st_mock}):
-    from app import PAGE_REGISTRY
-
 
 def test_page_registry_structure():
+    with patch.dict("sys.modules", {"streamlit": st_mock}):
+        from app import PAGE_REGISTRY
     """
     Tests that the PAGE_REGISTRY has the correct structure.
     """
@@ -21,6 +20,8 @@ def test_page_registry_structure():
 
 
 def test_admin_pages_are_correctly_flagged():
+    with patch.dict("sys.modules", {"streamlit": st_mock}):
+        from app import PAGE_REGISTRY
     """
     Tests that only the admin dashboard is flagged as an admin page.
     """
@@ -30,6 +31,8 @@ def test_admin_pages_are_correctly_flagged():
 
 
 def test_user_pages_are_correctly_flagged():
+    with patch.dict("sys.modules", {"streamlit": st_mock}):
+        from app import PAGE_REGISTRY
     """
     Tests that the correct pages are flagged as non-admin (user-facing).
     """
@@ -42,6 +45,8 @@ def test_user_pages_are_correctly_flagged():
 
 
 def test_all_render_functions_are_callable():
+    with patch.dict("sys.modules", {"streamlit": st_mock}):
+        from app import PAGE_REGISTRY
     """
     Ensures that every page in the registry points to a callable function.
     """

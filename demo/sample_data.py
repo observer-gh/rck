@@ -1,11 +1,8 @@
 from utils.ids import create_id_with_prefix
 from domain.models import User
-from .survey import classify_personality
+from services.survey import classify_personality
 import random
-
-INTERESTS = ["축구", "영화보기", "보드게임", "러닝", "독서", "헬스", "요리", "사진", "등산"]
-REGIONS = ["서울", "부산", "대전", "대구"]
-RANKS = ["사원", "대리", "과장", "차장", "부장"]
+from domain.constants import INTERESTS, REGIONS, RANKS
 
 def make_users(n: int = 15):
     users = []
