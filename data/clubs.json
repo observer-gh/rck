@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "club_1760595785478_1xj1",
+    "member_ids": [
+      "demo_user"
+    ],
+    "leader_id": "demo_user",
+    "name": "Demo Solo Club",
+    "primary_interest": "축구",
+    "status": "Active",
+    "chat_link": "",
+    "match_score_breakdown": {},
+    "explanations": {},
+    "match_run_id": null,
+    "created_at": "2025-10-16T06:23:05.478986Z",
+    "updated_at": "2025-10-16T06:23:05.478986Z"
+  }
+]

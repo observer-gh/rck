@@ -115,3 +115,6 @@ data/activity_reports.json
 data/clubs.json
 data/match_runs.json
 data/users.json
+
+# Deprecated legacy Streamlit auto-multipage directory (removed in favor of custom router in app.py)
+pages/
