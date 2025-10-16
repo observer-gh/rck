@@ -3,7 +3,8 @@ import datetime as dt
 from services import users as user_svc
 
 # Import the page rendering functions from the new modules
-from views import user_signup, my_club, activity_report, demo_script, admin_dashboard, profile
+from views import user_signup, my_club, activity_report, admin_dashboard, profile
+from demo import demo_script
 
 # --- Page Registry ---
 # Maps a page key to its label, rendering function from the imported module, and admin status.

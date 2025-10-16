@@ -1,6 +1,5 @@
 import streamlit as st
 from services import activity, persistence
-import pandas as pd
 from io import StringIO
 from ui.components import dataframe_with_status, inject_base_css, status_badge, report_card
 from ui.components import render_demo_actions_panel
@@ -97,6 +96,7 @@ def view():
         st.info("필터 조건에 해당하는 보고서가 없습니다.")
         return
     if view_mode == "테이블":
+        import pandas as pd
         df = pd.DataFrame([
             {
                 'id': r['id'],
@@ -120,6 +120,7 @@ def view():
             st.download_button("CSV 다운로드", data=csv_buf.getvalue(),
                                file_name="reports.csv", mime="text/csv")
     else:  # 카드 view (default)
+        import pandas as pd
         sorted_reports = sorted(
             filtered, key=lambda r: r['date'], reverse=True)
         for r in sorted_reports:

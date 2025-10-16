@@ -1,6 +1,5 @@
 import streamlit as st
 from typing import Dict, Any, Iterable, Optional
-import pandas as _pd
 
 PRIMARY_BG = "#111827"  # dark slate fallback
 PRIMARY_ACCENT = "#2563EB"  # blue-600
@@ -124,6 +123,7 @@ def styled_member_chips(user_ids: Iterable[str], user_map: Dict[str, Any]):
 
 
 def dataframe_with_status(df, status_col: Optional[str] = None):
+    import pandas as _pd
     inject_base_css()
     if df is None or df.empty:
         st.caption("표시할 데이터가 없습니다.")
