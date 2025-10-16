@@ -1,6 +1,7 @@
 import streamlit as st
 from services import persistence
 from typing import Dict
+from ui.components import club_card, styled_member_chips, inject_base_css, render_demo_actions_panel
 
 
 def _user_map():
@@ -19,6 +20,7 @@ def _club_points_map() -> Dict[str, int]:
 
 def view():
     st.header("내 클럽 정보")
+    render_demo_actions_panel("my_club_top")
     current_user_id = getattr(st.session_state, 'current_user_id', None)
     users = persistence.load_list('users')
     if not users:
@@ -33,7 +35,10 @@ def view():
         'member_ids', []) and c.get('status') == 'Active']
     if not user_clubs:
         st.info("아직 배정된 (활성) 클럽이 없습니다.")
-        st.write("관리자가 매칭을 실행하고 클럽을 활성화하면 이곳에 표시됩니다.")
+        if current_user_id == 'demo_user':
+            render_demo_actions_panel("my_club_empty")
+        else:
+            st.write("관리자가 매칭을 실행하고 클럽을 활성화하면 이곳에 표시됩니다.")
         return
 
     def _ts(club: dict):
@@ -41,20 +46,9 @@ def view():
     my_club = sorted(user_clubs, key=_ts, reverse=True)[0]
     user_map = _user_map()
     pts_map = _club_points_map()
-    st.subheader(
-        f"클럽: {user_map.get(my_club['leader_id'], {}).get('name', 'N/A')} 팀")
-    col1, col2, col3 = st.columns(3)
-    col1.metric("클럽 상태", my_club.get('status', 'N/A'))
-    col2.metric("총 인원", len(my_club['member_ids']))
-    col3.metric("누적 포인트", pts_map.get(my_club['id'], 0))
-    if my_club.get('chat_link'):
-        st.link_button("그룹 채팅방 바로가기", my_club['chat_link'])
-    st.write("---")
-    leader_name = user_map.get(my_club['leader_id'], {}).get('name', 'Unknown')
-    member_names = [user_map.get(mid, {}).get('name', 'Unknown')
-                    for mid in my_club['member_ids']]
-    st.write(f"**리더:** {leader_name}")
-    st.write(f"**멤버:** {', '.join(member_names)}")
+    inject_base_css()
+    club_card(my_club, user_map, pts_map.get(my_club['id'], 0))
+    styled_member_chips(my_club['member_ids'], user_map)
     with st.expander("매칭 점수 상세"):
         st.json(my_club.get('match_score_breakdown', {}))
     exp = my_club.get('explanations')

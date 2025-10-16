@@ -1,5 +1,9 @@
 import streamlit as st
 from services import activity, persistence
+import pandas as pd
+from io import StringIO
+from ui.components import dataframe_with_status, inject_base_css, status_badge, report_card
+from ui.components import render_demo_actions_panel
 
 
 def _club_options(current_user_id: str | None):
@@ -23,6 +27,7 @@ def _club_options(current_user_id: str | None):
 
 def view():
     st.header("활동 보고서 제출")
+    render_demo_actions_panel("activity_report")
     current_user_id = getattr(st.session_state, 'current_user_id', None)
     club_options = _club_options(current_user_id)
     if not club_options:
@@ -54,13 +59,72 @@ def view():
                     st.success(f"보고서 생성 완료. ID: {rep.id}")
     st.divider()
     st.subheader("내가 제출한 보고서")
+    inject_base_css()
     reports = activity.list_reports()
-    if reports:
-        # Filter to reports from user's clubs if user context exists
-        if current_user_id:
-            user_club_ids = {c['id'] for c in persistence.load_list(
-                'clubs') if current_user_id in c.get('member_ids', [])}
-            reports = [r for r in reports if r['club_id'] in user_club_ids]
-        st.dataframe(reports, use_container_width=True)
-    else:
+    if not reports:
         st.caption("아직 제출한 보고서가 없습니다.")
+        return
+    # Limit to user's clubs if context
+    if current_user_id:
+        user_club_ids = {c['id'] for c in persistence.load_list(
+            'clubs') if current_user_id in c.get('member_ids', [])}
+        reports = [r for r in reports if r['club_id'] in user_club_ids]
+    if not reports:
+        st.caption("표시할 보고서가 없습니다.")
+        return
+    # Filters
+    colf1, colf2, colf3 = st.columns([2, 2, 1])
+    unique_dates = sorted({r['date'] for r in reports})
+    date_filter = colf1.selectbox("날짜 필터", options=["(전체)"] + unique_dates)
+    status_filter = colf2.selectbox(
+        "상태 필터", options=["(전체)", "Pending", "Verified"])
+    # Default to 카드 view on first load
+    if 'report_view_mode' not in st.session_state:
+        st.session_state.report_view_mode = "카드"
+    view_mode = st.radio("표시 형식", ["카드", "테이블"],
+                         horizontal=True, key="report_view_mode")
+    search_text = colf3.text_input("검색", placeholder="키워드")
+    filtered = reports
+    if date_filter != "(전체)":
+        filtered = [r for r in filtered if r['date'] == date_filter]
+    if status_filter != "(전체)":
+        filtered = [r for r in filtered if r['status'] == status_filter]
+    if search_text:
+        lowered = search_text.lower()
+        filtered = [r for r in filtered if lowered in r.get(
+            'raw_text', '').lower() or lowered in r.get('formatted_report', '').lower()]
+    if not filtered:
+        st.info("필터 조건에 해당하는 보고서가 없습니다.")
+        return
+    if view_mode == "테이블":
+        df = pd.DataFrame([
+            {
+                'id': r['id'],
+                'date': r['date'],
+                'status': r['status'],
+                'points': r.get('points_awarded', 0),
+                'club_id': r['club_id'],
+                'photo': r.get('photo_filename', ''),
+                '요약': (r.get('formatted_report', '')[:60] + '…') if len(r.get('formatted_report', '')) > 60 else r.get('formatted_report', '')
+            } for r in filtered
+        ])
+        dataframe_with_status(df, status_col='status')
+        with st.expander("전체 내용 보기 / Export"):
+            for r in filtered:
+                st.markdown(
+                    f"**{r['id']}** {status_badge(r['status'])}", unsafe_allow_html=True)
+                st.caption(r.get('formatted_report', ''))
+                st.write("---")
+            csv_buf = StringIO()
+            pd.DataFrame(filtered).to_csv(csv_buf, index=False)
+            st.download_button("CSV 다운로드", data=csv_buf.getvalue(),
+                               file_name="reports.csv", mime="text/csv")
+    else:  # 카드 view (default)
+        sorted_reports = sorted(
+            filtered, key=lambda r: r['date'], reverse=True)
+        for r in sorted_reports:
+            report_card(r)
+        csv_buf = StringIO()
+        pd.DataFrame(sorted_reports).to_csv(csv_buf, index=False)
+        st.download_button("(필터) CSV 다운로드", data=csv_buf.getvalue(),
+                           file_name="reports.csv", mime="text/csv")

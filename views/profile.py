@@ -1,0 +1,84 @@
+import streamlit as st
+from typing import Dict, Any
+from services import users as user_svc
+from services.survey import QUESTIONS, classify_personality
+from ui.components import render_demo_actions_panel
+
+REGION_OPTIONS = ["서울", "부산", "대전", "대구"]
+RANK_OPTIONS = ["사원", "대리", "과장", "차장", "부장"]
+INTEREST_OPTIONS = ["축구", "영화보기", "보드게임", "러닝", "독서", "헬스", "요리", "사진", "등산"]
+
+is_duplicate_user = user_svc.is_duplicate_user
+load_users = user_svc.load_users
+save_users = user_svc.save_users
+
+
+def _profile_block(user: Dict[str, Any]):
+    st.markdown(
+        f"**이름:** {user['name']}  |  **지역:** {user['region']}  |  **직급:** {user['rank']}  |  **성향:** {user.get('personality_trait', '?')}")
+    st.markdown(f"**관심사:** {', '.join(user['interests'])}")
+
+
+def view():
+    st.header("내 프로필")
+    render_demo_actions_panel("profile")
+    users = load_users()
+    current_user_id = st.session_state.get('current_user_id')
+    if not current_user_id:
+        st.info("선택/생성된 사용자가 없습니다. 먼저 사용자 등록을 완료하세요.")
+        return
+    me = next((u for u in users if u['id'] == current_user_id), None)
+    if not me:
+        st.warning("세션 사용자 ID로 사용자를 찾을 수 없습니다. 다시 등록이 필요할 수 있습니다.")
+        return
+    _profile_block(me)
+    st.markdown("---")
+    st.subheader("프로필 수정")
+    with st.form(f"edit_self_{current_user_id}"):
+        new_name = st.text_input("이름", value=me.get('name', ''))
+        new_employee_number = st.text_input(
+            "사번", value=me.get('employee_number', ''))
+        raw_region = me.get('region')
+        raw_rank = me.get('rank')
+        region_val: str = raw_region if isinstance(
+            raw_region, str) and raw_region in REGION_OPTIONS else REGION_OPTIONS[0]
+        rank_val: str = raw_rank if isinstance(
+            raw_rank, str) and raw_rank in RANK_OPTIONS else RANK_OPTIONS[0]
+        new_region = st.selectbox(
+            "지역", REGION_OPTIONS, index=REGION_OPTIONS.index(region_val))
+        new_rank = st.selectbox(
+            "직급", RANK_OPTIONS, index=RANK_OPTIONS.index(rank_val))
+        new_interests = st.multiselect(
+            "관심사", INTEREST_OPTIONS, default=me.get('interests', []))
+        existing_answers = me.get('survey_answers') or []
+        # Pad/truncate to match QUESTIONS length
+        if len(existing_answers) < len(QUESTIONS):
+            existing_answers = existing_answers + \
+                [3] * (len(QUESTIONS) - len(existing_answers))
+        elif len(existing_answers) > len(QUESTIONS):
+            existing_answers = existing_answers[:len(QUESTIONS)]
+        new_answers = []
+        for i, q in enumerate(QUESTIONS):
+            default_val = existing_answers[i] if isinstance(
+                existing_answers[i], int) and 1 <= existing_answers[i] <= 5 else 3
+            new_answers.append(
+                st.slider(q, 1, 5, default_val, key=f"self_edit_q_{current_user_id}_{i}"))
+        submitted = st.form_submit_button("저장")
+        if submitted:
+            safe_name = new_name or ""
+            safe_region = new_region or ""
+            if is_duplicate_user(safe_name, safe_region, users, exclude_id=current_user_id):
+                st.error("중복 사용자 (이름+지역) 존재. 변경 취소.")
+            else:
+                me.update({
+                    'name': safe_name,
+                    'employee_number': new_employee_number,
+                    'region': safe_region,
+                    'rank': new_rank,
+                    'interests': new_interests,
+                    'personality_trait': classify_personality(new_answers),
+                    'survey_answers': new_answers
+                })
+                save_users(users)
+                st.success("업데이트 완료")
+                st.rerun()

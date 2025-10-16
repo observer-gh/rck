@@ -1,15 +1,21 @@
 import streamlit as st
 import datetime as dt
+from services import users as user_svc
 
 # Import the page rendering functions from the new modules
-from views import user_signup, my_club, activity_report, demo_script, admin_dashboard
+from views import user_signup, my_club, activity_report, demo_script, admin_dashboard, profile
 
 # --- Page Registry ---
 # Maps a page key to its label, rendering function from the imported module, and admin status.
 PAGE_REGISTRY = {
     "user_signup": {
-        "label": "프로필/설문",
+        "label": "등록/설문",
         "render_func": user_signup.view,
+        "admin": False,
+    },
+    "profile": {
+        "label": "내 프로필",
+        "render_func": profile.view,
         "admin": False,
     },
     "my_club": {
@@ -44,6 +50,14 @@ def main():
     """
     st.set_page_config(page_title="AI Club Matching Demo", layout="wide")
 
+    # Ensure demo user exists and is the active session user.
+    try:
+        user_svc.load_users()  # guarantees demo user persistence
+        st.session_state.current_user_id = 'demo_user'
+    except Exception:
+        # Fail silently if user bootstrap has an unexpected issue; app still usable.
+        pass
+
     # --- Sidebar ---
     st.sidebar.title("Navigation")
 
@@ -63,28 +77,23 @@ def main():
                          v in PAGE_REGISTRY.items() if not v["admin"]}
 
     page_keys = list(visible_pages.keys())
-    page_labels = [v["label"] for v in visible_pages.values()]
 
-    # Page selection radio buttons
-    # Use a session state variable to keep track of the current page
-    if 'current_page' not in st.session_state:
-        st.session_state.current_page = page_labels[0]
+    # Use a single source of truth: the radio widget's key is the nav state.
+    if 'nav_page' not in st.session_state or st.session_state.nav_page not in page_keys:
+        # Set a default before rendering the radio (only applies first render)
+        st.session_state.nav_page = page_keys[0]
 
-    selected_page_label = st.sidebar.radio(
+    st.sidebar.radio(
         "메뉴 이동",
-        page_labels,
-        index=page_labels.index(
-            st.session_state.current_page) if st.session_state.current_page in page_labels else 0,
-        key="navigation_radio"
+        page_keys,
+        key="nav_page",
+        format_func=lambda k: visible_pages[k]["label"],
     )
-    st.session_state.current_page = selected_page_label
-
-    # Find the key corresponding to the selected label
-    selected_page_key = page_keys[page_labels.index(selected_page_label)]
 
     # --- Page Rendering ---
     # Retrieve the render function from the registry and call it
-    page_to_render = visible_pages[selected_page_key]["render_func"]
+    # Use the up-to-date nav_page rather than the instantaneous selection variable
+    page_to_render = visible_pages[st.session_state.nav_page]["render_func"]
     page_to_render()
 
     # --- Footer ---

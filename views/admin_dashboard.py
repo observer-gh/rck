@@ -1,12 +1,15 @@
 import streamlit as st
+from dataclasses import asdict
 from services import persistence, activity, matching, sample_data
+from services import users as user_svc
 from domain.models import User, MatchRun
 from utils.ids import create_id_with_prefix
-from dataclasses import asdict
 import datetime as dt
 import time
 import csv
 import io
+from services.survey import QUESTIONS, classify_personality
+from ui.components import user_badge
 
 
 def _user_map():
@@ -38,6 +41,7 @@ def view():
 
     tabs = st.tabs([
         "📈 분석 및 현황",
+        "👤 사용자 관리",
         "⚙️ 매칭 실행",
         "📊 클럽 관리",
         "✅ 보고서 검증",
@@ -47,13 +51,83 @@ def view():
     with tabs[0]:
         render_analytics_tab()
     with tabs[1]:
-        render_matching_tab()
+        render_user_management_tab()
     with tabs[2]:
-        render_clubs_tab()
+        render_matching_tab()
     with tabs[3]:
-        render_verification_tab()
+        render_clubs_tab()
     with tabs[4]:
+        render_verification_tab()
+    with tabs[5]:
         render_data_tab()
+
+
+def render_user_management_tab():
+    st.subheader("👤 사용자 관리")
+    users = persistence.load_list('users')
+    if not users:
+        st.info("등록된 사용자가 없습니다.")
+        return
+    users.sort(key=lambda u: u['name'])
+    display_map = {f"{u['name']} ({u['region']})": u['id'] for u in users}
+    sel_disp = st.selectbox("사용자 선택", options=["-"] + list(display_map.keys()))
+    if sel_disp != "-":
+        sel_id = display_map[sel_disp]
+        st.session_state.current_user_id = sel_id
+        u = next((x for x in users if x['id'] == sel_id), None)
+        if u:
+            with st.expander(f"편집: {u['name']} ({u['region']})", expanded=True):
+                new_name = st.text_input(
+                    "이름", value=u['name'], key=f"adm_edit_name_{sel_id}")
+                new_employee_number = st.text_input("사번", value=u.get(
+                    'employee_number', ''), key=f"adm_edit_emp_{sel_id}")
+                REGION_OPTIONS = ["서울", "부산", "대전", "대구"]
+                RANK_OPTIONS = ["사원", "대리", "과장", "차장", "부장"]
+                INTEREST_OPTIONS = ["축구", "영화보기", "보드게임",
+                                    "러닝", "독서", "헬스", "요리", "사진", "등산"]
+                new_region = st.selectbox("지역", REGION_OPTIONS, index=REGION_OPTIONS.index(
+                    u['region']), key=f"adm_edit_region_{sel_id}")
+                new_rank = st.selectbox("직급", RANK_OPTIONS, index=RANK_OPTIONS.index(
+                    u['rank']), key=f"adm_edit_rank_{sel_id}")
+                new_interests = st.multiselect(
+                    "관심사", INTEREST_OPTIONS, default=u['interests'], key=f"adm_edit_interests_{sel_id}")
+                existing_answers = u.get('survey_answers') or [
+                    3] * len(QUESTIONS)
+                new_answers = []
+                for i, q in enumerate(QUESTIONS):
+                    new_answers.append(
+                        st.slider(q, 1, 5, existing_answers[i], key=f"adm_edit_q_{sel_id}_{i}"))
+                col1, col2, col3 = st.columns(3)
+                if col1.button("저장", key=f"adm_save_{sel_id}"):
+                    safe_name = new_name or ""
+                    safe_region = new_region or ""
+                    if user_svc.is_duplicate_user(safe_name, safe_region, users, exclude_id=sel_id):
+                        st.error("중복 사용자 (이름+지역) 존재. 변경 취소.")
+                    else:
+                        u.update({
+                            'name': safe_name,
+                            'employee_number': new_employee_number,
+                            'region': safe_region,
+                            'rank': new_rank,
+                            'interests': new_interests,
+                            'personality_trait': classify_personality(new_answers),
+                            'survey_answers': new_answers
+                        })
+                        persistence.replace_all('users', users)
+                        st.success("업데이트 완료")
+                        st.rerun()
+                if col2.button("삭제", key=f"adm_del_{sel_id}"):
+                    users = [x for x in users if x['id'] != sel_id]
+                    persistence.replace_all('users', users)
+                    st.warning("삭제됨 (매칭 재실행 필요)")
+                    st.rerun()
+                if col3.button("현재 사용자로 설정", key=f"adm_setcur_{sel_id}"):
+                    st.session_state.current_user_id = sel_id
+                    st.success("현재 사용자 세션이 업데이트되었습니다.")
+    st.markdown("---")
+    st.subheader("사용자 목록")
+    for u in users:
+        user_badge(u)
 
 
 def render_analytics_tab():
@@ -121,6 +195,34 @@ def render_matching_tab():
         st.warning("매칭을 실행할 사용자가 없습니다. 먼저 사용자를 등록하거나 생성해주세요.")
         return
     st.info(f"현재 등록된 총 사용자: **{len(users_raw)}명**")
+    # Auto-seed pathway when only demo user exists
+    if len(users_raw) == 1 and users_raw[0].get('id') == 'demo_user':
+        st.warning(
+            "현재 데모 사용자 1명만 존재합니다. 아래 버튼으로 동료 9명을 자동 생성하고 즉시 매칭을 실행할 수 있습니다.")
+        if st.button("동료 9명 자동생성 + 매칭 실행", type="primary"):
+            from services import sample_data
+            # generate 9 additional users
+            new_users = [asdict(u) for u in sample_data.make_users(9)]
+            users_all = users_raw + new_users
+            persistence.replace_all('users', users_all)
+            # run matching with default target size 5
+            user_objs = [User(**u) for u in users_all]
+            run_id = create_id_with_prefix('run')
+            clubs = matching.compute_matches(
+                user_objs, target_size=5, run_id=run_id)
+            clubs_dicts = [asdict(c) for c in clubs]
+            existing_clubs = persistence.load_list('clubs')
+            existing_clubs.extend(clubs_dicts)
+            persistence.replace_all('clubs', existing_clubs)
+            runs = persistence.load_list('match_runs')
+            run_meta = MatchRun(id=run_id, created_at=utc_now_iso(
+            ), target_size=5, user_count=len(users_all), club_count=len(clubs_dicts))
+            runs.append(asdict(run_meta))
+            persistence.replace_all('match_runs', runs)
+            st.success(
+                f"자동 생성 및 매칭 완료. Run ID: {run_id}, 생성된 클럽 수: {len(clubs_dicts)}")
+            st.balloons()
+            st.rerun()
     target_size = st.number_input(
         "클럽당 인원 (기본 5)", min_value=3, max_value=10, value=5)
     st.write("---")
@@ -270,9 +372,12 @@ def render_data_tab():
             code_input = st.text_input("삭제를 원하시면 'ERASE ALL DATA'를 입력하세요.")
             if code_input == "ERASE ALL DATA":
                 if st.button("모든 데이터 영구 삭제", type="primary"):
-                    for key in ['users', 'clubs', 'activity_reports', 'match_runs']:
+                    for key in ['clubs', 'activity_reports', 'match_runs']:
                         persistence.replace_all(key, [])
-                    st.success("모든 애플리케이션 데이터가 삭제되었습니다.")
+                    # Reset users but re-add demo user via service helper
+                    persistence.replace_all('users', [])
+                    user_svc.load_users()  # triggers ensure_demo_user persistence
+                    st.success("모든 애플리케이션 데이터가 삭제되었습니다 (데모사용자 제외).")
                     time.sleep(2)
                     st.rerun()
 
