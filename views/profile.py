@@ -3,10 +3,7 @@ from typing import Dict, Any
 from services import users as user_svc
 from services.survey import QUESTIONS, classify_personality
 from ui.components import render_demo_actions_panel
-
-REGION_OPTIONS = ["서울", "부산", "대전", "대구"]
-RANK_OPTIONS = ["사원", "대리", "과장", "차장", "부장"]
-INTEREST_OPTIONS = ["축구", "영화보기", "보드게임", "러닝", "독서", "헬스", "요리", "사진", "등산"]
+from domain.constants import REGIONS, RANKS, INTERESTS
 
 is_duplicate_user = user_svc.is_duplicate_user
 load_users = user_svc.load_users
@@ -41,15 +38,15 @@ def view():
         raw_region = me.get('region')
         raw_rank = me.get('rank')
         region_val: str = raw_region if isinstance(
-            raw_region, str) and raw_region in REGION_OPTIONS else REGION_OPTIONS[0]
+            raw_region, str) and raw_region in REGIONS else REGIONS[0]
         rank_val: str = raw_rank if isinstance(
-            raw_rank, str) and raw_rank in RANK_OPTIONS else RANK_OPTIONS[0]
+            raw_rank, str) and raw_rank in RANKS else RANKS[0]
         new_region = st.selectbox(
-            "지역", REGION_OPTIONS, index=REGION_OPTIONS.index(region_val))
+            "지역", REGIONS, index=REGIONS.index(region_val))
         new_rank = st.selectbox(
-            "직급", RANK_OPTIONS, index=RANK_OPTIONS.index(rank_val))
+            "직급", RANKS, index=RANKS.index(rank_val))
         new_interests = st.multiselect(
-            "관심사", INTEREST_OPTIONS, default=me.get('interests', []))
+            "관심사", INTERESTS, default=me.get('interests', []))
         existing_answers = me.get('survey_answers') or []
         # Pad/truncate to match QUESTIONS length
         if len(existing_answers) < len(QUESTIONS):
