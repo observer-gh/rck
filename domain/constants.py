@@ -3,6 +3,8 @@ This module contains centralized constants used throughout the application,
 ensuring a single source of truth for values like regions, ranks, and interests.
 """
 
+# These constants are used across multiple views to ensure consistency.
+
 # List of available regions for users
 REGIONS = ["서울", "부산", "대전", "대구"]
 

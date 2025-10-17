@@ -5,10 +5,7 @@ from utils.ids import create_id_with_prefix
 from services.survey import QUESTIONS, classify_personality
 from services import users as user_svc
 from ui.components import render_demo_actions_panel
-
-REGION_OPTIONS = ["서울", "부산", "대전", "대구"]
-RANK_OPTIONS = ["사원", "대리", "과장", "차장", "부장"]
-INTEREST_OPTIONS = ["축구", "영화보기", "보드게임", "러닝", "독서", "헬스", "요리", "사진", "등산"]
+from domain.constants import REGIONS, RANKS, INTERESTS
 
 is_duplicate_user = user_svc.is_duplicate_user
 load_users = user_svc.load_users
@@ -39,10 +36,10 @@ def view():
                 name = st.text_input("이름", key="new_name")
                 employee_number = st.text_input(
                     "사번", key="new_employee_number")
-                region = st.selectbox("지역", REGION_OPTIONS, key="new_region")
-                rank = st.selectbox("직급", RANK_OPTIONS, key="new_rank")
+                region = st.selectbox("지역", REGIONS, key="new_region")
+                rank = st.selectbox("직급", RANKS, key="new_rank")
                 interests = st.multiselect(
-                    "관심사", INTEREST_OPTIONS, key="new_interests")
+                    "관심사", INTERESTS, key="new_interests")
                 next_step = st.form_submit_button("다음 ➜ 성향 설문")
                 if next_step:
                     if not (name and employee_number and interests):
