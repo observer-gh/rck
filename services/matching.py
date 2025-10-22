@@ -8,6 +8,7 @@ import random
 
 from collections import Counter
 
+
 def get_primary_interest(users: List[User]) -> Optional[str]:
     """
     Determines the primary interest of a group of users.
@@ -46,6 +47,42 @@ def get_common_interests(users: List[User]) -> set[str]:
         common.intersection_update(interests)
 
     return common
+
+
+DEMO_SIMPLE = False  # Toggle: if True, use simplified canned explanations.
+
+
+def _personality_mix(users: List[User]) -> str:
+    traits = [u.personality_trait for u in users]
+    unique = sorted(set(traits))
+    if len(unique) == 1:
+        return f"동일 성향({unique[0]})"
+    return ",".join(unique)
+
+
+def _rank_diversity(users: List[User]) -> int:
+    return len({u.rank for u in users})
+
+
+def _build_user_explanations(group_users: List[User], common_interests: set[str]) -> Dict[str, Dict[str, str]]:
+    personality_mix = _personality_mix(group_users)
+    rank_div = _rank_diversity(group_users)
+    all_interests_sorted = sorted(common_interests)
+    for_display_interests = ", ".join(
+        all_interests_sorted) if all_interests_sorted else "(없음)"
+    explanations: Dict[str, Dict[str, str]] = {}
+    legacy_group_str = (
+        f"공통 관심사 ({len(common_interests)}개): {for_display_interests}. 직급 다양성: {rank_div}개. 성향 조합: {personality_mix}."
+    )
+    for u in group_users:
+        explanations[u.id] = {
+            "그룹": legacy_group_str,  # backward compatibility
+            "공통관심사": for_display_interests,
+            "직급다양성": f"{rank_div}개",
+            "성향조합": personality_mix,
+            "요약": f"{len(common_interests)}개 관심사 공유 / 직급 {rank_div}개 / 성향 {personality_mix}" if common_interests else f"직급 {rank_div}개 / 성향 {personality_mix}"
+        }
+    return explanations
 
 
 def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[str] = None) -> List[Club]:
@@ -89,7 +126,7 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
                 # Filter candidates to those who share at least one interest with the current group
                 potential_candidates = []
                 current_common_interests = get_common_interests(group_users)
-                if not current_common_interests: # Should not happen after the first user
+                if not current_common_interests:  # Should not happen after the first user
                     # In case the seed user has no interests, we can't form a club
                     break
 
@@ -98,7 +135,7 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
                         potential_candidates.append(cand_id)
 
                 if not potential_candidates:
-                    break # No more valid candidates to add
+                    break  # No more valid candidates to add
 
                 # Select the best candidate to add, prioritizing rank diversity
                 current_ranks = {user_map[uid].rank for uid in group_ids}
@@ -152,19 +189,24 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
     for club in all_clubs:
         club.created_at = now
         club.updated_at = now
-
-        # Build explanation string
         group_users = [user_map[uid] for uid in club.member_ids]
         common_interests = get_common_interests(group_users)
-        distinct_ranks = len({u.rank for u in group_users})
-
-        explanation_str = (
-            f"공통 관심사 ({len(common_interests)}개): {', '.join(sorted(list(common_interests)))}. "
-            f"직급 다양성: {distinct_ranks}개."
-        )
-
-        # Adapt to the existing explanation data structure
-        club.explanations = {uid: {"그룹": explanation_str} for uid in club.member_ids}
-        club.match_score_breakdown = {} # Clear obsolete scores
+        # Hybrid mode: optionally supply simple canned explanation for pure demo
+        if DEMO_SIMPLE:
+            explanation_str = "데모: 관심사 기반/직급 균형으로 자동 구성된 그룹입니다."
+            club.explanations = {u.id: {"그룹": explanation_str}
+                                 for u in group_users}
+            club.match_score_breakdown = {
+                "shared_interest_count": len(common_interests),
+                "rank_diversity_count": _rank_diversity(group_users)
+            }
+        else:
+            club.explanations = _build_user_explanations(
+                group_users, common_interests)
+            club.match_score_breakdown = {
+                "shared_interest_count": len(common_interests),
+                "rank_diversity_count": _rank_diversity(group_users),
+                "personality_mix": _personality_mix(group_users)
+            }
 
     return all_clubs
