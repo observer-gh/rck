@@ -47,6 +47,15 @@ def view():
             (u.get('region') for u in users_all if u.get('id') == 'demo_user'), '서울')
         demo_region = demo_region_raw if isinstance(
             demo_region_raw, str) and demo_region_raw else '서울'
+        # Ensure canonical demo user exists before seeding peers
+        if not any(u.get('id') == 'demo_user' for u in users_all):
+            try:
+                from domain.constants import DEMO_USER
+                users_all.append(DEMO_USER.copy())
+                _p.replace_all('users', users_all)
+                users_all = _p.load_list('users')
+            except Exception:
+                pass
         _seed_demo_peers(demo_region)
         users_all = _p.load_list('users')
         clubs_existing = _p.load_list('clubs')
@@ -56,7 +65,7 @@ def view():
             'id') == 'demo_user' or u.get('name') == '데모사용자'), None)
         peer_user_recs = [u for u in users_all if u.get('name') in PEER_NAMES]
         fixed_members = []
-        expected_name = f"{demo_region} 축구 클럽 A"
+        expected_name = f"{demo_region} 축구 클럽 A (demo)"
         for c in clubs_existing:
             mids = c.get('member_ids', []) or []
             # Detect by exact name OR by composition (demo user + 5 peers)
@@ -66,7 +75,7 @@ def view():
             if comp_ok or name_ok:
                 fixed_members = mids
                 break
-        if not fixed_members and demo_user_rec and len(peer_user_recs) == 5:
+        if not fixed_members and demo_user_rec and len(peer_user_recs) >= 5:
             fixed_members = [demo_user_rec['id']] + [p['id']
                                                      for p in peer_user_recs]
             fixed_club = Club(
@@ -84,6 +93,9 @@ def view():
             clubs_existing.append(fc_dict)
             _p.replace_all('clubs', clubs_existing)
             # Removed info bar per request (club created silently)
+        # Ensure session selects demo user for immediate render
+        if demo_user_rec and (getattr(st.session_state, 'current_user_id', None) not in fixed_members):
+            st.session_state['current_user_id'] = demo_user_rec['id']
         # Prepare remaining users for matching
         remaining_users = [user_from_dict(
             u) for u in users_all if u.get('id') not in fixed_members]
@@ -109,10 +121,8 @@ def view():
             runs.append(_asdict(run_meta))
             _p.replace_all('match_runs', runs)
             st.success(f"매칭 완료: 새 클럽 {len(new_cd)}개 생성 (Run {run_id})")
-            st.rerun()
-        else:
-            # Removed error bar; no matching performed when insufficient users
-            pass
+        # Unconditional rerun to refresh view (covers both creation-only and full match cases)
+        st.rerun()
     current_user_id = getattr(st.session_state, 'current_user_id', None)
     users = persistence.load_list('users')
     if not users:

@@ -51,7 +51,13 @@ def render_clubs_tab():
         pts = points_map.get(c['id'], 0)
         # Prefer persisted semantic name; fallback to generic numbered label.
         display_name = c.get('name') or f"클럽 #{idx}"
-        club_title = f"{display_name} | 인원 {len(c['member_ids'])} | 상태: {c.get('status', 'N/A')} | 포인트: {pts}"
+        # Render status as Active if nemo/demo_user is a member (display-only override)
+        members_ids = c.get('member_ids', []) or []
+        raw_status = c.get('status', 'N/A')
+        status_disp = 'Active' if 'demo_user' in members_ids else raw_status
+        display_name = display_name + \
+            ' (demo)' if 'demo_user' in members_ids else display_name
+        club_title = f"{display_name} | 인원 {len(members_ids)} | 상태: {status_disp} | 포인트: {pts}"
 
         with st.expander(club_title):
             leader_name = admin_svc.get_user_name(c['leader_id'], user_map)
@@ -64,10 +70,12 @@ def render_clubs_tab():
             leader_disp = _display_name(leader_name)
             members_disp = [_display_name(n) for n in member_names]
             # Map user IDs to employee numbers for display augmentation.
-            emp_map = {u['id']: u.get('employee_number', '') for u in admin_svc.get_user_map().values()} if hasattr(admin_svc, 'get_user_map') else {}
+            emp_map = {u['id']: u.get('employee_number', '') for u in admin_svc.get_user_map(
+            ).values()} if hasattr(admin_svc, 'get_user_map') else {}
             leader_emp = emp_map.get(c['leader_id'], '')
             leader_full = f"{leader_disp} ({leader_emp})" if leader_emp else leader_disp
-            members_full = [f"{n} ({emp_map.get(mid,'')})" if emp_map.get(mid,'') else n for n, mid in zip(members_disp, c['member_ids'])]
+            members_full = [f"{n} ({emp_map.get(mid,'')})" if emp_map.get(
+                mid, '') else n for n, mid in zip(members_disp, c['member_ids'])]
             st.write(f"**리더:** {leader_full}")
             st.write(f"**멤버:** {', '.join(members_full)}")
 

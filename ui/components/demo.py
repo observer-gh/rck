@@ -171,44 +171,18 @@ def render_demo_sidebar(context: str = ""):
         st.session_state.demo_seed_done = demo_count >= 6
     seed_disabled = st.session_state.demo_seed_done and demo_count >= 6
     from domain.constants import DEMO_USER
-    # Arrange buttons in a single row: Seed | Seed Whole | Reset
-    col_seed, col_whole, col_reset = st.sidebar.columns(3)
-    with col_seed:
-        if st.button("Seed", key="btn_seed_all", disabled=seed_disabled, help="데모 사용자(+존재시 skip) + 고정 5 peers"):
-            users_local = persistence.load_list('users')
-            # Ensure canonical demo_user or accept manually created one named 데모사용자
-            has_canonical = any(
-                u.get('id') == 'demo_user' for u in users_local)
-            has_named_demo = any(u.get('name') == '데모사용자' for u in users_local)
-            if not has_canonical:
-                if has_named_demo:
-                    # Skip creating canonical; treat named demo as baseline
-                    pass
-                else:
-                    users_local.append(DEMO_USER.copy())
-                    persistence.replace_all('users', users_local)
-            # Seed fixed peers + fixed club
-            _seed_demo_peers(region)
-            # Update state
-            users_local = persistence.load_list('users')
-            demo_cluster = [u for u in users_local if u.get('id') == 'demo_user' or u.get(
-                'name') in _PEER_NAMES or u.get('name') == '데모사용자']
-            st.session_state.demo_seed_done = len(demo_cluster) >= 6
-            st.sidebar.success("Seed 완료: 데모 사용자 + 5 peers")
-            st.rerun()
-    # Full cohort seeding button
+    # Arrange buttons now as: Seed (full cohort) | Reset
+    col_seed_full, col_reset = st.sidebar.columns(2)
     full_disabled = len(persistence.load_list('users')) >= 30
-    with col_whole:
-        if st.button("Seed Whole", key="btn_seed_whole", disabled=full_disabled, help="전체 데모 코호트(30명) 사용자만 생성 (매칭은 어드민에서 실행)"):
+    with col_seed_full:
+        if st.button("Seed", key="btn_seed_full", disabled=full_disabled, help="전체 데모 코호트(30명) 생성 (매칭은 어드민에서 실행)"):
             users_local = persistence.load_list('users')
             # Ensure demo base cohort present (demo_user + peers)
             if not any(u.get('id') == 'demo_user' for u in users_local):
-                from domain.constants import DEMO_USER as _DEMO
-                users_local.append(_DEMO.copy())
+                users_local.append(DEMO_USER.copy())
                 persistence.replace_all('users', users_local)
             _seed_demo_peers(region)
             users_local = persistence.load_list('users')
-            # Idempotent deterministic extras creation (24 total det_extra_ users)
             existing_det = [u for u in users_local if str(
                 u.get('name', '')).startswith('det_extra_')]
             if len(existing_det) < 24:
@@ -217,8 +191,8 @@ def render_demo_sidebar(context: str = ""):
                 users_local.extend([asdict(u) for u in extras])
                 persistence.replace_all('users', users_local)
             total_users = len(persistence.load_list('users'))
-            st.sidebar.success(
-                f"전체 사용자 시드 완료: 총 {total_users}명 (클럽/Run 미생성) · 매칭은 어드민 대시보드에서 실행하세요")
+            st.session_state.demo_seed_done = True
+            st.sidebar.success(f"시드 완료: 총 {total_users}명")
             st.rerun()
     # Reset button (third column)
     with col_reset:
