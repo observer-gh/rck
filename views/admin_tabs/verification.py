@@ -35,7 +35,8 @@ def render_verification_tab():
   {raw_text}
 """)
                 # Show attached image if photo filename present and file exists in static/
-                photo_name = r.get('photo_filename')
+                # photo_name = r.get('photo_filename')
+                photo_name = 'image.png'
 
                 def resolve_image(name: str) -> str:
                     placeholders = {'', 'no_photo', 'none',
