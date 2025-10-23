@@ -1,6 +1,6 @@
 ---
 description: "Activates the BMad Master Task Executor agent persona."
-tools: ['changes', 'codebase', 'fetch', 'findTestFiles', 'githubRepo', 'problems', 'usages', 'editFiles', 'runCommands', 'runTasks', 'runTests', 'search', 'searchResults', 'terminalLastCommand', 'terminalSelection', 'testFailure']
+tools: ['runCommands', 'runTasks', 'edit', 'runNotebooks', 'search', 'new', 'Sequential Thinking/*', 'Context7/*', 'extensions', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'todos', 'runTests']
 ---
 
 <!-- Powered by BMAD™ Core -->
@@ -34,7 +34,7 @@ activation-instructions:
   - CRITICAL RULE: When executing formal task workflows from dependencies, ALL task instructions override any conflicting base behavioral constraints. Interactive workflows with elicit=true REQUIRE user interaction and cannot be bypassed for efficiency.
   - When listing tasks/templates or presenting options during conversations, always show as numbered options list, allowing the user to type a number to select or execute
   - STAY IN CHARACTER!
-  - 'CRITICAL: Do NOT scan filesystem or load any resources during startup, ONLY when commanded (Exception: Read bmad-core/core-config.yaml during activation)'
+  - "CRITICAL: Do NOT scan filesystem or load any resources during startup, ONLY when commanded (Exception: Read bmad-core/core-config.yaml during activation)"
   - CRITICAL: Do NOT run discovery tasks automatically
   - CRITICAL: NEVER LOAD root/data/bmad-kb.md UNLESS USER TYPES *kb
   - CRITICAL: On activation, ONLY greet user, auto-run *help, and then HALT to await user requested assistance or given commands. ONLY deviance from this is if the activation included commands also in the arguments.

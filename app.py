@@ -1,41 +1,40 @@
 import streamlit as st
 import datetime as dt
-from services import users as user_svc
+from ui.components.demo import render_demo_sidebar
 
 # Import the page rendering functions from the new modules
-from views import user_signup, my_club, activity_report, admin_dashboard, profile
-from demo import demo_script
+from views import user_signup, my_club, activity_report, demo_script, admin_dashboard, profile
 
 # --- Page Registry ---
 # Maps a page key to its label, rendering function from the imported module, and admin status.
 PAGE_REGISTRY = {
     "user_signup": {
-        "label": "등록/설문",
+        "label": "📝 프로필/설문",
         "render_func": user_signup.view,
         "admin": False,
     },
     "profile": {
-        "label": "내 프로필",
+        "label": "🙍 내 프로필",
         "render_func": profile.view,
         "admin": False,
     },
     "my_club": {
-        "label": "내 클럽",
+        "label": "👥 내 클럽",
         "render_func": my_club.view,
         "admin": False,
     },
     "activity_report": {
-        "label": "활동 보고",
+        "label": "🧾 활동 보고",
         "render_func": activity_report.view,
         "admin": False,
     },
     "demo_script": {
-        "label": "데모 가이드",
+        "label": "🧪 데모 가이드",
         "render_func": demo_script.view,
         "admin": False,
     },
     "admin_dashboard": {
-        "label": "어드민 대시보드",
+        "label": "🛠️ 어드민 대시보드",
         "render_func": admin_dashboard.view,
         "admin": True,
     },
@@ -51,16 +50,15 @@ def main():
     """
     st.set_page_config(page_title="AI Club Matching Demo", layout="wide")
 
-    # Ensure demo user exists and is the active session user.
-    try:
-        user_svc.load_users()  # guarantees demo user persistence
-        st.session_state.current_user_id = 'demo_user'
-    except Exception:
-        # Fail silently if user bootstrap has an unexpected issue; app still usable.
-        pass
-
     # --- Sidebar ---
     st.sidebar.title("Navigation")
+    st.markdown("""<div style='padding:0.9rem 1.1rem; border-radius:10px; background:linear-gradient(135deg,#3f51b5,#5c6bc0); color:white; margin-bottom:1.0rem;'>
+    <div style='font-size:1.05rem; font-weight:600;'>AI로 연결되는 사내 인적 네트워크</div>
+    <div style='font-size:0.75rem; opacity:0.85;'>취향과 성향 기반 클럽 매칭 데모</div>
+    </div>""", unsafe_allow_html=True)
+
+    # Standard top demo panel
+    render_demo_sidebar("global")
 
     # Initialize session state for admin_mode if it doesn't exist
     if 'admin_mode' not in st.session_state:
@@ -78,23 +76,30 @@ def main():
                          v in PAGE_REGISTRY.items() if not v["admin"]}
 
     page_keys = list(visible_pages.keys())
+    page_labels = [v["label"] for v in visible_pages.values()]
 
-    # Use a single source of truth: the radio widget's key is the nav state.
-    if 'nav_page' not in st.session_state or st.session_state.nav_page not in page_keys:
-        # Set a default before rendering the radio (only applies first render)
-        st.session_state.nav_page = page_keys[0]
+    # Handle deferred navigation target before creating radio (cannot set after instantiation)
+    if 'nav_target' in st.session_state:
+        target_label = st.session_state.nav_target
+        # Validate target exists among labels
+        if target_label in [v['label'] for v in PAGE_REGISTRY.values()]:
+            # Preseed widget state key expected by radio
+            st.session_state.navigation_radio = target_label
+        del st.session_state.nav_target
 
-    st.sidebar.radio(
+    # Page selection radio buttons (single source of truth via widget state)
+    selected_page_label = st.sidebar.radio(
         "메뉴 이동",
-        page_keys,
-        key="nav_page",
-        format_func=lambda k: visible_pages[k]["label"],
+        page_labels,
+        key="navigation_radio"
     )
+    selected_page_key = page_keys[page_labels.index(selected_page_label)]
+
+    # (Demo panel already rendered at top)
 
     # --- Page Rendering ---
     # Retrieve the render function from the registry and call it
-    # Use the up-to-date nav_page rather than the instantaneous selection variable
-    page_to_render = visible_pages[st.session_state.nav_page]["render_func"]
+    page_to_render = visible_pages[selected_page_key]["render_func"]
     page_to_render()
 
     # --- Footer ---

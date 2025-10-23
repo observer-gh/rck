@@ -1,35 +1,27 @@
 from typing import List
 
 QUESTIONS = [
-    "나는 새로운 사람들을 만나는 것을 즐긴다.",
-    "나는 대규모 모임보다는 소규모 모임을 선호한다.",
-    "나는 대화의 중심에 있는 것을 좋아한다.",
-    "나는 혼자 시간을 보내며 재충전한다.",
-    "나는 즉흥적인 계획을 세우는 것을 좋아한다."
+    "낯선 사람과도 금방 대화를 시작한다.",
+    "생각을 정리할 때 혼자 있는 시간을 꼭 필요로 한다.",
+    "여러 사람 앞에서 의견을 말하는 것이 편하다.",
+    "피곤할 때 사람들과 어울리기보다 조용히 쉰다.",
+    "팀 활동에서 분위기를 주도하는 편이다.",
+    "즉흥적인 모임 제안이 오면 흔쾌히 참여한다.",
+    "아이디어를 다른 사람과 빠르게 공유하는 것을 선호한다."
 ]
 
+
 def classify_personality(answers: List[int]) -> str:
+    """3점 척도(1~3) 7문항 평균 기반 성향 분류.
+    값 의미: 1=아니요, 2=잘 모르겠다, 3=네
+    평균 >= 2.4 → 외향, 평균 <= 1.6 → 내향, 그 사이는 중간.
+    길이 불일치 시 보수적으로 중간 반환.
     """
-    Classifies personality based on survey answers.
-    - 5 questions, Likert scale 1-5.
-    - Questions 2 and 4 are reverse-scored.
-    - Score >= 18: 외향 (Extrovert)
-    - Score <= 10: 내향 (Introvert)
-    - Otherwise: 중간 (Ambivert)
-    """
-    if len(answers) != 5:
-        raise ValueError("Expected 5 answers.")
-
-    scores = answers.copy()
-    # Reverse score questions 2 and 4
-    scores[1] = 6 - scores[1]
-    scores[3] = 6 - scores[3]
-
-    total_score = sum(scores)
-
-    if total_score >= 18:
-        return "외향"
-    elif total_score <= 10:
-        return "내향"
-    else:
+    if not answers or len(answers) != len(QUESTIONS):
         return "중간"
+    avg = sum(answers) / len(answers)
+    if avg >= 2.4:
+        return "외향"
+    if avg <= 1.6:
+        return "내향"
+    return "중간"

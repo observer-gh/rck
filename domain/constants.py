@@ -6,7 +6,10 @@ ensuring a single source of truth for values like regions, ranks, and interests.
 # These constants are used across multiple views to ensure consistency.
 
 # List of available regions for users
-REGIONS = ["서울", "부산", "대전", "대구"]
+REGIONS = [
+    "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+    "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"
+]
 
 # List of available job ranks for users
 RANKS = ["사원", "대리", "과장", "차장", "부장"]

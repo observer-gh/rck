@@ -48,18 +48,32 @@ def view():
         new_interests = st.multiselect(
             "관심사", INTERESTS, default=me.get('interests', []))
         existing_answers = me.get('survey_answers') or []
-        # Pad/truncate to match QUESTIONS length
-        if len(existing_answers) < len(QUESTIONS):
-            existing_answers = existing_answers + \
-                [3] * (len(QUESTIONS) - len(existing_answers))
-        elif len(existing_answers) > len(QUESTIONS):
-            existing_answers = existing_answers[:len(QUESTIONS)]
+        # normalize legacy 5-point answers to 3-point by mapping: 1-2 ->1, 3 ->2, 4-5 ->3
+        norm_answers = []
+        for v in existing_answers:
+            if isinstance(v, int):
+                if v <= 2:
+                    norm_answers.append(1)
+                elif v == 3:
+                    norm_answers.append(2)
+                else:
+                    norm_answers.append(3)
+            else:
+                norm_answers.append(2)
+        # Pad/truncate
+        if len(norm_answers) < len(QUESTIONS):
+            norm_answers += [2] * (len(QUESTIONS) - len(norm_answers))
+        elif len(norm_answers) > len(QUESTIONS):
+            norm_answers = norm_answers[:len(QUESTIONS)]
+        OPTION_MAP = {"아니요": 1, "중간": 2, "네": 3}
+        labels = list(OPTION_MAP.keys())
+        reverse_map = {v: k for k, v in OPTION_MAP.items()}
         new_answers = []
         for i, q in enumerate(QUESTIONS):
-            default_val = existing_answers[i] if isinstance(
-                existing_answers[i], int) and 1 <= existing_answers[i] <= 5 else 3
-            new_answers.append(
-                st.slider(q, 1, 5, default_val, key=f"self_edit_q_{current_user_id}_{i}"))
+            initial_label = reverse_map.get(norm_answers[i], "중간")
+            choice = st.radio(f"{i+1}. {q}", labels, key=f"self_edit_q_{current_user_id}_{i}",
+                              index=labels.index(initial_label), horizontal=True)
+            new_answers.append(OPTION_MAP[choice])
         submitted = st.form_submit_button("저장")
         if submitted:
             safe_name = new_name or ""

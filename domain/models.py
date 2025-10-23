@@ -1,13 +1,11 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import datetime as _dt
 
 
 def _now_iso():
     return _dt.datetime.now(_dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
 
-
-from typing import List, Dict, Optional
 
 @dataclass
 class User:
@@ -20,6 +18,17 @@ class User:
     personality_trait: str  # 외향, 내향, 중간
     survey_answers: Optional[List[int]] = None
     created_at: str = field(default_factory=_now_iso)
+
+
+def user_from_dict(d: Dict[str, Any]) -> User:
+    """Safe conversion dropping legacy keys (e.g., preferred_vibe)."""
+    allowed = {"id", "name", "employee_number", "region", "rank",
+               "interests", "personality_trait", "survey_answers", "created_at"}
+    filtered = {k: v for k, v in d.items() if k in allowed}
+    # created_at optional
+    if 'created_at' not in filtered:
+        filtered['created_at'] = _now_iso()
+    return User(**filtered)
 
 
 @dataclass

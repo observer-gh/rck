@@ -1,94 +1,165 @@
 import streamlit as st
-from typing import List, Dict, Any
+from services import persistence
 from domain.models import User
 from utils.ids import create_id_with_prefix
 from services.survey import QUESTIONS, classify_personality
-from services import users as user_svc
-from ui.components import render_demo_actions_panel
-from domain.constants import REGIONS, RANKS, INTERESTS
+from dataclasses import asdict
+from typing import Optional, List, Dict, Any
 
-is_duplicate_user = user_svc.is_duplicate_user
-load_users = user_svc.load_users
-save_users = user_svc.save_users
+REGION_OPTIONS = [
+    "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
+    "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"
+]
+RANK_OPTIONS = ["사원", "대리", "과장", "차장", "부장"]
+INTEREST_OPTIONS = ["축구", "영화보기", "보드게임", "러닝", "독서", "헬스", "요리", "사진", "등산"]
+
+
+def is_duplicate_user(name: str, region: str, users: List[Dict[str, Any]], exclude_id: Optional[str] = None) -> bool:
+    name_norm = (name or '').strip().lower()
+    region_norm = (region or '').strip().lower()
+    for u in users:
+        if exclude_id and u['id'] == exclude_id:
+            continue
+        if u.get('name', '').strip().lower() == name_norm and u.get('region', '').strip().lower() == region_norm:
+            return True
+    return False
+
+
+def load_users():
+    return persistence.load_list('users')
+
+
+def save_users(users):
+    persistence.replace_all('users', users)
 
 
 def view():
     st.header("사용자 등록 / 성향 설문")
+    from ui.components import render_demo_actions_panel
     render_demo_actions_panel("signup")
-    admin_mode = st.session_state.get('admin_mode', False)
-    # Admin previously had tabs for 관리; user management moved to admin dashboard.
-    tabs = None
 
-    # --- Deferred reset of survey sliders after successful save ---
+    # Sidebar demo tools rendered globally in app.py; avoid duplicate call here.
+
+    # Deferred survey slider cleanup if flagged
     if st.session_state.pop('clear_survey_answers', False):
         for i in range(len(QUESTIONS)):
             st.session_state.pop(f"q_{i}", None)
-        # also clear basic draft input widget values if any remained
         for k in ["new_name", "new_employee_number", "new_region", "new_rank", "new_interests"]:
             st.session_state.pop(k, None)
 
-    # --- Creation Form (Tab 0 or standalone) ---
-    create_container = st.container()
-    with create_container:
-        st.subheader("신규 사용자 등록")
-        if 'new_user_draft' not in st.session_state:
-            with st.form("form_basic", clear_on_submit=False):
-                name = st.text_input("이름", key="new_name")
-                employee_number = st.text_input(
-                    "사번", key="new_employee_number")
-                region = st.selectbox("지역", REGIONS, key="new_region")
-                rank = st.selectbox("직급", RANKS, key="new_rank")
-                interests = st.multiselect(
-                    "관심사", INTERESTS, key="new_interests")
-                next_step = st.form_submit_button("다음 ➜ 성향 설문")
-                if next_step:
-                    if not (name and employee_number and interests):
-                        st.error("이름, 사번, 관심사를 모두 입력해야 합니다.")
-                    else:
-                        users = load_users()
-                        if is_duplicate_user(name, region, users):
-                            st.error("중복 사용자 (이름+지역) 존재. 저장 취소.")
-                        else:
-                            st.session_state.new_user_draft = {
-                                'name': name,
-                                'employee_number': employee_number,
-                                'region': region,
-                                'rank': rank,
-                                'interests': interests,
-                            }
-                            st.success("기본 정보가 임시 저장되었습니다. 성향 설문을 완료하세요.")
-                            st.rerun()
-        else:
-            draft = st.session_state.new_user_draft
-            st.info(
-                f"기본 정보 저장됨: {draft['name']} / {draft['region']} / {draft['rank']}")
-            if st.button("◀ 기본 정보 수정"):
-                del st.session_state.new_user_draft
-                st.rerun()
-            with st.form("form_survey", clear_on_submit=False):
-                st.markdown("### 성향 설문")
-                answers: list[int] = []
-                for i, q in enumerate(QUESTIONS):
-                    default_val = st.session_state.get(f"q_{i}", 3)
-                    answer = st.slider(q, 1, 5, int(default_val), key=f"q_{i}")
-                    answers.append(answer)
-                finish = st.form_submit_button("최종 저장")
-                if finish:
-                    personality_trait = classify_personality(answers)
-                    uid = create_id_with_prefix('u')
-                    d = draft
-                    user = User(id=uid, name=d['name'], employee_number=d['employee_number'], region=d['region'], rank=d['rank'],
-                                interests=d['interests'], personality_trait=personality_trait, survey_answers=answers)
-                    user_svc.append_user(user)
-                    st.session_state.current_user_id = uid
-                    # cleanup
-                    del st.session_state.new_user_draft
-                    for k in ["new_name", "new_employee_number", "new_interests"]:
-                        st.session_state[k] = "" if k != "new_interests" else [
-                        ]
-                    # mark survey answers for clearing on next script run to avoid modifying widget state post-instantiation
-                    st.session_state.clear_survey_answers = True
-                    st.success(f"저장 완료: {d['name']} (성향: {personality_trait})")
-                    st.rerun()
+    users = load_users()
 
-    # All user list/edit/delete logic moved to Admin Dashboard (사용자 관리 탭)
+    # If a user already registered, disable further registration unless draft in progress
+    existing_current = st.session_state.get('current_user_id')
+    if existing_current and 'new_user_draft' not in st.session_state:
+        st.info("이미 등록된 사용자가 있습니다. 추가 등록은 비활성화되었습니다.")
+        if st.button("내 프로필로 이동 ▶"):
+            st.session_state.nav_target = "🙍 내 프로필"
+            st.rerun()
+        return
+
+    # Step 1: Basic info form if draft not present
+    if 'new_user_draft' not in st.session_state:
+        # Determine default demo-based values
+        demo_base = next(
+            (u for u in users if u.get('id') == 'demo_user'), None)
+        if not demo_base:
+            demo_base = next(
+                (u for u in users if u.get('name') == 'nemo'), None)
+        # Default name always "데모사용자" for convenience (user can change)
+        default_name = "데모사용자"
+        # Fixed default employee number irrespective of demo_base
+        default_emp = '10150000'
+        reg_val = demo_base.get('region') if demo_base else None
+        default_region = reg_val if isinstance(
+            reg_val, str) and reg_val in REGION_OPTIONS else REGION_OPTIONS[0]
+        # Rank default: demo base rank if valid else '사원'
+        # Fixed default rank
+        default_rank = '사원'
+        ints_val = demo_base.get('interests') if demo_base else []
+        # 관심사 기본값: 데모 사용자/네모의 관심사 없으면 대표 2개 자동 선택
+        default_interests = ints_val if isinstance(
+            ints_val, list) and ints_val else ["축구", "영화보기"]
+        with st.form("form_basic", clear_on_submit=False):
+            st.subheader("1단계: 기본 정보")
+            name = st.text_input("이름", key="new_name", value=default_name)
+            employee_number = st.text_input(
+                "사번", key="new_employee_number", value=default_emp, placeholder="8자리 숫자 (예: 10150000)")
+            region = st.selectbox(
+                "지역", REGION_OPTIONS, key="new_region", index=REGION_OPTIONS.index(default_region))
+            rank = st.selectbox("직급", RANK_OPTIONS, key="new_rank",
+                                index=RANK_OPTIONS.index(default_rank))
+            interests = st.multiselect(
+                "관심사", INTEREST_OPTIONS, key="new_interests", default=default_interests)
+            next_step = st.form_submit_button("다음 ➜ 성향 설문")
+            if next_step:
+                def _emp_valid(v: str) -> bool:
+                    return v.isdigit() and len(v) == 8
+                if not (name and employee_number and interests):
+                    st.error("이름, 사번, 관심사를 모두 입력해야 합니다.")
+                elif not _emp_valid(employee_number):
+                    st.error("사번은 8자리 숫자여야 합니다 (예: 10150000).")
+                else:
+                    if is_duplicate_user(name, region, users):
+                        st.error("중복 사용자 (이름+지역) 존재. 저장 취소.")
+                    else:
+                        st.session_state.new_user_draft = {
+                            'name': name,
+                            'employee_number': employee_number,
+                            'region': region,
+                            'rank': rank,
+                            'interests': interests,
+                        }
+                        st.success("기본 정보가 임시 저장되었습니다. 성향 설문을 완료하세요.")
+                        st.rerun()
+    else:
+        draft = st.session_state.new_user_draft
+        st.info(
+            f"기본 정보 저장됨: {draft['name']} / {draft['region']} / {draft['rank']}")
+        if st.button("◀ 기본 정보 수정"):
+            del st.session_state.new_user_draft
+            st.rerun()
+        with st.form("form_survey", clear_on_submit=False):
+            st.subheader("2단계: 성향 설문")
+            st.markdown("""
+            <style>
+            div[data-testid="stRadio"] > label {font-weight:600; margin-bottom:0.25rem;}
+            div[data-testid="stRadio"] div[role="radiogroup"] {display:flex; gap:.6rem; flex-wrap:wrap;}
+            div[data-testid="stRadio"] label[data-baseweb="radio"] {border:1px solid #ccc; padding:.45rem .95rem; border-radius:999px; cursor:pointer; background:#ffffff; font-size:.9rem; color:#222;}
+            div[data-testid="stRadio"] label[data-baseweb="radio"]:hover {background:#f3f7ff; border-color:#5c6bc0;}
+            /* Selected state: thicker border + subtle background, keep dark text */
+            div[data-testid="stRadio"] input:checked + div + label {background:#e8edff; border-color:#3f51b5; box-shadow:0 0 0 2px rgba(63,81,181,.18); color:#1a237e; font-weight:600;}
+            </style>
+            """, unsafe_allow_html=True)
+            OPTION_MAP = {"아니요": 1, "중간": 2, "네": 3}
+            option_labels = list(OPTION_MAP.keys())
+            answers: List[int] = []
+            # sanitize legacy stored values "잘 모르겠다" -> "중간"
+            for i in range(len(QUESTIONS)):
+                legacy_key = f"q_{i}"
+                if st.session_state.get(legacy_key) == "잘 모르겠다":
+                    st.session_state[legacy_key] = "중간"
+            for i, q in enumerate(QUESTIONS):
+                choice = st.radio(f"{i+1}. {q}", option_labels,
+                                  key=f"q_{i}", index=1, horizontal=True)
+                answers.append(OPTION_MAP[choice])
+            finish = st.form_submit_button("최종 저장")
+            if finish:
+                personality_trait = classify_personality(answers)
+                uid = create_id_with_prefix('u')
+                d = draft
+                user = User(id=uid, name=d['name'], employee_number=d['employee_number'], region=d['region'], rank=d['rank'],
+                            interests=d['interests'], personality_trait=personality_trait, survey_answers=answers)
+                users.append(asdict(user))
+                save_users(users)
+                st.session_state.current_user_id = uid
+                # Defer navigation to profile page via nav_target (handled in app before radio instantiation)
+                st.session_state.nav_target = "🙍 내 프로필"
+                # cleanup
+                del st.session_state.new_user_draft
+                # clear text fields for potential next creation
+                for k in ["new_name", "new_employee_number", "new_interests"]:
+                    st.session_state[k] = "" if k != "new_interests" else []
+                st.session_state.clear_survey_answers = True
+                st.success(f"저장 완료: {d['name']} (성향: {personality_trait})")
+                st.rerun()

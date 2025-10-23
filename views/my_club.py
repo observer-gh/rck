@@ -1,7 +1,7 @@
 import streamlit as st
 from services import persistence
 from typing import Dict
-from ui.components import club_card, styled_member_chips, inject_base_css, render_demo_actions_panel
+from ui.components import club_card, styled_member_chips, render_demo_actions_panel
 
 
 def _user_map():
@@ -46,7 +46,6 @@ def view():
     my_club = sorted(user_clubs, key=_ts, reverse=True)[0]
     user_map = _user_map()
     pts_map = _club_points_map()
-    inject_base_css()
     club_card(my_club, user_map, pts_map.get(my_club['id'], 0))
     styled_member_chips(my_club['member_ids'], user_map)
     with st.expander("매칭 점수 상세"):
@@ -54,8 +53,17 @@ def view():
     exp = my_club.get('explanations')
     if exp:
         with st.expander("매칭 설명 (AI 분석)"):
-            for uid, peers in exp.items():
+            for uid, detail in exp.items():
                 uname = user_map.get(uid, {}).get('name', 'Unknown')
-                rendered = '; '.join(
-                    f"{user_map.get(pid, {}).get('name', '?')}:{reason}" for pid, reason in peers.items())
-                st.write(f"**{uname}**: {rendered}")
+                group_line = detail.get('그룹')
+                summary = detail.get('요약')
+                st.markdown(f"**{uname}**")
+                if group_line:
+                    st.caption(group_line)
+                bullets = []
+                for k in ["공통관심사", "직급다양성", "성향조합"]:
+                    if k in detail:
+                        bullets.append(f"- {k}: {detail[k]}")
+                if summary:
+                    bullets.append(f"- 요약: {summary}")
+                st.markdown("\n".join(bullets))
