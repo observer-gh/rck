@@ -92,6 +92,53 @@ def _seed_all_demo_users(region: str):
     return len(base_created), extra_created
 
 
+def _build_deterministic_extras(count: int, region: str):
+    """Build deterministic extra users whose attributes guarantee club formation.
+
+    All users share at least one common interest ("축구") ensuring the matching
+    algorithm can keep a non-empty intersection while growing each group.
+    Personality alternates to create distinct (region, personality_trait) buckets
+    of size >= target_size (6). Ranks cycle to improve diversity.
+    Names are Korean via canonical generator so they sort to top in admin.
+    """
+    from domain.models import User
+    from utils.ids import create_id_with_prefix
+    from utils.korean_names import generate_canonical_names
+    from domain.constants import RANKS
+
+    # Interest pool (each user gets 축구 + one variant)
+    interest_pool = ["영화보기", "보드게임", "러닝", "독서", "헬스", "요리", "사진", "등산"]
+    # Existing names: ensure no collisions with already persisted users.
+    from services import persistence as _p
+    existing_users = _p.load_list('users')
+    existing_names = {str(u.get('name'))
+                      for u in existing_users if isinstance(u.get('name'), str)}
+    # high start_index to avoid collision
+    names = generate_canonical_names(
+        count, existing=existing_names, start_index=1000)
+    extras = []
+    for i in range(count):
+        personality = "외향" if (i % 2 == 0) else "내향"
+        rank = RANKS[i % len(RANKS)]
+        second_interest = interest_pool[i % len(interest_pool)]
+        interests = ["축구", second_interest]
+        # Deterministic survey answers pattern keeps classify_personality unused; set trait directly.
+        answers = [3, 3, 3, 3, 3, 3, 3]
+        u = User(
+            id=create_id_with_prefix('u'),
+            name=f"det_extra_{names[i]}",  # prefix for easy identification
+            employee_number=f"DET-{i+1:02}",
+            region=region,
+            rank=rank,
+            interests=interests,
+            personality_trait=personality,
+            survey_answers=answers,
+            nickname=None
+        )
+        extras.append(u)
+    return extras
+
+
 def render_demo_sidebar(context: str = ""):
     """Sidebar component aggregating demo utilities (seeding, status, quick solo club, auto-seed/match).
 
@@ -123,9 +170,10 @@ def render_demo_sidebar(context: str = ""):
         st.session_state.demo_seed_done = demo_count >= 6
     seed_disabled = st.session_state.demo_seed_done and demo_count >= 6
     from domain.constants import DEMO_USER
-    col_seed, col_match, col_reset = st.sidebar.columns(3)
+    # Arrange buttons in a single row: Seed | Seed Whole | Reset
+    col_seed, col_whole, col_reset = st.sidebar.columns(3)
     with col_seed:
-        if st.button("Seed", key="btn_seed_all", disabled=seed_disabled, help="데모 사용자(+존재시 skip) + 고정 5 peers + 추가 25 랜덤"):
+        if st.button("Seed", key="btn_seed_all", disabled=seed_disabled, help="데모 사용자(+존재시 skip) + 고정 5 peers"):
             users_local = persistence.load_list('users')
             # Ensure canonical demo_user or accept manually created one named 데모사용자
             has_canonical = any(
@@ -140,54 +188,70 @@ def render_demo_sidebar(context: str = ""):
                     persistence.replace_all('users', users_local)
             # Seed fixed peers + fixed club
             _seed_demo_peers(region)
-            # Add 25 random users (excluding any existing names)
-            from services.survey import QUESTIONS, classify_personality
-            from domain.models import User
-            from dataclasses import asdict as _asdict
-            import random
-            users_local = persistence.load_list('users')  # refresh after peers
-            existing_names = {u.get('name') for u in users_local}
-            INTERESTS = ["축구", "영화보기", "보드게임",
-                         "러닝", "독서", "헬스", "요리", "사진", "등산"]
-            RANKS = ["사원", "대리", "과장", "차장", "부장"]
-            REGIONS = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
-                       "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"]
-            added = 0
-            for i in range(1, 26):
-                name = f"auto25_{i}"
-                if name in existing_names:
-                    continue
-                interests = random.sample(INTERESTS, k=random.randint(2, 4))
-                answers = [random.choice([1, 2, 3])
-                           for _ in range(len(QUESTIONS))]
-                trait = classify_personality(answers)
-                from utils.ids import create_id_with_prefix
-                u = User(id=create_id_with_prefix('u'), name=name, employee_number=f"AUTO25-{i:02}",
-                         region=random.choice(REGIONS), rank=random.choice(RANKS), interests=interests,
-                         personality_trait=trait, survey_answers=answers)
-                users_local.append(_asdict(u))
-                existing_names.add(name)
-                added += 1
-            if added:
-                persistence.replace_all('users', users_local)
             # Update state
             users_local = persistence.load_list('users')
             demo_cluster = [u for u in users_local if u.get('id') == 'demo_user' or str(
                 u.get('name', '')).startswith('demo_peer') or u.get('name') == '데모사용자']
             st.session_state.demo_seed_done = len(demo_cluster) >= 6
-            st.sidebar.success(f"Seed 완료: peers 확보 + 추가 {added}명")
+            st.sidebar.success("Seed 완료: 데모 사용자 + 5 peers")
             st.rerun()
-    with col_match:
-        # (caption removed)
-        pass
+    # Full cohort seeding button
+    full_disabled = len(persistence.load_list('users')) >= 30
+    with col_whole:
+        if st.button("Seed Whole", key="btn_seed_whole", disabled=full_disabled, help="전체 데모 코호트(30명) 생성 + 24명 매칭(4 클럽)"):
+            users_local = persistence.load_list('users')
+            # Ensure demo base cohort present
+            has_demo_user = any(
+                u.get('id') == 'demo_user' for u in users_local)
+            if not has_demo_user:
+                from domain.constants import DEMO_USER as _DEMO
+                users_local.append(_DEMO.copy())
+                persistence.replace_all('users', users_local)
+            _seed_demo_peers(region)
+            users_local = persistence.load_list('users')  # refresh
+            # Idempotent deterministic extras creation (24)
+            existing_det = [u for u in users_local if str(
+                u.get('name', '')).startswith('det_extra_')]
+            if len(existing_det) < 24:
+                need = 24 - len(existing_det)
+                extras = _build_deterministic_extras(need, region)
+                users_local.extend([asdict(u) for u in extras])
+                persistence.replace_all('users', users_local)
+                users_local = persistence.load_list('users')
+            # Prepare matching ONLY on deterministic extras
+            det_pool = [u for u in users_local if str(
+                u.get('name', '')).startswith('det_extra_')]
+            if len(det_pool) < 24:
+                st.sidebar.warning(
+                    f"필요한 24명 결정적 사용자 부족: {len(det_pool)}명. 일부 클럽만 생성됩니다.")
+            from domain.models import User as _User, MatchRun as _MatchRun
+            from utils.ids import create_id_with_prefix as _cid
+            from services import matching as _matching
+            run_id = _cid('run')
+            user_objs = [_User(**u) for u in det_pool]
+            clubs_new = _matching.compute_matches(
+                user_objs, target_size=6, run_id=run_id, seed=42)
+            clubs_dicts = [asdict(c) for c in clubs_new]
+            existing_clubs = persistence.load_list('clubs')
+            existing_clubs.extend(clubs_dicts)
+            persistence.replace_all('clubs', existing_clubs)
+            runs = persistence.load_list('match_runs')
+            run_meta = MatchRun(id=run_id, created_at=_dt.datetime.now(_dt.timezone.utc).isoformat().replace(
+                '+00:00', 'Z'), target_size=6, user_count=len(det_pool), club_count=len(clubs_dicts))
+            runs.append(asdict(run_meta))
+            persistence.replace_all('match_runs', runs)
+            st.sidebar.success(
+                f"전체 시드 완료: 사용자 {len(persistence.load_list('users'))}명 / 신규 클럽 {len(clubs_dicts)}개 (Run {run_id})")
+            st.rerun()
+    # Reset button (third column)
     with col_reset:
-        if st.button("Reset", key="btn_demo_wipe_simple"):
+        if st.button("Reset", key="btn_demo_wipe_simple", help="모든 데모 데이터 초기화"):
             from services import persistence as _p
             for _k in ['users', 'clubs', 'match_runs', 'activity_reports']:
                 _p.replace_all(_k, [])
             st.session_state.pop('current_user_id', None)
             st.session_state.pop('demo_seed_done', None)
-            st.success("Cleared")
+            st.success("데모 상태 초기화 완료")
             st.rerun()
     # Removed legacy auto-seed+match button; consolidated in Seed + Match Clubs flows.
     st.sidebar.markdown("---")

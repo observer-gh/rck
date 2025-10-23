@@ -49,9 +49,13 @@ def main():
     Main application router.
 
     This function controls the sidebar navigation and renders the selected page.
-    It filters the available pages based on whether "Admin Mode" is active.
+    It filters the available pages based on whether the Admin Dashboard mode is active.
     """
     st.set_page_config(page_title="AI Club Matching Demo", layout="wide")
+
+    # Preserve admin dashboard mode after sidebar-triggered reruns
+    if st.session_state.get('admin_mode'):
+        st.session_state.admin_mode = True
 
     # Global survey radio pill styling (neutral smaller variant)
     st.markdown("""
@@ -81,16 +85,16 @@ def main():
     # Standard top demo panel
     render_demo_sidebar("global")
 
-    # Initialize session state for admin_mode if it doesn't exist
+    # Initialize session state for admin dashboard toggle if it doesn't exist
     if 'admin_mode' not in st.session_state:
         st.session_state.admin_mode = False
 
-    # Admin mode toggle
-    is_admin = st.sidebar.checkbox("Admin Mode", key="admin_mode")
+    # Admin dashboard toggle
+    is_admin = st.sidebar.checkbox("Admin Dashboard", key="admin_mode")
 
-    # Display a prominent banner at the top of the page if in admin mode
+    # Display a prominent banner at the top of the page if in admin dashboard mode
     if is_admin:
-        st.info("관리자 모드: 대시보드가 열렸습니다.", icon="👑")
+        st.info("관리자 대시보드 활성화됨", icon="👑")
         # Remember last non-admin selection (once) to restore after exit
         if 'last_non_admin_page' not in st.session_state:
             # If a radio selection exists and it's non-admin, store it
@@ -101,7 +105,7 @@ def main():
                     if _v['label'] == current_label and not _v.get('admin'):
                         st.session_state.last_non_admin_page = current_label
                         break
-        # In admin mode we only show non-admin pages in radio (dashboard auto renders)
+    # In admin dashboard mode we only show non-admin pages in radio (dashboard auto renders)
         visible_pages = {k: v for k,
                          v in PAGE_REGISTRY.items() if not v['admin']}
     else:

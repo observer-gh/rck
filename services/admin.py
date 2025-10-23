@@ -15,6 +15,7 @@ from utils.ids import create_id_with_prefix
 from services.survey import classify_personality
 from demo import sample_data
 
+
 def get_user_map():
     """Returns a dictionary mapping user IDs to user objects."""
     return {u['id']: u for u in persistence.load_list('users')}
@@ -32,7 +33,8 @@ def get_club_points_map():
     points = {}
     for r in reports:
         if r.get('status') == 'Verified':
-            points[r['club_id']] = points.get(r['club_id'], 0) + int(r.get('points_awarded', 0))
+            points[r['club_id']] = points.get(
+                r['club_id'], 0) + int(r.get('points_awarded', 0))
     return points
 
 
@@ -44,8 +46,10 @@ def get_system_analytics():
     reports_all = persistence.load_list('activity_reports')
 
     active_clubs = sum(1 for c in clubs_all if c.get('status') == 'Active')
-    pending_reports = sum(1 for r in reports_all if r.get('status') == 'Pending')
-    verified_reports = sum(1 for r in reports_all if r.get('status') == 'Verified')
+    pending_reports = sum(
+        1 for r in reports_all if r.get('status') == 'Pending')
+    verified_reports = sum(
+        1 for r in reports_all if r.get('status') == 'Verified')
     club_points = get_club_points_map()
     total_points = sum(club_points.values())
 
@@ -57,20 +61,26 @@ def get_system_analytics():
         "pending_reports": pending_reports,
         "verified_reports": verified_reports,
         "total_points_awarded": total_points,
-        "avg_rank_diversity": 0,
-        "avg_interest_variety": 0,
+        # averages are floats
+        "avg_rank_diversity": 0.0,
+        "avg_interest_variety": 0.0,
     }
 
     if clubs_all and users_all:
-        rank_diversities = [len({m['rank'] for m in users_all if m['id'] in c['member_ids']}) for c in clubs_all if c['member_ids']]
-        interest_varieties = [len({i for m in users_all if m['id'] in c['member_ids'] for i in m['interests']}) for c in clubs_all if c['member_ids']]
+        rank_diversities = [len({m['rank'] for m in users_all if m['id'] in c['member_ids']})
+                            for c in clubs_all if c['member_ids']]
+        interest_varieties = [len({i for m in users_all if m['id'] in c['member_ids']
+                                  for i in m['interests']}) for c in clubs_all if c['member_ids']]
 
         if rank_diversities:
-            analytics["avg_rank_diversity"] = sum(rank_diversities) / len(rank_diversities)
+            analytics["avg_rank_diversity"] = sum(
+                rank_diversities) / len(rank_diversities)
         if interest_varieties:
-            analytics["avg_interest_variety"] = sum(interest_varieties) / len(interest_varieties)
+            analytics["avg_interest_variety"] = sum(
+                interest_varieties) / len(interest_varieties)
 
     return analytics
+
 
 def get_top_clubs_by_points(limit=5):
     """Returns the top N clubs sorted by their verified points."""
@@ -81,7 +91,8 @@ def get_top_clubs_by_points(limit=5):
     clubs_map = {c['id']: c for c in persistence.load_list('clubs')}
     user_map = get_user_map()
 
-    top_club_items = sorted(club_points.items(), key=lambda item: item[1], reverse=True)[:limit]
+    top_club_items = sorted(club_points.items(),
+                            key=lambda item: item[1], reverse=True)[:limit]
 
     top_clubs = []
     for club_id, points in top_club_items:
@@ -118,6 +129,7 @@ def delete_user(user_id, all_users):
         raise ValueError("User not found for deletion")
     persistence.replace_all('users', users_after_deletion)
 
+
 def run_new_matching(target_size):
     """Executes a new matching run for all users."""
     users_raw = persistence.load_list('users')
@@ -127,7 +139,8 @@ def run_new_matching(target_size):
     user_objs = [User(**u) for u in users_raw]
     run_id = create_id_with_prefix('run')
 
-    clubs = matching.compute_matches(user_objs, target_size=target_size, run_id=run_id)
+    clubs = matching.compute_matches(
+        user_objs, target_size=target_size, run_id=run_id)
     clubs_dicts = [asdict(c) for c in clubs]
 
     existing_clubs = persistence.load_list('clubs')
@@ -147,6 +160,7 @@ def run_new_matching(target_size):
 
     return run_id, len(clubs_dicts)
 
+
 def activate_club(club_id, chat_link, all_clubs):
     """Activates a club and sets its chat link."""
     club = next((c for c in all_clubs if c['id'] == club_id), None)
@@ -160,7 +174,8 @@ def activate_club(club_id, chat_link, all_clubs):
     persistence.replace_all('clubs', all_clubs)
     return True
 
-def generate_sample_users_and_match(num_users=9, target_size=5):
+
+def generate_sample_users_and_match(num_users=9, target_size=6):
     """Generates sample users, adds them, and runs matching."""
     users_raw = persistence.load_list('users')
     new_users = [asdict(u) for u in sample_data.make_users(num_users)]
@@ -171,12 +186,14 @@ def generate_sample_users_and_match(num_users=9, target_size=5):
     run_id, club_count = run_new_matching(target_size)
     return run_id, club_count
 
+
 def add_sample_users(num_users=15):
     """Adds a specified number of sample users to the system."""
     users = persistence.load_list('users')
     new_users = [asdict(u) for u in sample_data.make_users(num_users)]
     users.extend(new_users)
     persistence.replace_all('users', users)
+
 
 def export_to_csv(data_key: str):
     """Exports data for a given key to a CSV string."""
@@ -200,7 +217,7 @@ def reset_all_data():
 
     # Reset users but re-add demo user
     persistence.replace_all('users', [])
-    user_svc.load_users() # This ensures the demo user is recreated
+    user_svc.load_users()  # This ensures the demo user is recreated
 
 
 def utc_now_iso():

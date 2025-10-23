@@ -3,9 +3,11 @@ from services import activity, persistence
 from ui.components import report_card, status_badge, dataframe_with_status
 import pandas as pd
 from io import StringIO
+from typing import Optional  # Python 3.9 compatibility for Optional[str]
+import datetime as _dt
 
 
-def _club_options(current_user_id: str | None):
+def _club_options(current_user_id: Optional[str]):
     clubs_all = persistence.load_list('clubs')
     active_clubs = [c for c in clubs_all if c.get('status') == 'Active']
     # Auto-upgrade matched clubs to Active for demo convenience if user has only Matched
@@ -41,24 +43,21 @@ def view():
     club_options = _club_options(current_user_id)
     if not club_options:
         st.warning("활동 보고서를 제출할 수 있는 'Active' 상태의 (내) 클럽이 없습니다.")
-    else:
-        choice = st.selectbox("클럽 선택", options=club_options)
-        if not choice:
-            st.stop()
-        club_id = str(choice).split()[0]
-        # Persist selected club id in session for later use outside this block
-        st.session_state.selected_club_id = club_id
-        # Prefill support via session state keys
-        import datetime as _dt
-        if 'prefill_date' not in st.session_state:
-            st.session_state.prefill_date = _dt.date.today()
-        st.session_state.setdefault('prefill_report_text', "")
-        st.session_state.setdefault('prefill_participants', 0)
-        # Initialize widget-bound keys once (avoid later assignment warnings)
-        st.session_state.setdefault(
-            'report_raw_text', st.session_state.prefill_report_text)
-        st.session_state.setdefault(
-            'report_participants', st.session_state.prefill_participants)
+        return  # Prevent form rendering that relies on initialized session keys
+    choice = st.selectbox("클럽 선택", options=club_options)
+    if not choice:
+        st.stop()
+    club_id = str(choice).split()[0]
+    st.session_state.selected_club_id = club_id
+    # Global prefill/session key initialization (runs regardless of club state)
+    if 'prefill_date' not in st.session_state:
+        st.session_state.prefill_date = _dt.date.today()
+    st.session_state.setdefault('prefill_report_text', "")
+    st.session_state.setdefault('prefill_participants', 0)
+    st.session_state.setdefault(
+        'report_raw_text', st.session_state.prefill_report_text)
+    st.session_state.setdefault(
+        'report_participants', st.session_state.prefill_participants)
 
     # File uploader outside form for immediate preview
     photo = st.file_uploader("사진 업로드 (시뮬레이션)", key="report_photo")

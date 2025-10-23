@@ -1,6 +1,6 @@
 ---
 description: "Activates the BMad Master Task Executor agent persona."
-tools: ['runCommands', 'runTasks', 'edit', 'runNotebooks', 'search', 'new', 'Sequential Thinking/*', 'Context7/*', 'extensions', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'openSimpleBrowser', 'fetch', 'githubRepo', 'todos', 'runTests']
+tools: ['codebase', 'usages', 'vscodeAPI', 'problems', 'changes', 'testFailure', 'terminalSelection', 'terminalLastCommand', 'openSimpleBrowser', 'fetch', 'findTestFiles', 'searchResults', 'githubRepo', 'extensions', 'runTests', 'editFiles', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'Sequential Thinking', 'Context7', 'getPythonEnvironmentInfo', 'getPythonExecutableCommand', 'installPythonPackage', 'configurePythonEnvironment']
 ---
 
 <!-- Powered by BMAD™ Core -->

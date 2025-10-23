@@ -19,9 +19,11 @@ def _user_name(uid, user_map):
     return u['name'] if u else uid
 
 
+@st.cache_data(ttl=30)
 def _club_points_map():
+    """Compute verified points per club (cached briefly for snappy UI)."""
     reports = persistence.load_list('activity_reports')
-    pts = {}
+    pts: dict[str, int] = {}
     for r in reports:
         if r.get('status') == 'Verified':
             pts[r['club_id']] = pts.get(
@@ -35,10 +37,11 @@ def utc_now_iso():
 
 def view():
     st.header("어드민 대시보드")
-    st.markdown("이곳에서 데이터 관리, 매칭 실행, 활동 보고서 검증 등 주요 관리 작업을 수행합니다.")
+    st.markdown("주요 관리 작업을 한 곳에서 빠르게 수행하고 시스템 상태를 살펴봅니다.")
 
+    # Separate 사용자 관리 and 매칭 실행 tabs
     tabs = st.tabs([
-        "📈 분석 및 현황", "⚙️ 매칭 실행", "📊 클럽 관리", "✅ 보고서 검증", "� 데이터 관리"
+        "📈 분석 및 현황", "👥 사용자 관리", "⚙️ 매칭 실행", "📊 클럽 관리", "✅ 보고서 검증", "💾 데이터 관리"
     ])
     # Lazy import of tab renderers if separated into modules; fallback to local functions
     try:
@@ -51,24 +54,32 @@ def view():
         with tabs[0]:
             _ra()
         with tabs[1]:
-            _rum(); _rm()
+            _rum()
         with tabs[2]:
-            _rc()
+            _rm()
         with tabs[3]:
-            _rv()
+            _rc()
         with tabs[4]:
+            _rv()
+        with tabs[5]:
             _rd()
     except ImportError:
         # Fallback to legacy inline implementations below if modular imports fail
         with tabs[0]:
             render_analytics_tab()
         with tabs[1]:
-            render_matching_tab()
+            try:
+                from views.admin_tabs.user_management import render_user_management_tab as _rum_fallback
+                _rum_fallback()
+            except ImportError:
+                st.warning("사용자 관리 모듈을 찾을 수 없습니다.")
         with tabs[2]:
-            render_clubs_tab()
+            render_matching_tab()
         with tabs[3]:
-            render_verification_tab()
+            render_clubs_tab()
         with tabs[4]:
+            render_verification_tab()
+        with tabs[5]:
             render_data_tab()
 
 
@@ -84,50 +95,59 @@ def render_analytics_tab():
         1 for r in reports_all if r.get('status') == 'Pending')
     verified_reports = sum(
         1 for r in reports_all if r.get('status') == 'Verified')
-
     club_points = _club_points_map()
     total_points = sum(club_points.values())
 
+    # Quick Actions / Summary strip
+    with st.container(border=True):
+        cqa1, cqa2, cqa3, cqa4, cqa5 = st.columns(5)
+        cqa1.metric("사용자", len(users_all))
+        cqa2.metric("클럽", f"{len(clubs_all)} / 활성 {active_clubs}")
+        cqa3.metric("보고서 대기", pending_reports)
+        cqa4.metric("보고서 검증", verified_reports)
+        cqa5.metric("총 포인트", total_points)
+
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("총 사용자", len(users_all))
-    c2.metric("총 클럽", len(clubs_all))
-    c3.metric("활성 클럽", active_clubs)
-    c4.metric("매칭 실행 횟수", len(runs_all))
-    c1.metric("보고서 (대기/검증)", f"{pending_reports}/{verified_reports}")
-    c2.metric("총 포인트 (검증)", total_points)
+    c1.metric("직급 다양성 평균", _avg_metric(lambda c: {
+              m['rank'] for m in users_all if m['id'] in c['member_ids']}, clubs_all))
+    c2.metric("관심사 다양성 평균", _avg_metric(lambda c: {
+              i for m in users_all if m['id'] in c['member_ids'] for i in m['interests']}, clubs_all))
+    c3.metric("매칭 Run 수", len(runs_all))
+    c4.metric("보고서 (대/검)", f"{pending_reports}/{verified_reports}")
 
-    if clubs_all:
-        rank_diversities = [len({m['rank'] for m in users_all if m['id'] in c['member_ids']})
-                            for c in clubs_all if c['member_ids']]
-        interest_varieties = [len({i for m in users_all if m['id'] in c['member_ids']
-                                  for i in m['interests']}) for c in clubs_all if c['member_ids']]
+    # (클럽 포인트 순위 Top 5 섹션 제거됨 - 데모 집중을 위해 간소화)
 
-        avg_rank_diversity = sum(rank_diversities) / \
-            len(rank_diversities) if rank_diversities else 0
-        avg_interest_variety = sum(
-            interest_varieties) / len(interest_varieties) if interest_varieties else 0
+    # Verification metrics overview (aggregate pass rate simulation)
+    if reports_all:
+        verified_with_metrics = [
+            r for r in reports_all if r.get('verification_metrics')]
+        if verified_with_metrics:
+            part_scores = [r['verification_metrics']['participants']
+                           for r in verified_with_metrics]
+            interest_scores = [r['verification_metrics']['interest']
+                               for r in verified_with_metrics]
+            diversity_scores = [r['verification_metrics']
+                                ['diversity'] for r in verified_with_metrics]
+            st.write("---")
+            st.caption("최근 검증된 보고서의 평균 메트릭")
+            m1, m2, m3 = st.columns(3)
+            m1.metric("참여율", f"{sum(part_scores)/len(part_scores):.2f}")
+            m2.metric(
+                "관심사 정렬", f"{sum(interest_scores)/len(interest_scores):.2f}")
+            m3.metric(
+                "직급 다양성", f"{sum(diversity_scores)/len(diversity_scores):.2f}")
 
-        c3.metric("평균 직급 다양성", f"{avg_rank_diversity:.2f}")
-        c4.metric("평균 관심사 다양성", f"{avg_interest_variety:.2f}")
 
-    st.write("---")
-    st.subheader("클럽 포인트 순위 Top 5")
-    if club_points:
-        user_map = _user_map()
-        clubs_map = {c['id']: c for c in clubs_all}
-        top_clubs = sorted(club_points.items(),
-                           key=lambda item: item[1], reverse=True)[:5]
-        leader_names = []
-        points = []
-        for cid, pts in top_clubs:
-            club = clubs_map.get(cid)
-            leader_name = _user_name(
-                club['leader_id'], user_map) if club else '?'
-            leader_names.append(f"{leader_name} 팀")
-            points.append(pts)
-        st.bar_chart({"클럽": points, "이름": leader_names}, x="이름", y="클럽")
-    else:
-        st.caption("검증된 포인트가 있는 클럽이 없습니다.")
+def _avg_metric(extractor, clubs_all):
+    values = []
+    for c in clubs_all:
+        if c.get('member_ids'):
+            extracted = extractor(c)
+            if extracted:
+                values.append(len(extracted))
+    if not values:
+        return "0"
+    return f"{sum(values)/len(values):.2f}"
 
 
 def render_matching_tab():
@@ -138,7 +158,7 @@ def render_matching_tab():
         return
     st.info(f"현재 등록된 총 사용자: **{len(users_raw)}명**")
     target_size = st.number_input(
-        "클럽당 인원 (기본 5)", min_value=3, max_value=10, value=5)
+        "클럽당 인원 (기본 6)", min_value=3, max_value=10, value=6)
     st.write("---")
     st.subheader("전체 재매칭")
     st.warning("주의: 이 작업은 기존 클럽에 영향을 주지 않고 새로운 클럽들을 추가 생성합니다.")
