@@ -20,8 +20,19 @@ def _club_points_map() -> Dict[str, int]:
 
 def view():
     st.header("내 클럽 정보")
+    # Style the Match Clubs button with a dotted border (scoped to this page)
+    st.markdown(
+        """
+        <style>
+        /* Unified dotted style for action buttons on this page */
+        div.stButton > button {border:2px dotted #555 !important; background:#fff; color:#222; border-radius:12px; padding:.55rem 1.1rem; font-weight:600; font-size:.9rem;}
+        div.stButton > button:hover {border-color:#222; background:#f5f7fa;}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
     # Match Clubs button (moved from demo sidebar)
-    if st.button("Match Clubs", help="고정 데모 클럽 생성 후 나머지 사용자 매칭"):
+    if st.button("(demo) 클럽 매칭 실행", help="고정 데모 클럽 생성 후 나머지 사용자 매칭"):
         from services import persistence as _p
         from services import matching
         from domain.models import user_from_dict, MatchRun, Club
@@ -55,7 +66,7 @@ def view():
                 fixed_members = [demo_user_rec['id']] + peer_ids
                 fixed_club = Club(
                     id=create_id_with_prefix('club'),
-                    name=f"{demo_user_rec.get('region', '서울')} 축구 · 데모 팀",
+                    name=f"{demo_user_rec.get('region', '서울')} 축구 · 데모 팀 6명",
                     member_ids=fixed_members,
                     leader_id=demo_user_rec['id'],
                     primary_interest='축구',
@@ -76,17 +87,18 @@ def view():
         if len(remaining_users) >= 5:
             run_id = create_id_with_prefix('run')
             new_clubs = matching.compute_matches(
-                remaining_users, target_size=5, run_id=run_id)
+                remaining_users, target_size=6, run_id=run_id)
             new_cd = []
             for c in new_clubs:
                 d = _asdict(c)
-                d['status'] = d.get('status') or 'Active'
+                # Force status to Active (override any 'Matched') at creation time
+                d['status'] = 'Active'
                 new_cd.append(d)
             clubs_existing.extend(new_cd)
             _p.replace_all('clubs', clubs_existing)
             runs = _p.load_list('match_runs')
             run_meta = MatchRun(id=run_id, created_at=_dt.datetime.now(_dt.timezone.utc).isoformat().replace(
-                '+00:00', 'Z'), target_size=5, user_count=len(remaining_users), club_count=len(new_cd))
+                '+00:00', 'Z'), target_size=6, user_count=len(remaining_users), club_count=len(new_cd))
             runs.append(_asdict(run_meta))
             _p.replace_all('match_runs', runs)
             st.success(f"매칭 완료: {len(new_cd)} 클럽 생성 (Run {run_id})")

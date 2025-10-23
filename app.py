@@ -14,26 +14,32 @@ PAGE_REGISTRY = {
     "user_signup": {
         "label": "📝 프로필/설문",
         "render_func": user_signup.view,
+        "admin": False,
     },
     "profile": {
         "label": "🙍 내 프로필",
         "render_func": profile.view,
+        "admin": False,
     },
     "my_club": {
         "label": "👥 내 클럽",
         "render_func": my_club.view,
+        "admin": False,
     },
     "activity_report": {
         "label": "🧾 활동 보고",
         "render_func": activity_report.view,
+        "admin": False,
     },
     "demo_script": {
         "label": "🧪 데모 가이드",
         "render_func": demo_script.view,
+        "admin": False,
     },
     "admin_dashboard": {
         "label": "🛠️ 어드민 대시보드",
         "render_func": admin_dashboard.view,
+        "admin": True,
     },
 }
 
@@ -60,12 +66,20 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-    # Ensure demo user exists & session locked
-    users = persistence.load_list('users')
-    if not any(u.get('id') == 'demo_user' for u in users):
-        users.append(DEMO_USER.copy())
-        persistence.replace_all('users', users)
-    st.session_state.current_user_id = 'demo_user'
+    # Helper to seed demo user only when missing (idempotent)
+    def ensure_demo_user():
+        users_local = persistence.load_list('users')
+        if not any(u.get('id') == 'demo_user' for u in users_local):
+            users_local.append(DEMO_USER.copy())
+            persistence.replace_all('users', users_local)
+        return users_local
+
+    users = ensure_demo_user()
+    # Guard: only set current_user_id if absent or invalid
+    if 'current_user_id' not in st.session_state or not any(u['id'] == st.session_state['current_user_id'] for u in users):
+        st.session_state.current_user_id = 'demo_user'
+
+    # User selector removed; current_user_id persists until explicitly changed elsewhere.
 
     # --- Sidebar ---
     st.sidebar.title("Navigation")

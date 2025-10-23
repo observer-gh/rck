@@ -1,55 +1,16 @@
 [
   {
-    "id": "rep_1761242756855_ma4h",
-    "club_id": "club_1761242744027_0b40",
+    "id": "rep_1761250674264_l27i",
+    "club_id": "club_1761250650352_pwve",
     "date": "2025-10-24",
-    "photo_filename": "no_photo",
+    "photo_filename": "image.png",
     "raw_text": "야외 잔디에서 스피드·코디네이션 드릴 진행. 동시 스타트 스프린트와 페이스 맞추기 반복으로 집중도 상승, 구성원 간 콜과 격려 자연스럽게 형성. 마무리 후 다음 모임에 미니게임+회복 스트레칭 블록 추가 계획.",
-    "formatted_report": "활동일자: 2025-10-24, 참여인원: 5, 활동내용: 야외 잔디에서 스피드·코디네이션 드릴 진행. 동시 스타트 스프린트와 페이스 맞추기 반복으로 집중도 상승, 구성원 간 콜과 격려 자연스럽게 형성. 마무리 후 다음 모임에 미니게임+회복 스트레칭 블록 추가 계획.",
-    "participant_override": 5,
+    "formatted_report": "활동일자: 2025-10-24, 참여인원: 6, 활동내용: 야외 잔디에서 스피드·코디네이션 드릴 진행. 동시 스타트 스프린트와 페이스 맞추기 반복으로 집중도 상승, 구성원 간 콜과 격려 자연스럽게 형성. 마무리 후 다음 모임에 미니게임+회복 스트레칭 블록 추가 계획.",
+    "participant_override": 6,
     "verification_metrics": null,
     "status": "Pending",
     "verified_at": null,
     "points_awarded": 0,
-    "created_at": "2025-10-23T18:05:56Z",
-    "verification_preview": {
-      "report_id": "rep_1761242756855_ma4h",
-      "metrics": {
-        "participants": 1.0,
-        "interest": 1.0,
-        "diversity": 1.0
-      },
-      "thresholds": {
-        "participants": 0.75,
-        "interest": 0.7,
-        "diversity": 0.6
-      },
-      "passed": true,
-      "points_if_finalized": 10,
-      "participant_ids_preview": [
-        "u_1761242744025_3f7e",
-        "u_1761242744025_ft7r",
-        "u_1761242744025_b3ue",
-        "demo_user",
-        "u_1761242744025_itga"
-      ],
-      "image_analysis": {
-        "tags": [
-          "게임",
-          "전략",
-          "활발"
-        ],
-        "relevance_score": 0.33,
-        "safety": "OK",
-        "image": {
-          "file": "no_photo",
-          "exists": false,
-          "size_bytes": null,
-          "width": null,
-          "height": null
-        },
-        "commentary": "이미지에 추정 태그 게임, 전략, 활발 감지. 보고 내용과의 관련도 33%"
-      }
-    }
+    "created_at": "2025-10-23T20:17:54Z"
   }
 ]

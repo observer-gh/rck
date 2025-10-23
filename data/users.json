@@ -3,7 +3,7 @@
     "id": "demo_user",
     "name": "데모사용자",
     "nickname": "nemo",
-    "employee_number": "D0000001",
+    "employee_number": "15000001",
     "region": "서울",
     "rank": "사원",
     "interests": [
@@ -22,7 +22,30 @@
     ]
   },
   {
-    "id": "u_1761242744025_4pi8",
+    "id": "u_1761250639568_ni8e",
+    "name": "데모사용자",
+    "employee_number": "10150000",
+    "region": "서울",
+    "rank": "사원",
+    "interests": [
+      "축구",
+      "영화보기"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      1,
+      1
+    ],
+    "nickname": "nemo",
+    "created_at": "2025-10-23T20:17:19Z"
+  },
+  {
+    "id": "u_1761250648982_f5t5",
     "name": "김서준",
     "employee_number": "DEMO-김서준",
     "region": "서울",
@@ -43,10 +66,10 @@
       2
     ],
     "nickname": "alpha",
-    "created_at": "2025-10-23T18:05:44Z"
+    "created_at": "2025-10-23T20:17:28Z"
   },
   {
-    "id": "u_1761242744025_3f7e",
+    "id": "u_1761250648982_ts4f",
     "name": "이민준",
     "employee_number": "DEMO-이민준",
     "region": "서울",
@@ -67,10 +90,10 @@
       2
     ],
     "nickname": "bravo",
-    "created_at": "2025-10-23T18:05:44Z"
+    "created_at": "2025-10-23T20:17:28Z"
   },
   {
-    "id": "u_1761242744025_itga",
+    "id": "u_1761250648982_2yef",
     "name": "박서연",
     "employee_number": "DEMO-박서연",
     "region": "서울",
@@ -91,10 +114,10 @@
       2
     ],
     "nickname": "charlie",
-    "created_at": "2025-10-23T18:05:44Z"
+    "created_at": "2025-10-23T20:17:28Z"
   },
   {
-    "id": "u_1761242744025_b3ue",
+    "id": "u_1761250648982_hhyp",
     "name": "최지후",
     "employee_number": "DEMO-최지후",
     "region": "서울",
@@ -115,10 +138,10 @@
       2
     ],
     "nickname": "delta",
-    "created_at": "2025-10-23T18:05:44Z"
+    "created_at": "2025-10-23T20:17:28Z"
   },
   {
-    "id": "u_1761242744025_ft7r",
+    "id": "u_1761250648983_a4v5",
     "name": "정하윤",
     "employee_number": "DEMO-정하윤",
     "region": "서울",
@@ -139,6 +162,558 @@
       2
     ],
     "nickname": "echo",
-    "created_at": "2025-10-23T18:05:44Z"
+    "created_at": "2025-10-23T20:17:28Z"
+  },
+  {
+    "id": "u_1761250694595_s5io",
+    "name": "det_extra_김주현",
+    "employee_number": "10150001",
+    "region": "서울",
+    "rank": "사원",
+    "interests": [
+      "축구",
+      "영화보기"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_m05i",
+    "name": "det_extra_이주현",
+    "employee_number": "10150002",
+    "region": "서울",
+    "rank": "대리",
+    "interests": [
+      "축구",
+      "보드게임"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_515w",
+    "name": "det_extra_박주현",
+    "employee_number": "10150003",
+    "region": "서울",
+    "rank": "과장",
+    "interests": [
+      "축구",
+      "러닝"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_1fs4",
+    "name": "det_extra_최주현",
+    "employee_number": "10150004",
+    "region": "서울",
+    "rank": "차장",
+    "interests": [
+      "축구",
+      "독서"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_oguu",
+    "name": "det_extra_정주현",
+    "employee_number": "10150005",
+    "region": "서울",
+    "rank": "부장",
+    "interests": [
+      "축구",
+      "헬스"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_goha",
+    "name": "det_extra_강주현",
+    "employee_number": "10150006",
+    "region": "서울",
+    "rank": "사원",
+    "interests": [
+      "축구",
+      "요리"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_sgxn",
+    "name": "det_extra_조주현",
+    "employee_number": "10150007",
+    "region": "서울",
+    "rank": "대리",
+    "interests": [
+      "축구",
+      "사진"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_cp6m",
+    "name": "det_extra_윤주현",
+    "employee_number": "10150008",
+    "region": "서울",
+    "rank": "과장",
+    "interests": [
+      "축구",
+      "등산"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_h4ip",
+    "name": "det_extra_장주현",
+    "employee_number": "10150009",
+    "region": "서울",
+    "rank": "차장",
+    "interests": [
+      "축구",
+      "영화보기"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_6kfg",
+    "name": "det_extra_임주현",
+    "employee_number": "10150010",
+    "region": "서울",
+    "rank": "부장",
+    "interests": [
+      "축구",
+      "보드게임"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_tnxh",
+    "name": "det_extra_오주현",
+    "employee_number": "10150011",
+    "region": "서울",
+    "rank": "사원",
+    "interests": [
+      "축구",
+      "러닝"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_ucpa",
+    "name": "det_extra_한주현",
+    "employee_number": "10150012",
+    "region": "서울",
+    "rank": "대리",
+    "interests": [
+      "축구",
+      "독서"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_jzqa",
+    "name": "det_extra_신주현",
+    "employee_number": "10150013",
+    "region": "서울",
+    "rank": "과장",
+    "interests": [
+      "축구",
+      "헬스"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_9ifm",
+    "name": "det_extra_서주현",
+    "employee_number": "10150014",
+    "region": "서울",
+    "rank": "차장",
+    "interests": [
+      "축구",
+      "요리"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_douo",
+    "name": "det_extra_권주현",
+    "employee_number": "10150015",
+    "region": "서울",
+    "rank": "부장",
+    "interests": [
+      "축구",
+      "사진"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_wt96",
+    "name": "det_extra_황주현",
+    "employee_number": "10150016",
+    "region": "서울",
+    "rank": "사원",
+    "interests": [
+      "축구",
+      "등산"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_5lic",
+    "name": "det_extra_안주현",
+    "employee_number": "10150017",
+    "region": "서울",
+    "rank": "대리",
+    "interests": [
+      "축구",
+      "영화보기"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_p554",
+    "name": "det_extra_송주현",
+    "employee_number": "10150018",
+    "region": "서울",
+    "rank": "과장",
+    "interests": [
+      "축구",
+      "보드게임"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_mayw",
+    "name": "det_extra_유주현",
+    "employee_number": "10150019",
+    "region": "서울",
+    "rank": "차장",
+    "interests": [
+      "축구",
+      "러닝"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_zmi6",
+    "name": "det_extra_전주현",
+    "employee_number": "10150020",
+    "region": "서울",
+    "rank": "부장",
+    "interests": [
+      "축구",
+      "독서"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_w82s",
+    "name": "det_extra_김하은",
+    "employee_number": "10150021",
+    "region": "서울",
+    "rank": "사원",
+    "interests": [
+      "축구",
+      "헬스"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_q7ra",
+    "name": "det_extra_이하은",
+    "employee_number": "10150022",
+    "region": "서울",
+    "rank": "대리",
+    "interests": [
+      "축구",
+      "요리"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_i3mx",
+    "name": "det_extra_박하은",
+    "employee_number": "10150023",
+    "region": "서울",
+    "rank": "과장",
+    "interests": [
+      "축구",
+      "사진"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
+  },
+  {
+    "id": "u_1761250694596_3dl7",
+    "name": "det_extra_최하은",
+    "employee_number": "10150024",
+    "region": "서울",
+    "rank": "차장",
+    "interests": [
+      "축구",
+      "등산"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T20:18:14Z"
   }
 ]

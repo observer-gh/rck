@@ -22,7 +22,7 @@ DEMO_USER = {
     'id': 'demo_user',
     'name': '데모사용자',
     'nickname': 'nemo',
-    'employee_number': 'D0000001',
+    'employee_number': '15000001',
     'region': '서울',
     'rank': '사원',
     'interests': ['축구', '영화보기'],

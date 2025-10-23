@@ -66,33 +66,32 @@ def club_card(club: Dict[str, Any], user_map: Dict[str, Any], points: int, curre
             'personality_trait') or '—'
         primary_interest = club.get('primary_interest') or '—'
         st.markdown(f"**성향:** {leader_trait} | **대표 관심사:** {primary_interest}")
-        # AI explanation for fixed demo cohort: use names to detect peers
+        # AI explanation gating (demo cohort detection)
         member_ids = club.get('member_ids', [])
         names = [user_map.get(mid, {}).get('name', '') for mid in member_ids]
-        demo_user_present = any(
-            n == '데모사용자' for n in names) or 'demo_user' in member_ids
-        peer_count = sum(1 for n in names if n.startswith('demo_peer'))
+        demo_user_present = 'demo_user' in member_ids or any(
+            n == '데모사용자' for n in names)
+        _KOREAN_PEERS = {"김서준", "이민준", "박서연", "최지후", "정하윤"}
+        peer_count = sum(1 for n in names if (
+            n in _KOREAN_PEERS or n.startswith('demo_peer')))
         if demo_user_present and peer_count >= 4:
             expl = build_ai_match_explanation(club, user_map)
             st.markdown("### AI 매칭 설명")
-            # Pastel blue container styling
-            # Convert bullets to separate lines; add Shannon tooltip marks
             shannon_help = "다양성 지수(Shannon): 값↑ → 분포가 한쪽에 치우치지 않고 고르게 퍼져 있음"
             bullet_lines = []
             for b in expl['bullets']:
-                # inject tooltip span for lines containing 'Shannon'
                 if 'Shannon' in b:
                     b = b.replace(
                         'Shannon', f'<span title="{shannon_help}">Shannon</span>')
                 bullet_lines.append(f"<div style='margin:2px 0'>{b}</div>")
             st.markdown(
                 f"""
-                <div style="background:#eef6ff;border:1px solid #d2e6fb;padding:14px 18px;border-radius:12px;font-size:14px;line-height:1.55;">
-                    <p style="margin:0 0 8px;font-weight:600;">{expl['summary']}</p>
-                    {''.join(bullet_lines)}
-                    <p style="margin:10px 0 0;">{expl.get('narrative', '')}</p>
-                </div>
-                """,
+<div style="background:#eef6ff;border:1px solid #d2e6fb;padding:14px 18px;border-radius:12px;font-size:14px;line-height:1.55;">
+  <p style="margin:0 0 8px;font-weight:600;">{expl['summary']}</p>
+  {''.join(bullet_lines)}
+  <p style="margin:10px 0 0;">{expl.get('narrative', '')}</p>
+</div>
+""",
                 unsafe_allow_html=True
             )
             with st.expander("매칭 멤버 상세", expanded=False):
