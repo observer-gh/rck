@@ -191,22 +191,25 @@ def render_clubs_tab():
         st.info("생성된 클럽이 없습니다.")
         return
     runs_meta = persistence.load_list('match_runs')
-    run_order = {r['id']: i + 1 for i,
-                 r in enumerate(sorted(runs_meta, key=lambda r: r['created_at']))}
-    run_ids = sorted({c.get('match_run_id', '')
-                     for c in clubs_all if c.get('match_run_id')}, reverse=True)
-    selected_run_id = None
-    if run_ids:
-        label_map = {}
-        for rid in run_ids:
-            meta = next((r for r in runs_meta if r['id'] == rid), None)
-            if meta:
-                created = meta['created_at'].replace('T', ' ')[:16]
-                label_map[f"Run #{run_order.get(rid, '?')}: {created} | size {meta['target_size']} | clubs {meta['club_count']}"] = rid
-            else:
-                label_map[rid] = rid
-        sel_label = st.selectbox(
-            "표시할 Match Run 선택", options=list(label_map.keys()))
+    # Chronological map for stable run numbering (oldest = #1)
+    runs_chrono = sorted(runs_meta, key=lambda r: r.get('created_at', ''))
+    run_number_map = {r['id']: i + 1 for i, r in enumerate(runs_chrono)}
+    # Only runs that actually produced clubs
+    runs_with_clubs = [r for r in runs_meta if any(
+        c.get('match_run_id') == r['id'] for c in clubs_all)]
+    if runs_with_clubs:
+        # Display newest first by timestamp
+        runs_display = sorted(runs_with_clubs, key=lambda r: r.get(
+            'created_at', ''), reverse=True)
+        label_map: dict[str, str] = {}
+        for r in runs_display:
+            # Keep seconds for uniqueness (avoid duplicate minute labels)
+            created_disp = r['created_at'].replace('T', ' ')[:19]
+            label = f"Run #{run_number_map.get(r['id'], '?')}: {created_disp} | size {r['target_size']} | clubs {r['club_count']}"
+            label_map[label] = r['id']
+        labels = list(label_map.keys())
+        # Default select latest (index 0 after reverse sort)
+        sel_label = st.selectbox("표시할 Match Run 선택", options=labels, index=0)
         selected_run_id = label_map[sel_label]
         clubs_to_display = [c for c in clubs_all if c.get(
             'match_run_id') == selected_run_id]

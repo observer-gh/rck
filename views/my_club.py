@@ -60,13 +60,15 @@ def view():
         for c in clubs_existing:
             mids = c.get('member_ids', []) or []
             # Detect by exact name OR by composition (demo user + 5 peers)
-            comp_ok = demo_user_rec and demo_user_rec['id'] in mids and len({m for m in mids if any(p['id'] == m for p in peer_user_recs)}) == 5
+            comp_ok = demo_user_rec and demo_user_rec['id'] in mids and len(
+                {m for m in mids if any(p['id'] == m for p in peer_user_recs)}) == 5
             name_ok = c.get('name') == expected_name
             if comp_ok or name_ok:
                 fixed_members = mids
                 break
         if not fixed_members and demo_user_rec and len(peer_user_recs) == 5:
-            fixed_members = [demo_user_rec['id']] + [p['id'] for p in peer_user_recs]
+            fixed_members = [demo_user_rec['id']] + [p['id']
+                                                     for p in peer_user_recs]
             fixed_club = Club(
                 id=create_id_with_prefix('club'),
                 name=expected_name,
@@ -77,7 +79,8 @@ def view():
             )
             fc_dict = _asdict(fixed_club)
             fc_dict['is_demo_fixed'] = True
-            fc_dict['explanations'] = {mid: {"그룹": "고정 데모 팀 A"} for mid in fixed_members}
+            fc_dict['explanations'] = {
+                mid: {"그룹": "고정 데모 팀 A"} for mid in fixed_members}
             clubs_existing.append(fc_dict)
             _p.replace_all('clubs', clubs_existing)
             # Removed info bar per request (club created silently)

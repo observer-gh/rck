@@ -199,50 +199,24 @@ def render_demo_sidebar(context: str = ""):
     # Full cohort seeding button
     full_disabled = len(persistence.load_list('users')) >= 30
     with col_whole:
-        if st.button("Seed Whole", key="btn_seed_whole", disabled=full_disabled, help="전체 데모 코호트(30명) 생성 + 24명 매칭(4 클럽)"):
+        if st.button("Seed Whole", key="btn_seed_whole", disabled=full_disabled, help="전체 데모 코호트(30명) 사용자만 생성 (매칭은 어드민에서 실행)"):
             users_local = persistence.load_list('users')
-            # Ensure demo base cohort present
-            has_demo_user = any(
-                u.get('id') == 'demo_user' for u in users_local)
-            if not has_demo_user:
+            # Ensure demo base cohort present (demo_user + peers)
+            if not any(u.get('id') == 'demo_user' for u in users_local):
                 from domain.constants import DEMO_USER as _DEMO
                 users_local.append(_DEMO.copy())
                 persistence.replace_all('users', users_local)
             _seed_demo_peers(region)
-            users_local = persistence.load_list('users')  # refresh
-            # Idempotent deterministic extras creation (24)
-            existing_det = [u for u in users_local if str(
-                u.get('name', '')).startswith('det_extra_')]
+            users_local = persistence.load_list('users')
+            # Idempotent deterministic extras creation (24 total det_extra_ users)
+            existing_det = [u for u in users_local if str(u.get('name', '')).startswith('det_extra_')]
             if len(existing_det) < 24:
                 need = 24 - len(existing_det)
                 extras = _build_deterministic_extras(need, region)
                 users_local.extend([asdict(u) for u in extras])
                 persistence.replace_all('users', users_local)
-                users_local = persistence.load_list('users')
-            # Prepare matching ONLY on deterministic extras
-            det_pool = [u for u in users_local if str(
-                u.get('name', '')).startswith('det_extra_')]
-            if len(det_pool) < 24:
-                st.sidebar.warning(
-                    f"필요한 24명 결정적 사용자 부족: {len(det_pool)}명. 일부 클럽만 생성됩니다.")
-            from domain.models import User as _User, MatchRun as _MatchRun
-            from utils.ids import create_id_with_prefix as _cid
-            from services import matching as _matching
-            run_id = _cid('run')
-            user_objs = [_User(**u) for u in det_pool]
-            clubs_new = _matching.compute_matches(
-                user_objs, target_size=6, run_id=run_id, seed=42)
-            clubs_dicts = [asdict(c) for c in clubs_new]
-            existing_clubs = persistence.load_list('clubs')
-            existing_clubs.extend(clubs_dicts)
-            persistence.replace_all('clubs', existing_clubs)
-            runs = persistence.load_list('match_runs')
-            run_meta = MatchRun(id=run_id, created_at=_dt.datetime.now(_dt.timezone.utc).isoformat().replace(
-                '+00:00', 'Z'), target_size=6, user_count=len(det_pool), club_count=len(clubs_dicts))
-            runs.append(asdict(run_meta))
-            persistence.replace_all('match_runs', runs)
-            st.sidebar.success(
-                f"전체 시드 완료: 사용자 {len(persistence.load_list('users'))}명 / 신규 클럽 {len(clubs_dicts)}개 (Run {run_id})")
+            total_users = len(persistence.load_list('users'))
+            st.sidebar.success(f"전체 사용자 시드 완료: 총 {total_users}명 (클럽/Run 미생성) · 매칭은 어드민 대시보드에서 실행하세요")
             st.rerun()
     # Reset button (third column)
     with col_reset:
