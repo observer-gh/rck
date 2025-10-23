@@ -8,6 +8,7 @@ import random
 
 from collections import Counter
 
+
 def get_primary_interest(users: List[User]) -> Optional[str]:
     """
     Determines the primary interest of a group of users.
@@ -89,7 +90,7 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
                 # Filter candidates to those who share at least one interest with the current group
                 potential_candidates = []
                 current_common_interests = get_common_interests(group_users)
-                if not current_common_interests: # Should not happen after the first user
+                if not current_common_interests:  # Should not happen after the first user
                     # In case the seed user has no interests, we can't form a club
                     break
 
@@ -98,7 +99,7 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
                         potential_candidates.append(cand_id)
 
                 if not potential_candidates:
-                    break # No more valid candidates to add
+                    break  # No more valid candidates to add
 
                 # Select the best candidate to add, prioritizing rank diversity
                 current_ranks = {user_map[uid].rank for uid in group_ids}
@@ -164,7 +165,72 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
         )
 
         # Adapt to the existing explanation data structure
-        club.explanations = {uid: {"그룹": explanation_str} for uid in club.member_ids}
-        club.match_score_breakdown = {} # Clear obsolete scores
+        club.explanations = {uid: {"그룹": explanation_str}
+                             for uid in club.member_ids}
+        club.match_score_breakdown = {}  # Clear obsolete scores
+
+    # Fallback: ensure demo_user is in at least one club when possible.
+    # If no existing club contains demo_user and enough compatible users exist, build one.
+    if not any('demo_user' in c.member_ids for c in all_clubs):
+        demo_user = next((u for u in users if u.id == 'demo_user'), None)
+        if demo_user:
+            def _pick_candidates(predicate):
+                return [u for u in users if u.id != 'demo_user' and predicate(u)]
+
+            # Strict candidates: same region & personality & share interest
+            strict = _pick_candidates(lambda u: u.region == demo_user.region and u.personality_trait ==
+                                      demo_user.personality_trait and set(demo_user.interests) & set(u.interests))
+            pool = strict
+            # Relax personality if insufficient
+            if len(pool) < target_size - 1:
+                relaxed_personality = _pick_candidates(
+                    lambda u: u.region == demo_user.region and set(demo_user.interests) & set(u.interests))
+                pool = relaxed_personality
+            # Relax region if still insufficient
+            if len(pool) < target_size - 1:
+                relaxed_region = _pick_candidates(
+                    lambda u: set(demo_user.interests) & set(u.interests))
+                pool = relaxed_region
+            # Need at least target_size-1 peers
+            if len(pool) >= target_size - 1:
+                # Rank diversity: pick peers preferring distinct ranks first
+                by_rank = {}
+                for u in pool:
+                    by_rank.setdefault(u.rank, []).append(u)
+                selected = []
+                for rank, members in by_rank.items():
+                    if len(selected) >= target_size - 1:
+                        break
+                    selected.append(members[0])
+                # Fill remaining with any leftover users
+                if len(selected) < target_size - 1:
+                    remaining = [u for u in pool if u not in selected]
+                    selected.extend(
+                        remaining[: (target_size - 1 - len(selected))])
+                group_users = [demo_user] + selected
+                common_interests = get_common_interests(group_users)
+                if common_interests:  # safety check
+                    leader_id = demo_user.id
+                    primary_interest = get_primary_interest(group_users)
+                    club_name = f"{demo_user.region} {primary_interest} 데모 팀"
+                    fallback_club = Club(
+                        id=create_id_with_prefix('club'),
+                        name=club_name,
+                        member_ids=[u.id for u in group_users],
+                        leader_id=leader_id,
+                        primary_interest=primary_interest,
+                        match_run_id=run_id,
+                        status='Active'
+                    )
+                    fallback_club.created_at = now
+                    fallback_club.updated_at = now
+                    distinct_ranks = len({u.rank for u in group_users})
+                    explanation_str = (
+                        f"공통 관심사 ({len(common_interests)}개): {', '.join(sorted(list(common_interests)))}. 직급 다양성: {distinct_ranks}개. (데모 보장)"
+                    )
+                    fallback_club.explanations = {
+                        u.id: {"그룹": explanation_str} for u in group_users}
+                    fallback_club.match_score_breakdown = {}
+                    all_clubs.append(fallback_club)
 
     return all_clubs

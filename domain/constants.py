@@ -16,3 +16,15 @@ RANKS = ["사원", "대리", "과장", "차장", "부장"]
 
 # List of available interests for users
 INTERESTS = ["축구", "영화보기", "보드게임", "러닝", "독서", "헬스", "요리", "사진", "등산"]
+
+# Hard-coded demo user baseline (always present in session)
+DEMO_USER = {
+    'id': 'demo_user',
+    'name': '데모사용자',
+    'employee_number': 'D0000001',
+    'region': '서울',
+    'rank': '사원',
+    'interests': ['축구', '영화보기'],
+    'personality_trait': '중간',
+    'survey_answers': [2] * 7,
+}

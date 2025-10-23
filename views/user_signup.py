@@ -35,10 +35,7 @@ def save_users(users):
 
 def view():
     st.header("사용자 등록 / 성향 설문")
-    from ui.components import render_demo_actions_panel
-    render_demo_actions_panel("signup")
-
-    # Sidebar demo tools rendered globally in app.py; avoid duplicate call here.
+    # Demo actions panel removed; all demo buttons reside in sidebar only.
 
     # Deferred survey slider cleanup if flagged
     if st.session_state.pop('clear_survey_answers', False):
@@ -49,14 +46,22 @@ def view():
 
     users = load_users()
 
-    # If a user already registered, disable further registration unless draft in progress
+    # Determine first-visit behavior: allow demo user scenario to appear as fresh
+    if 'signup_first_visit' not in st.session_state:
+        st.session_state.signup_first_visit = True
     existing_current = st.session_state.get('current_user_id')
-    if existing_current and 'new_user_draft' not in st.session_state:
-        st.info("이미 등록된 사용자가 있습니다. 추가 등록은 비활성화되었습니다.")
+    demo_only_context = len(users) == 1 and (
+        users[0].get('id') == 'demo_user' or users[0].get('name') == '데모사용자')
+    base_locked = bool(
+        existing_current and 'new_user_draft' not in st.session_state)
+    registration_locked = base_locked and not (
+        st.session_state.signup_first_visit and demo_only_context)
+    if registration_locked:
+        st.info("이미 등록된 사용자가 있습니다. 폼은 읽기 전용 상태입니다.")
         if st.button("내 프로필로 이동 ▶"):
+            st.session_state.signup_first_visit = False
             st.session_state.nav_target = "🙍 내 프로필"
             st.rerun()
-        return
 
     # Step 1: Basic info form if draft not present
     if 'new_user_draft' not in st.session_state:
@@ -91,8 +96,9 @@ def view():
                                 index=RANK_OPTIONS.index(default_rank))
             interests = st.multiselect(
                 "관심사", INTEREST_OPTIONS, key="new_interests", default=default_interests)
-            next_step = st.form_submit_button("다음 ➜ 성향 설문")
-            if next_step:
+            next_step = st.form_submit_button(
+                "다음 ➜ 성향 설문", disabled=registration_locked)
+            if next_step and not registration_locked:
                 def _emp_valid(v: str) -> bool:
                     return v.isdigit() and len(v) == 8
                 if not (name and employee_number and interests):
@@ -100,7 +106,9 @@ def view():
                 elif not _emp_valid(employee_number):
                     st.error("사번은 8자리 숫자여야 합니다 (예: 10150000).")
                 else:
-                    if is_duplicate_user(name, region, users):
+                    is_dup = is_duplicate_user(name, region, users)
+                    allow_demo_dup = name == '데모사용자'
+                    if is_dup and not allow_demo_dup:
                         st.error("중복 사용자 (이름+지역) 존재. 저장 취소.")
                     else:
                         st.session_state.new_user_draft = {
@@ -110,6 +118,7 @@ def view():
                             'rank': rank,
                             'interests': interests,
                         }
+                        st.session_state.signup_first_visit = False
                         st.success("기본 정보가 임시 저장되었습니다. 성향 설문을 완료하세요.")
                         st.rerun()
     else:
@@ -121,16 +130,6 @@ def view():
             st.rerun()
         with st.form("form_survey", clear_on_submit=False):
             st.subheader("2단계: 성향 설문")
-            st.markdown("""
-            <style>
-            div[data-testid="stRadio"] > label {font-weight:600; margin-bottom:0.25rem;}
-            div[data-testid="stRadio"] div[role="radiogroup"] {display:flex; gap:.6rem; flex-wrap:wrap;}
-            div[data-testid="stRadio"] label[data-baseweb="radio"] {border:1px solid #ccc; padding:.45rem .95rem; border-radius:999px; cursor:pointer; background:#ffffff; font-size:.9rem; color:#222;}
-            div[data-testid="stRadio"] label[data-baseweb="radio"]:hover {background:#f3f7ff; border-color:#5c6bc0;}
-            /* Selected state: thicker border + subtle background, keep dark text */
-            div[data-testid="stRadio"] input:checked + div + label {background:#e8edff; border-color:#3f51b5; box-shadow:0 0 0 2px rgba(63,81,181,.18); color:#1a237e; font-weight:600;}
-            </style>
-            """, unsafe_allow_html=True)
             OPTION_MAP = {"아니요": 1, "중간": 2, "네": 3}
             option_labels = list(OPTION_MAP.keys())
             answers: List[int] = []
@@ -143,8 +142,9 @@ def view():
                 choice = st.radio(f"{i+1}. {q}", option_labels,
                                   key=f"q_{i}", index=1, horizontal=True)
                 answers.append(OPTION_MAP[choice])
-            finish = st.form_submit_button("최종 저장")
-            if finish:
+            finish = st.form_submit_button(
+                "최종 저장", disabled=registration_locked)
+            if finish and not registration_locked:
                 personality_trait = classify_personality(answers)
                 uid = create_id_with_prefix('u')
                 d = draft
@@ -161,5 +161,6 @@ def view():
                 for k in ["new_name", "new_employee_number", "new_interests"]:
                     st.session_state[k] = "" if k != "new_interests" else []
                 st.session_state.clear_survey_answers = True
+                st.session_state.signup_first_visit = False
                 st.success(f"저장 완료: {d['name']} (성향: {personality_trait})")
                 st.rerun()

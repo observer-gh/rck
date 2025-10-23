@@ -17,17 +17,27 @@ class User:
     interests: List[str]
     personality_trait: str  # 외향, 내향, 중간
     survey_answers: Optional[List[int]] = None
+    nickname: Optional[str] = None  # Short anonymized handle
     created_at: str = field(default_factory=_now_iso)
 
 
 def user_from_dict(d: Dict[str, Any]) -> User:
     """Safe conversion dropping legacy keys (e.g., preferred_vibe)."""
     allowed = {"id", "name", "employee_number", "region", "rank",
-               "interests", "personality_trait", "survey_answers", "created_at"}
+               "interests", "personality_trait", "survey_answers", "created_at", "nickname"}
     filtered = {k: v for k, v in d.items() if k in allowed}
     # created_at optional
     if 'created_at' not in filtered:
         filtered['created_at'] = _now_iso()
+    # nickname fallback: derive simple handle from name if missing
+    if 'nickname' not in filtered or not filtered.get('nickname'):
+        base_name = str(filtered.get('name', 'user'))
+        # simple slug: keep ascii alnum, lower
+        import re
+        slug = re.sub(r'[^A-Za-z0-9]+', '', base_name).lower()
+        if not slug:
+            slug = 'user'
+        filtered['nickname'] = slug[:8]
     return User(**filtered)
 
 

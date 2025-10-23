@@ -2,6 +2,15 @@ import streamlit as st
 from typing import Dict, Any, Iterable
 
 from .base import inject_base_css, status_badge
+from typing import Optional
+
+
+def _handle(user: Dict[str, Any], current_user_id: Optional[str] = None) -> str:
+    nick = user.get('nickname') or user.get('name') or 'user'
+    if current_user_id and user.get('id') == current_user_id:
+        return f"{nick} (나)"
+    return nick
+
 
 def user_badge(user: Dict[str, Any]):
     """
@@ -31,12 +40,12 @@ def user_badge(user: Dict[str, Any]):
     )
 
 
-def club_card(club: Dict[str, Any], user_map: Dict[str, Any], points: int):
+def club_card(club: Dict[str, Any], user_map: Dict[str, Any], points: int, current_user_id: Optional[str] = None):
     """
     Displays a card with detailed information about a club.
     """
     leader_id = club.get('leader_id') or ''
-    leader_name = user_map.get(str(leader_id), {}).get('name', 'N/A')
+    leader_name = _handle(user_map.get(str(leader_id), {}), current_user_id)
 
     with st.container(border=True):
         st.subheader(f"Club: {leader_name}'s Team")
@@ -46,7 +55,7 @@ def club_card(club: Dict[str, Any], user_map: Dict[str, Any], points: int):
         c2.metric("Members", len(club.get('member_ids', [])))
         c3.metric("Points", points)
 
-        member_names = [user_map.get(mid, {}).get('name', '?')
+        member_names = [_handle(user_map.get(mid, {}), current_user_id)
                         for mid in club.get('member_ids', [])]
         st.write(f"**Leader:** {leader_name}")
         st.write(f"**Members:** {', '.join(member_names)}")

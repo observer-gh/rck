@@ -1,6 +1,8 @@
 import streamlit as st
 import datetime as dt
 from ui.components.demo import render_demo_sidebar
+from services import persistence
+from domain.constants import DEMO_USER
 
 # Import the page rendering functions from the new modules
 from views import user_signup, my_club, activity_report, demo_script, admin_dashboard, profile
@@ -49,6 +51,24 @@ def main():
     It filters the available pages based on whether "Admin Mode" is active.
     """
     st.set_page_config(page_title="AI Club Matching Demo", layout="wide")
+
+    # Global survey radio pill styling (neutral smaller variant)
+    st.markdown("""
+    <style>
+    div[data-testid="stRadio"] > label {font-weight:600; margin-bottom:0.2rem;}
+    div[data-testid="stRadio"] div[role="radiogroup"] {display:flex; gap:.5rem; flex-wrap:wrap;}
+    div[data-testid="stRadio"] label[data-baseweb="radio"] {border:1px solid #d2d5da; padding:.35rem .75rem; border-radius:999px; cursor:pointer; background:#f7f7f9; font-size:.8rem; color:#222; transition:background .15s,border-color .15s;}
+    div[data-testid="stRadio"] label[data-baseweb="radio"]:hover {background:#eceff2; border-color:#b5b9bf;}
+    div[data-testid="stRadio"] input:checked + div + label {background:#e2e4e7; border-color:#999; box-shadow:0 0 0 2px rgba(0,0,0,.06); color:#111; font-weight:600;}
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Ensure demo user exists & session locked
+    users = persistence.load_list('users')
+    if not any(u.get('id') == 'demo_user' for u in users):
+        users.append(DEMO_USER.copy())
+        persistence.replace_all('users', users)
+    st.session_state.current_user_id = 'demo_user'
 
     # --- Sidebar ---
     st.sidebar.title("Navigation")

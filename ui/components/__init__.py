@@ -32,6 +32,7 @@ from .demo import (
 from typing import Dict, Any, Iterable, Optional
 import streamlit as st
 
+
 def metric_chip(label: str, value: Any, delta: str = "", delta_color: str = "normal"):
     """
     Displays a metric in a compact, chip-like format.
@@ -52,13 +53,21 @@ def metric_chip(label: str, value: Any, delta: str = "", delta_color: str = "nor
     )
 
 
-def styled_member_chips(user_ids: Iterable[str], user_map: Dict[str, Any]):
+def _display_handle(user: Dict[str, Any], current_user_id: Optional[str] = None) -> str:
+    nick = user.get('nickname') or user.get('name') or 'user'
+    suffix = ' (나)' if current_user_id and user.get(
+        'id') == current_user_id else ''
+    return f"{nick}{suffix}"
+
+
+def styled_member_chips(user_ids: Iterable[str], user_map: Dict[str, Any], current_user_id: Optional[str] = None):
     inject_base_css()
     chips = []
     for uid in user_ids:
-        name = user_map.get(uid, {}).get("name", uid)
-        initial = name[0]
-        chips.append(f"<span class='badge'>{initial}</span>")
+        user = user_map.get(uid, {})
+        handle = _display_handle(user, current_user_id)
+        initial = handle[0]
+        chips.append(f"<span class='badge' title='{handle}'>{initial}</span>")
     st.markdown(" ".join(chips), unsafe_allow_html=True)
 
 

@@ -2,7 +2,6 @@ import streamlit as st
 from typing import Dict, Any
 from services import users as user_svc
 from services.survey import QUESTIONS, classify_personality
-from ui.components import render_demo_actions_panel
 from domain.constants import REGIONS, RANKS, INTERESTS
 
 is_duplicate_user = user_svc.is_duplicate_user
@@ -11,14 +10,12 @@ save_users = user_svc.save_users
 
 
 def _profile_block(user: Dict[str, Any]):
-    st.markdown(
-        f"**이름:** {user['name']}  |  **지역:** {user['region']}  |  **직급:** {user['rank']}  |  **성향:** {user.get('personality_trait', '?')}")
-    st.markdown(f"**관심사:** {', '.join(user['interests'])}")
+    # Deprecated summary block intentionally left empty (removed per requirements)
+    pass
 
 
 def view():
     st.header("내 프로필")
-    render_demo_actions_panel("profile")
     users = load_users()
     current_user_id = st.session_state.get('current_user_id')
     if not current_user_id:
@@ -28,8 +25,7 @@ def view():
     if not me:
         st.warning("세션 사용자 ID로 사용자를 찾을 수 없습니다. 다시 등록이 필요할 수 있습니다.")
         return
-    _profile_block(me)
-    st.markdown("---")
+    # Summary block removed; editing section shown directly.
     st.subheader("프로필 수정")
     with st.form(f"edit_self_{current_user_id}"):
         new_name = st.text_input("이름", value=me.get('name', ''))
