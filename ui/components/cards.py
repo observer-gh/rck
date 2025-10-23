@@ -17,6 +17,11 @@ def user_badge(user: Dict[str, Any]):
     """
     Displays a compact badge with user information.
     """
+    name_raw = user.get('name', 'N/A')
+    if isinstance(name_raw, str) and name_raw.startswith('det_extra_'):
+        name_raw = name_raw[len('det_extra_'):]
+    emp = user.get('employee_number') or ''
+    emp_part = f"{emp}, " if emp else ''
     st.markdown(
         f"""
         <div style="
@@ -29,8 +34,8 @@ def user_badge(user: Dict[str, Any]):
             justify-content: space-between;
         ">
             <div>
-                <span style="font-weight: bold;">{user.get('name', 'N/A')}</span>
-                <small style="color: #666; margin-left: 8px;">({user.get('rank', 'N/A')}, {user.get('region', 'N/A')})</small>
+                <span style="font-weight: bold;">{name_raw}</span>
+                <small style="color: #666; margin-left: 8px;">({emp_part}{user.get('rank', 'N/A')}, {user.get('region', 'N/A')})</small>
             </div>
             <div>
                 <small style="background-color: #f0f2f6; padding: 2px 6px; border-radius: 4px;">{user.get('personality_trait', 'N/A')}</small>

@@ -76,7 +76,8 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
 
     all_clubs = []
 
-    club_seq = 0  # for canonical naming
+    # Maintain separate sequence per (region, personality) bucket for A,B,... labeling
+    bucket_seq: Dict[tuple[str, str], int] = {}
     for (region, personality), bucket_users in buckets.items():
         if len(bucket_users) < target_size:
             continue
@@ -135,11 +136,13 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
                 if get_common_interests(final_group_users):
                     leader_id = group_ids[0]
                     primary_interest = get_primary_interest(final_group_users)
-                    # Canonical deterministic club name sequence (A, B, C ...)
-                    club_label = chr(ord('A') + (club_seq % 26))
-                    club_seq += 1
-                    # keep simple / demo friendly
-                    club_name = f"매칭 클럽 {club_label}"
+                    seq_val = bucket_seq.get((region, personality), 0)
+                    club_label = chr(ord('A') + (seq_val % 26))
+                    bucket_seq[(region, personality)] = seq_val + 1
+                    # Region + primary_interest + letter style
+                    base_region = region or "지역"
+                    base_interest = primary_interest or "취미"
+                    club_name = f"{base_region} {base_interest} 클럽 {club_label}"
 
                     new_club = Club(
                         id=create_id_with_prefix('club'),
@@ -230,7 +233,10 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
                 if common_interests:  # safety check
                     leader_id = demo_user.id
                     primary_interest = get_primary_interest(group_users)
-                    club_name = "데모 매칭 클럽"
+                    # Fallback demo naming consistent with bucket format (no letter)
+                    base_region = demo_user.region or "지역"
+                    base_interest = primary_interest or "취미"
+                    club_name = f"{base_region} {base_interest} 클럽"
                     fallback_club = Club(
                         id=create_id_with_prefix('club'),
                         name=club_name,

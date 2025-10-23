@@ -222,7 +222,8 @@ def render_clubs_tab():
     modified = False
     for idx, c in enumerate(clubs_to_display, start=1):
         pts = points_map.get(c['id'], 0)
-        club_title = f"클럽 #{idx} | 인원 {len(c['member_ids'])} | 상태: {c.get('status', 'N/A')} | 포인트: {pts}"
+        display_name = c.get('name') or f"클럽 #{idx}"
+        club_title = f"{display_name} | 인원 {len(c['member_ids'])} | 상태: {c.get('status', 'N/A')} | 포인트: {pts}"
         with st.expander(club_title):
             leader_name = _user_name(c['leader_id'], user_map)
             member_names = [_user_name(mid, user_map)

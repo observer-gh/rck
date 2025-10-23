@@ -25,21 +25,25 @@ def render_user_management_tab():
             return (1, name.lower())  # push to bottom
         return (0, name)  # Korean or other stays upper group
     users.sort(key=_kor_first_key)
-    display_map = {f"{u['name']} ({u['region']})": u['id'] for u in users}
+    def _clean_name(n: str):
+        return n[len('det_extra_'):] if isinstance(n, str) and n.startswith('det_extra_') else n
+    display_map = {f"{_clean_name(u['name'])} ({u.get('employee_number','')}, {u['region']})": u['id'] for u in users}
 
     sel_disp = st.selectbox("사용자 선택", options=["-"] + list(display_map.keys()))
     if sel_disp == "-":
         st.markdown("---")
         st.subheader("사용자 목록")
         for u in users:
-            user_badge(u)
+            # Temporarily augment name for badge display without mutating persistence.
+            disp_user = {**u, 'name': _clean_name(u['name'])}
+            user_badge(disp_user)
         return
 
     sel_id = display_map[sel_disp]
     user = next((u for u in users if u['id'] == sel_id), None)
 
     if user:
-        with st.expander(f"편집: {user['name']} ({user['region']})", expanded=True):
+        with st.expander(f"편집: {_clean_name(user['name'])} ({user.get('employee_number','')}, {user['region']})", expanded=True):
             # The user editing form fields.
             new_name = st.text_input(
                 "이름", value=user['name'], key=f"adm_edit_name_{sel_id}")

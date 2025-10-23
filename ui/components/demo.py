@@ -209,14 +209,16 @@ def render_demo_sidebar(context: str = ""):
             _seed_demo_peers(region)
             users_local = persistence.load_list('users')
             # Idempotent deterministic extras creation (24 total det_extra_ users)
-            existing_det = [u for u in users_local if str(u.get('name', '')).startswith('det_extra_')]
+            existing_det = [u for u in users_local if str(
+                u.get('name', '')).startswith('det_extra_')]
             if len(existing_det) < 24:
                 need = 24 - len(existing_det)
                 extras = _build_deterministic_extras(need, region)
                 users_local.extend([asdict(u) for u in extras])
                 persistence.replace_all('users', users_local)
             total_users = len(persistence.load_list('users'))
-            st.sidebar.success(f"전체 사용자 시드 완료: 총 {total_users}명 (클럽/Run 미생성) · 매칭은 어드민 대시보드에서 실행하세요")
+            st.sidebar.success(
+                f"전체 사용자 시드 완료: 총 {total_users}명 (클럽/Run 미생성) · 매칭은 어드민 대시보드에서 실행하세요")
             st.rerun()
     # Reset button (third column)
     with col_reset:
