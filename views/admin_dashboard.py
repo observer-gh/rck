@@ -224,12 +224,18 @@ def render_clubs_tab():
             leader_name = _user_name(c['leader_id'], user_map)
             member_names = [_user_name(mid, user_map)
                             for mid in c['member_ids']]
-            st.write(f"**리더:** {leader_name}")
-            st.write(f"**멤버:** {', '.join(member_names)}")
+            # Display-only cleanup: hide 'det_extra_' prefix.
+
+            def _disp(n: str):
+                return n[len('det_extra_'):] if isinstance(n, str) and n.startswith('det_extra_') else n
+            leader_disp = _disp(leader_name)
+            members_disp = [_disp(n) for n in member_names]
+            st.write(f"**리더:** {leader_disp}")
+            st.write(f"**멤버:** {', '.join(members_disp)}")
             if c.get('status') == 'Matched':
                 leader_input = st.text_input(
-                    "리더 이름 확인", key=f"leader_check_{c['id']}", help=f"'{leader_name}'을(를) 입력하세요.")
-                if leader_input.strip() == leader_name:
+                    "리더 이름 확인", key=f"leader_check_{c['id']}", help=f"'{leader_disp}'을(를) 입력하세요.")
+                if leader_input.strip() == leader_disp:
                     chat_url = st.text_input(
                         "채팅 링크 (선택)", key=f"chat_{c['id']}")
                     if st.button(f"클럽 활성화", key=f"activate_{c['id']}"):

@@ -1,18 +1,10 @@
 [
   {
-    "id": "run_1761240391061_qa1p",
-    "created_at": "2025-10-23T17:26:31.062669Z",
-    "target_size": 6,
-    "user_count": 24,
-    "club_count": 4,
-    "superseded": false
-  },
-  {
-    "id": "run_1761240394035_mf8m",
-    "created_at": "2025-10-23T17:26:34.039414Z",
-    "target_size": 6,
-    "user_count": 30,
-    "club_count": 5,
+    "id": "run_1761242744027_xom6",
+    "created_at": "2025-10-23T18:05:44.028036Z",
+    "target_size": 5,
+    "user_count": 6,
+    "club_count": 1,
     "superseded": false
   }
 ]

@@ -1,3 +1,5 @@
+from dataclasses import asdict
+from domain.models import Club
 from domain.models import User
 from services.matching import compute_matches
 from services import activity, persistence
@@ -12,9 +14,6 @@ if PROJECT_ROOT not in sys.path:
 def make_user(i, interests, region='서울', rank='사원', atmos='외향'):
     return User(id=f'tu{i}', name=f'TU{i}', employee_number=f"E-TEST-{i}", region=region, rank=rank, interests=interests, personality_trait=atmos)
 
-
-from domain.models import Club
-from dataclasses import asdict
 
 def test_match_explanations_present(tmp_path, monkeypatch):
     # Redirect data dir for isolation
@@ -41,7 +40,8 @@ def test_verify_report_points(tmp_path, monkeypatch):
 
     # Create a dummy club and users for the report to be verified against
     test_users = [make_user(i, ['축구', '영화보기']) for i in range(5)]
-    test_club = Club(id='clubX', member_ids=[u.id for u in test_users], leader_id=test_users[0].id)
+    test_club = Club(id='clubX', member_ids=[
+                     u.id for u in test_users], leader_id=test_users[0].id)
     persistence.replace_all('users', [asdict(u) for u in test_users])
     persistence.replace_all('clubs', [asdict(test_club)])
 
@@ -60,3 +60,12 @@ def test_verify_report_points(tmp_path, monkeypatch):
     assert verified_report['points_awarded'] > 0
     assert 'verification_metrics' in verified_report
     assert verified_report['verification_metrics']['interest'] > 0
+
+    # Now un-verify and ensure reset
+    activity.unverify_report(verified_report['id'])
+    reports3 = persistence.load_list('activity_reports')
+    reverted = reports3[0]
+    assert reverted['status'] == 'Pending'
+    assert 'points_awarded' not in reverted
+    assert 'verification_metrics' not in reverted
+    assert 'verified_at' not in reverted

@@ -4,11 +4,9 @@ import time  # may not be needed if unconditional rerun kept; left for potential
 
 
 def _seed_demo_peers(region: str):
-    """Deterministically ensure demo peers demo_peer1..5 exist.
+    """Ensure 5 fixed demo peers exist with hardcoded Korean names.
 
-    NOTE: Previously this function also created a fixed demo club automatically.
-    That side-effect has been removed so that club formation only occurs when
-    the user explicitly triggers matching (e.g. via '매칭 실행' on the 내 클럽 page).
+    Names chosen to be common and distinct. English codes kept as nickname for reference.
     """
     from services import persistence
     from services.survey import classify_personality
@@ -17,28 +15,27 @@ def _seed_demo_peers(region: str):
 
     users_existing = persistence.load_list('users')
     created = []
-    # Define deterministic peers
     peer_defs = [
-        {"idx": 1, "rank": "사원", "nickname": "alpha", "interests": [
+        {"name": "김서준", "rank": "사원", "nickname": "alpha", "interests": [
             "축구", "보드게임", "독서"], "answers": [2, 2, 2, 2, 2, 2, 2]},
-        {"idx": 2, "rank": "대리", "nickname": "bravo", "interests": [
+        {"name": "이민준", "rank": "대리", "nickname": "bravo", "interests": [
             "축구", "러닝", "보드게임"], "answers": [3, 2, 2, 2, 2, 2, 2]},
-        {"idx": 3, "rank": "과장", "nickname": "charlie", "interests": [
+        {"name": "박서연", "rank": "과장", "nickname": "charlie", "interests": [
             "축구", "헬스", "요리"], "answers": [2, 3, 2, 2, 2, 2, 2]},
-        {"idx": 4, "rank": "차장", "nickname": "delta", "interests": [
+        {"name": "최지후", "rank": "차장", "nickname": "delta", "interests": [
             "축구", "사진", "등산"], "answers": [2, 2, 3, 2, 2, 2, 2]},
-        {"idx": 5, "rank": "부장", "nickname": "echo", "interests": [
+        {"name": "정하윤", "rank": "부장", "nickname": "echo", "interests": [
             "축구", "러닝", "보드게임"], "answers": [2, 2, 2, 3, 2, 2, 2]},
     ]
+    existing_names = {u.get('name') for u in users_existing}
     for pd in peer_defs:
-        name_peer = f"demo_peer{pd['idx']}"
-        if any(u.get('name') == name_peer for u in users_existing):
+        if pd['name'] in existing_names:
             continue
         trait = classify_personality(pd['answers'])
         peer_user = User(
             id=create_id_with_prefix('u'),
-            name=name_peer,
-            employee_number=f"DEMO-P{pd['idx']}",
+            name=pd['name'],
+            employee_number=f"DEMO-{pd['name']}",  # keep unique but readable
             region=region,
             rank=pd['rank'],
             interests=pd['interests'],
@@ -47,7 +44,7 @@ def _seed_demo_peers(region: str):
             nickname=pd.get('nickname')
         )
         users_existing.append(asdict(peer_user))
-        created.append(name_peer)
+        created.append(pd['name'])
     if created:
         persistence.replace_all('users', users_existing)
 
@@ -124,10 +121,13 @@ def _build_deterministic_extras(count: int, region: str):
         interests = ["축구", second_interest]
         # Deterministic survey answers pattern keeps classify_personality unused; set trait directly.
         answers = [3, 3, 3, 3, 3, 3, 3]
+        # Numeric employee number format (e.g., 10150001, 10150002, ...)
+        base_emp = 10150000
+        emp_num = f"{base_emp + i + 1:08d}"  # ensure 8 digits
         u = User(
             id=create_id_with_prefix('u'),
             name=f"det_extra_{names[i]}",  # prefix for easy identification
-            employee_number=f"DET-{i+1:02}",
+            employee_number=emp_num,
             region=region,
             rank=rank,
             interests=interests,
@@ -155,8 +155,9 @@ def render_demo_sidebar(context: str = ""):
     st.sidebar.markdown("<div style='font-size:11px; padding:4px 8px; background:#f5f7fa; border:1px solid #d0d7e2; border-radius:6px; display:inline-block; margin-bottom:6px;'>✏️ 데모 전용 영역</div>", unsafe_allow_html=True)
     users = persistence.load_list('users')
     clubs = persistence.load_list('clubs')
-    demo_cluster = [u for u in users if u.get('id') == 'demo_user' or str(
-        u.get('name', '')).startswith('demo_peer')]
+    _PEER_NAMES = {"김서준", "이민준", "박서연", "최지후", "정하윤"}
+    demo_cluster = [u for u in users if u.get(
+        'id') == 'demo_user' or u.get('name') in _PEER_NAMES]
     demo_count = len(demo_cluster)
     st.sidebar.write(f"demo cohort: {demo_count}/6")
     # Region fallback from existing demo_user or nemo else 서울
@@ -190,8 +191,8 @@ def render_demo_sidebar(context: str = ""):
             _seed_demo_peers(region)
             # Update state
             users_local = persistence.load_list('users')
-            demo_cluster = [u for u in users_local if u.get('id') == 'demo_user' or str(
-                u.get('name', '')).startswith('demo_peer') or u.get('name') == '데모사용자']
+            demo_cluster = [u for u in users_local if u.get('id') == 'demo_user' or u.get(
+                'name') in _PEER_NAMES or u.get('name') == '데모사용자']
             st.session_state.demo_seed_done = len(demo_cluster) >= 6
             st.sidebar.success("Seed 완료: 데모 사용자 + 5 peers")
             st.rerun()
@@ -373,8 +374,8 @@ def render_demo_sidebar_floating(context: str = ""):
     users = persistence.load_list('users')
     clubs = persistence.load_list('clubs')
     # demo cohort now defined as demo_user + demo_peer1..4; legacy 'nemo' removed
-    demo_cluster = [u for u in users if u.get('id') == 'demo_user' or str(
-        u.get('name', '')).startswith('demo_peer')]
+    demo_cluster = [u for u in users if u.get(
+        'id') == 'demo_user' or u.get('name') in _PEER_NAMES]
     demo_count = len(demo_cluster)
     raw_region = next((u.get('region')
                       for u in users if u.get('id') == 'demo_user'), None)
