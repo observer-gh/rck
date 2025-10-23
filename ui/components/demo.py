@@ -176,7 +176,8 @@ def render_demo_sidebar(context: str = ""):
             st.sidebar.success(f"Seed 완료: peers 확보 + 추가 {added}명")
             st.rerun()
     with col_match:
-        st.caption("매칭 기능은 '내 클럽' 페이지로 이동되었습니다.")
+        # (caption removed)
+        pass
     with col_reset:
         if st.button("Reset", key="btn_demo_wipe_simple"):
             from services import persistence as _p

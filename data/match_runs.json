@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "id": "run_1761204111473_s5ls",
+    "created_at": "2025-10-23T07:21:51.474970Z",
+    "target_size": 5,
+    "user_count": 6,
+    "club_count": 1,
+    "superseded": false
+  }
+]

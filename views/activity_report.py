@@ -47,49 +47,62 @@ def view():
             st.stop()
         club_id = str(choice).split()[0]
         # Prefill support via session state keys
-        if 'prefill_report_text' not in st.session_state:
-            st.session_state.prefill_report_text = ""
-        if 'prefill_participants' not in st.session_state:
-            st.session_state.prefill_participants = 0
+        import datetime as _dt
         if 'prefill_date' not in st.session_state:
-            import datetime as _dt
             st.session_state.prefill_date = _dt.date.today()
+        st.session_state.setdefault('prefill_report_text', "")
+        st.session_state.setdefault('prefill_participants', 0)
+        # Initialize widget-bound keys once (avoid later assignment warnings)
+        st.session_state.setdefault(
+            'report_raw_text', st.session_state.prefill_report_text)
+        st.session_state.setdefault(
+            'report_participants', st.session_state.prefill_participants)
 
-        with st.form("activity_report_form", clear_on_submit=True):
-            date = st.date_input("활동 날짜", key="report_date",
-                                 value=st.session_state.prefill_date)
-            photo = st.file_uploader("사진 업로드 (시뮬레이션)", key="report_photo")
-            # Auto-fill trigger (appears only after a photo is chosen)
-            autofill_triggered = False
-            if photo is not None:
-                if st.form_submit_button("사진 기반 자동 채우기", type="secondary"):
-                    import time
-                    time.sleep(1)
-                    # Hard-coded demo values
-                    st.session_state.prefill_report_text = "영화 감상 후 토론 진행. 공통 관심사 확장 및 다음 활동(실외 러닝) 아이디어 도출."
-                    st.session_state.prefill_participants = 5
-                    st.session_state.prefill_date = date  # keep chosen date
-                    autofill_triggered = True
-            raw_text = st.text_area(
-                "활동 내용", key="report_raw_text", value=st.session_state.prefill_report_text)
-            part_count = st.number_input(
-                "참여 인원(선택)", min_value=0, max_value=100, value=st.session_state.prefill_participants, key="report_participants")
-            submitted = st.form_submit_button("보고서 제출")
-            if autofill_triggered:
-                st.info("자동 채우기 완료: 데모 하드코딩 값 적용")
-            if submitted:
-                if not raw_text:
-                    st.error("활동 내용을 입력해주세요.")
-                else:
-                    photo_name = photo.name if photo is not None else 'no_photo'
-                    rep = activity.create_activity_report(
-                        club_id=club_id,
-                        date=str(date),
-                        photo_name=photo_name,
-                        raw_text=raw_text,
-                        participant_override=part_count if part_count > 0 else None,
-                    )
-                    st.success(f"보고서 생성 완료. ID: {rep.id}")
+    # Keep form values after submission so auto-fill results remain visible
+    with st.form("activity_report_form", clear_on_submit=False):
+        date = st.date_input("활동 날짜", key="report_date",
+                             value=st.session_state.prefill_date)
+        photo = st.file_uploader("사진 업로드 (시뮬레이션)", key="report_photo")
+        # Auto-fill trigger (button always visible now)
+        autofill_triggered = False
+        if st.form_submit_button("사진 기반 자동 채우기", type="secondary"):
+            import time
+            with st.spinner("사진 분석 중…"):
+                # Simulated incremental progress over ~3s
+                prog = st.progress(0)
+                steps = 30  # finer increments
+                for i in range(steps):
+                    time.sleep(3/steps)
+                    prog.progress(int((i+1)/steps*100))
+            # Hard-coded demo values (independent of photo)
+            st.session_state.prefill_report_text = "영화 감상 후 토론 진행. 공통 관심사 확장 및 다음 활동(실외 러닝) 아이디어 도출."
+            st.session_state.prefill_participants = 5
+            st.session_state.prefill_date = date  # keep chosen date
+            # Synchronize widget-bound keys so values appear immediately after rerun
+            st.session_state.report_raw_text = st.session_state.prefill_report_text
+            st.session_state.report_participants = st.session_state.prefill_participants
+            # Do not set report_date here; widget already instantiated (would raise StreamlitAPIException)
+            autofill_triggered = True
+            st.rerun()
+        raw_text = st.text_area(
+            "활동 내용", key="report_raw_text")
+        part_count = st.number_input(
+            "참여 인원(선택)", min_value=0, max_value=100, key="report_participants")
+        submitted = st.form_submit_button("보고서 제출")
+        # Removed completion info banner for cleaner UI (spinner/progress already gives feedback)
+        if submitted:
+            if not raw_text:
+                st.error("활동 내용을 입력해주세요.")
+            else:
+                photo_name = photo.name if photo is not None else 'no_photo'
+                rep = activity.create_activity_report(
+                    club_id=club_id,
+                    date=str(date),
+                    photo_name=photo_name,
+                    raw_text=raw_text,
+                    participant_override=part_count if part_count > 0 else None,
+                )
+                st.success(f"보고서 생성 완료. ID: {rep.id}")
     st.divider()
     st.subheader("내가 제출한 보고서")
     reports = activity.list_reports()
