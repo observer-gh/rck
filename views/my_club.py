@@ -32,7 +32,7 @@ def view():
         unsafe_allow_html=True
     )
     # Match Clubs button (moved from demo sidebar)
-    if st.button("(demo) 클럽 매칭 실행", help="고정 데모 클럽 생성 후 나머지 사용자 매칭"):
+    if st.button("(demo) 클럽 매칭 실행", help="고정 6명 데모 클럽 생성 + 나머지 사용자 매칭(1회 클릭)"):
         from services import persistence as _p
         from services import matching
         from domain.models import user_from_dict, MatchRun, Club
@@ -50,41 +50,45 @@ def view():
         _seed_demo_peers(demo_region)
         users_all = _p.load_list('users')
         clubs_existing = _p.load_list('clubs')
-        # Detect fixed demo club
+        # Detect or create fixed 6-member demo club using Korean peer names
+        PEER_NAMES = {"김서준", "이민준", "박서연", "최지후", "정하윤"}
+        demo_user_rec = next((u for u in users_all if u.get(
+            'id') == 'demo_user' or u.get('name') == '데모사용자'), None)
+        peer_user_recs = [u for u in users_all if u.get('name') in PEER_NAMES]
         fixed_members = []
+        expected_name = f"{demo_region} 축구 클럽 A"
         for c in clubs_existing:
-            mids = c.get('member_ids', [])
-            if 'demo_user' in mids and len([m for m in mids if str(m).startswith('demo_peer')]) >= 5:
+            mids = c.get('member_ids', []) or []
+            # Detect by exact name OR by composition (demo user + 5 peers)
+            comp_ok = demo_user_rec and demo_user_rec['id'] in mids and len({m for m in mids if any(p['id'] == m for p in peer_user_recs)}) == 5
+            name_ok = c.get('name') == expected_name
+            if comp_ok or name_ok:
                 fixed_members = mids
                 break
-        if not fixed_members:
-            demo_user_rec = next((u for u in users_all if u.get(
-                'id') == 'demo_user' or u.get('name') == '데모사용자'), None)
-            peer_ids = [u.get('id') for u in users_all if str(
-                u.get('name', '')).startswith('demo_peer')][:5]
-            if demo_user_rec and len(peer_ids) == 5:
-                fixed_members = [demo_user_rec['id']] + peer_ids
-                fixed_club = Club(
-                    id=create_id_with_prefix('club'),
-                    name=f"{demo_user_rec.get('region', '서울')} 축구 · 데모 팀 6명",
-                    member_ids=fixed_members,
-                    leader_id=demo_user_rec['id'],
-                    primary_interest='축구',
-                    status='Active'
-                )
-                fc_dict = _asdict(fixed_club)
-                fc_dict['is_demo_fixed'] = True
-                fc_dict['explanations'] = {
-                    mid: {"그룹": "고정 데모 팀"} for mid in fixed_members}
-                clubs_existing.append(fc_dict)
-                _p.replace_all('clubs', clubs_existing)
+        if not fixed_members and demo_user_rec and len(peer_user_recs) == 5:
+            fixed_members = [demo_user_rec['id']] + [p['id'] for p in peer_user_recs]
+            fixed_club = Club(
+                id=create_id_with_prefix('club'),
+                name=expected_name,
+                member_ids=fixed_members,
+                leader_id=demo_user_rec['id'],
+                primary_interest='축구',
+                status='Active'
+            )
+            fc_dict = _asdict(fixed_club)
+            fc_dict['is_demo_fixed'] = True
+            fc_dict['explanations'] = {mid: {"그룹": "고정 데모 팀 A"} for mid in fixed_members}
+            clubs_existing.append(fc_dict)
+            _p.replace_all('clubs', clubs_existing)
+            # Removed info bar per request (club created silently)
         # Prepare remaining users for matching
         remaining_users = [user_from_dict(
             u) for u in users_all if u.get('id') not in fixed_members]
-        if len(remaining_users) < 5:
-            st.warning("매칭에 필요한 인원이 부족하여 전체 사용자 대상으로 재시도합니다.")
-            remaining_users = [user_from_dict(u) for u in users_all]
-        if len(remaining_users) >= 5:
+        if len(remaining_users) < 6:
+            # Removed warning bar (silent fallback to broader set)
+            remaining_users = [user_from_dict(
+                u) for u in users_all if u.get('id') not in fixed_members]
+        if len(remaining_users) >= 6:
             run_id = create_id_with_prefix('run')
             new_clubs = matching.compute_matches(
                 remaining_users, target_size=6, run_id=run_id)
@@ -101,10 +105,11 @@ def view():
                 '+00:00', 'Z'), target_size=6, user_count=len(remaining_users), club_count=len(new_cd))
             runs.append(_asdict(run_meta))
             _p.replace_all('match_runs', runs)
-            st.success(f"매칭 완료: {len(new_cd)} 클럽 생성 (Run {run_id})")
+            st.success(f"매칭 완료: 새 클럽 {len(new_cd)}개 생성 (Run {run_id})")
             st.rerun()
         else:
-            st.error("매칭을 수행하기 위한 사용자가 부족합니다.")
+            # Removed error bar; no matching performed when insufficient users
+            pass
     current_user_id = getattr(st.session_state, 'current_user_id', None)
     users = persistence.load_list('users')
     if not users:

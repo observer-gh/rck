@@ -52,6 +52,8 @@ def main():
     It filters the available pages based on whether the Admin Dashboard mode is active.
     """
     st.set_page_config(page_title="AI Club Matching Demo", layout="wide")
+    # Top anchor for post-navigation focus
+    st.markdown("<div id='app-top'></div>", unsafe_allow_html=True)
 
     # (Removed admin_mode toggle; admin dashboard now a direct page selection)
 
@@ -168,6 +170,12 @@ def main():
     else:
         page_to_render = PAGE_REGISTRY[active_key]["render_func"]
         page_to_render()
+        # Focus / scroll to anchor if requested (e.g., after registration)
+        if st.session_state.get('focus_anchor'):
+            anchor = st.session_state['focus_anchor']
+            st.markdown(
+                f"<script>setTimeout(()=>{{const el=document.getElementById('{anchor}'); if(el){{el.scrollIntoView({{behavior:'instant',block:'start'}}); el.tabIndex=-1; el.focus();}}}},180);</script>", unsafe_allow_html=True)
+            del st.session_state['focus_anchor']
 
     # --- Footer ---
     st.sidebar.markdown("---")

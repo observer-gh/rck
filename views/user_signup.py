@@ -164,6 +164,8 @@ def view():
                 st.session_state.current_user_id = uid
                 # Defer navigation to profile page via nav_target (handled in app before radio instantiation)
                 st.session_state.nav_target = "🙍 내 프로필"
+                # Request focus on top anchor next load
+                st.session_state.focus_anchor = 'app-top'
                 # cleanup
                 del st.session_state.new_user_draft
                 # clear text fields for potential next creation

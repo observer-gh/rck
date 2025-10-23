@@ -22,30 +22,7 @@
     ]
   },
   {
-    "id": "u_1761250639568_ni8e",
-    "name": "데모사용자",
-    "employee_number": "10150000",
-    "region": "서울",
-    "rank": "사원",
-    "interests": [
-      "축구",
-      "영화보기"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      2,
-      2,
-      2,
-      2,
-      2,
-      1,
-      1
-    ],
-    "nickname": "nemo",
-    "created_at": "2025-10-23T20:17:19Z"
-  },
-  {
-    "id": "u_1761250648982_f5t5",
+    "id": "u_1761251985938_gyp0",
     "name": "김서준",
     "employee_number": "DEMO-김서준",
     "region": "서울",
@@ -66,10 +43,10 @@
       2
     ],
     "nickname": "alpha",
-    "created_at": "2025-10-23T20:17:28Z"
+    "created_at": "2025-10-23T20:39:45Z"
   },
   {
-    "id": "u_1761250648982_ts4f",
+    "id": "u_1761251985938_lqmz",
     "name": "이민준",
     "employee_number": "DEMO-이민준",
     "region": "서울",
@@ -90,10 +67,10 @@
       2
     ],
     "nickname": "bravo",
-    "created_at": "2025-10-23T20:17:28Z"
+    "created_at": "2025-10-23T20:39:45Z"
   },
   {
-    "id": "u_1761250648982_2yef",
+    "id": "u_1761251985938_i4ik",
     "name": "박서연",
     "employee_number": "DEMO-박서연",
     "region": "서울",
@@ -114,10 +91,10 @@
       2
     ],
     "nickname": "charlie",
-    "created_at": "2025-10-23T20:17:28Z"
+    "created_at": "2025-10-23T20:39:45Z"
   },
   {
-    "id": "u_1761250648982_hhyp",
+    "id": "u_1761251985938_zjlo",
     "name": "최지후",
     "employee_number": "DEMO-최지후",
     "region": "서울",
@@ -138,10 +115,10 @@
       2
     ],
     "nickname": "delta",
-    "created_at": "2025-10-23T20:17:28Z"
+    "created_at": "2025-10-23T20:39:45Z"
   },
   {
-    "id": "u_1761250648983_a4v5",
+    "id": "u_1761251985938_d8ji",
     "name": "정하윤",
     "employee_number": "DEMO-정하윤",
     "region": "서울",
@@ -162,10 +139,10 @@
       2
     ],
     "nickname": "echo",
-    "created_at": "2025-10-23T20:17:28Z"
+    "created_at": "2025-10-23T20:39:45Z"
   },
   {
-    "id": "u_1761250694595_s5io",
+    "id": "u_1761252016028_wwck",
     "name": "det_extra_김주현",
     "employee_number": "10150001",
     "region": "서울",
@@ -185,10 +162,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_m05i",
+    "id": "u_1761252016029_50i6",
     "name": "det_extra_이주현",
     "employee_number": "10150002",
     "region": "서울",
@@ -208,10 +185,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_515w",
+    "id": "u_1761252016029_70j5",
     "name": "det_extra_박주현",
     "employee_number": "10150003",
     "region": "서울",
@@ -231,10 +208,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_1fs4",
+    "id": "u_1761252016029_ru74",
     "name": "det_extra_최주현",
     "employee_number": "10150004",
     "region": "서울",
@@ -254,10 +231,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_oguu",
+    "id": "u_1761252016029_j76x",
     "name": "det_extra_정주현",
     "employee_number": "10150005",
     "region": "서울",
@@ -277,10 +254,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_goha",
+    "id": "u_1761252016029_5ine",
     "name": "det_extra_강주현",
     "employee_number": "10150006",
     "region": "서울",
@@ -300,10 +277,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_sgxn",
+    "id": "u_1761252016029_mhik",
     "name": "det_extra_조주현",
     "employee_number": "10150007",
     "region": "서울",
@@ -323,10 +300,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_cp6m",
+    "id": "u_1761252016029_eax7",
     "name": "det_extra_윤주현",
     "employee_number": "10150008",
     "region": "서울",
@@ -346,10 +323,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_h4ip",
+    "id": "u_1761252016029_qlxe",
     "name": "det_extra_장주현",
     "employee_number": "10150009",
     "region": "서울",
@@ -369,10 +346,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_6kfg",
+    "id": "u_1761252016029_ff7x",
     "name": "det_extra_임주현",
     "employee_number": "10150010",
     "region": "서울",
@@ -392,10 +369,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_tnxh",
+    "id": "u_1761252016029_lxeu",
     "name": "det_extra_오주현",
     "employee_number": "10150011",
     "region": "서울",
@@ -415,10 +392,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_ucpa",
+    "id": "u_1761252016029_wkql",
     "name": "det_extra_한주현",
     "employee_number": "10150012",
     "region": "서울",
@@ -438,10 +415,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_jzqa",
+    "id": "u_1761252016029_hvfp",
     "name": "det_extra_신주현",
     "employee_number": "10150013",
     "region": "서울",
@@ -461,10 +438,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_9ifm",
+    "id": "u_1761252016029_bumu",
     "name": "det_extra_서주현",
     "employee_number": "10150014",
     "region": "서울",
@@ -484,10 +461,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_douo",
+    "id": "u_1761252016029_wjpk",
     "name": "det_extra_권주현",
     "employee_number": "10150015",
     "region": "서울",
@@ -507,10 +484,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_wt96",
+    "id": "u_1761252016029_m1dr",
     "name": "det_extra_황주현",
     "employee_number": "10150016",
     "region": "서울",
@@ -530,10 +507,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_5lic",
+    "id": "u_1761252016029_pgpj",
     "name": "det_extra_안주현",
     "employee_number": "10150017",
     "region": "서울",
@@ -553,10 +530,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_p554",
+    "id": "u_1761252016029_onzm",
     "name": "det_extra_송주현",
     "employee_number": "10150018",
     "region": "서울",
@@ -576,10 +553,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_mayw",
+    "id": "u_1761252016029_8cbd",
     "name": "det_extra_유주현",
     "employee_number": "10150019",
     "region": "서울",
@@ -599,10 +576,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_zmi6",
+    "id": "u_1761252016029_5qk9",
     "name": "det_extra_전주현",
     "employee_number": "10150020",
     "region": "서울",
@@ -622,10 +599,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_w82s",
+    "id": "u_1761252016029_l7rc",
     "name": "det_extra_김하은",
     "employee_number": "10150021",
     "region": "서울",
@@ -645,10 +622,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_q7ra",
+    "id": "u_1761252016029_cf8d",
     "name": "det_extra_이하은",
     "employee_number": "10150022",
     "region": "서울",
@@ -668,10 +645,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_i3mx",
+    "id": "u_1761252016029_fg72",
     "name": "det_extra_박하은",
     "employee_number": "10150023",
     "region": "서울",
@@ -691,10 +668,10 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   },
   {
-    "id": "u_1761250694596_3dl7",
+    "id": "u_1761252016029_be8s",
     "name": "det_extra_최하은",
     "employee_number": "10150024",
     "region": "서울",
@@ -714,6 +691,6 @@
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T20:18:14Z"
+    "created_at": "2025-10-23T20:40:16Z"
   }
 ]
