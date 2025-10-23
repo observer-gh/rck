@@ -1,5 +1,6 @@
 import streamlit as st
 import datetime as dt
+from urllib.parse import unquote
 from ui.components.demo import render_demo_sidebar
 from services import persistence
 from domain.constants import DEMO_USER
@@ -98,14 +99,19 @@ def main():
     page_keys = list(visible_pages.keys())
     page_labels = [v["label"] for v in visible_pages.values()]
 
-    # Handle deferred navigation target before creating radio (cannot set after instantiation)
+    # Query param persistence (new API)
+    qs = st.query_params
     if 'nav_target' in st.session_state:
         target_label = st.session_state.nav_target
-        # Validate target exists among labels
         if target_label in [v['label'] for v in PAGE_REGISTRY.values()]:
-            # Preseed widget state key expected by radio
             st.session_state.navigation_radio = target_label
+            st.experimental_set_query_params(page=target_label)
         del st.session_state.nav_target
+    elif 'page' in qs and 'navigation_radio' not in st.session_state:
+        raw_param = qs.get('page')
+        raw = unquote(raw_param) if isinstance(raw_param, str) else ''
+        if raw in [v['label'] for v in PAGE_REGISTRY.values()]:
+            st.session_state.navigation_radio = raw
 
     # Page selection radio buttons (single source of truth via widget state)
     selected_page_label = st.sidebar.radio(
@@ -113,6 +119,8 @@ def main():
         page_labels,
         key="navigation_radio"
     )
+    # Update query param when selection changes
+    st.query_params['page'] = selected_page_label
     selected_page_key = page_keys[page_labels.index(selected_page_label)]
 
     # (Demo panel already rendered at top)

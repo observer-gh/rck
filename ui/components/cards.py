@@ -2,6 +2,7 @@ import streamlit as st
 from typing import Dict, Any, Iterable
 
 from .base import inject_base_css, status_badge
+from utils.explanations import build_ai_match_explanation
 from typing import Optional
 
 
@@ -59,6 +60,34 @@ def club_card(club: Dict[str, Any], user_map: Dict[str, Any], points: int, curre
                         for mid in club.get('member_ids', [])]
         st.write(f"**Leader:** {leader_name}")
         st.write(f"**Members:** {', '.join(member_names)}")
+        # Display trait + primary interest summary (take leader's trait as representative)
+        leader_trait = user_map.get(str(leader_id), {}).get(
+            'personality_trait') or '—'
+        primary_interest = club.get('primary_interest') or '—'
+        st.markdown(f"**성향:** {leader_trait} | **대표 관심사:** {primary_interest}")
+        # AI explanation for fixed demo cohort: use names to detect peers
+        member_ids = club.get('member_ids', [])
+        names = [user_map.get(mid, {}).get('name', '') for mid in member_ids]
+        demo_user_present = any(
+            n == '데모사용자' for n in names) or 'demo_user' in member_ids
+        peer_count = sum(1 for n in names if n.startswith('demo_peer'))
+        if demo_user_present and peer_count >= 4:
+            expl = build_ai_match_explanation(club, user_map)
+            st.markdown("### AI 매칭 설명")
+            # Pastel blue container styling
+            st.markdown(
+                f"""
+                <div style="background:#eef6ff;border:1px solid #d2e6fb;padding:14px 18px;border-radius:12px;font-size:14px;line-height:1.55;">
+                    <p style="margin:0 0 8px;font-weight:600;">{expl['summary']}</p>
+                    <p style="margin:0 0 6px;white-space:normal;">{' '.join(expl['bullets'])}</p>
+                    <p style="margin:8px 0 0;">{expl.get('narrative', '')}</p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            with st.expander("매칭 멤버 상세", expanded=False):
+                for line in expl.get('member_details', []):
+                    st.markdown(f"- {line}")
 
         if club.get('chat_link'):
             st.link_button("Go to Group Chat", club['chat_link'])

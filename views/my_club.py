@@ -118,22 +118,4 @@ def view():
     pts_map = _club_points_map()
     club_card(my_club, user_map, pts_map.get(
         my_club['id'], 0), current_user_id=current_user_id)
-    styled_member_chips(my_club['member_ids'],
-                        user_map, current_user_id=current_user_id)
-    exp = my_club.get('explanations')
-    if exp:
-        with st.expander("매칭 설명 (AI 분석)"):
-            for uid, detail in exp.items():
-                uname = user_map.get(uid, {}).get('name', 'Unknown')
-                group_line = detail.get('그룹')
-                summary = detail.get('요약')
-                st.markdown(f"**{uname}**")
-                if group_line:
-                    st.caption(group_line)
-                bullets = []
-                for k in ["공통관심사", "직급다양성", "성향조합"]:
-                    if k in detail:
-                        bullets.append(f"- {k}: {detail[k]}")
-                if summary:
-                    bullets.append(f"- 요약: {summary}")
-                st.markdown("\n".join(bullets))
+    # Legacy per-user explanation expander removed for streamlined demo view.

@@ -21,6 +21,7 @@ INTERESTS = ["축구", "영화보기", "보드게임", "러닝", "독서", "헬�
 DEMO_USER = {
     'id': 'demo_user',
     'name': '데모사용자',
+    'nickname': 'nemo',
     'employee_number': 'D0000001',
     'region': '서울',
     'rank': '사원',
