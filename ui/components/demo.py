@@ -4,7 +4,7 @@ import time  # may not be needed if unconditional rerun kept; left for potential
 
 
 def _seed_demo_peers(region: str):
-    """Deterministically ensure demo peers demo_peer1..4 exist.
+    """Deterministically ensure demo peers demo_peer1..5 exist.
 
     NOTE: Previously this function also created a fixed demo club automatically.
     That side-effect has been removed so that club formation only occurs when
@@ -20,13 +20,15 @@ def _seed_demo_peers(region: str):
     # Define deterministic peers
     peer_defs = [
         {"idx": 1, "rank": "사원", "nickname": "alpha", "interests": [
-            "영화보기", "보드게임", "독서"], "answers": [2, 2, 2, 2, 2, 2, 2]},
+            "축구", "보드게임", "독서"], "answers": [2, 2, 2, 2, 2, 2, 2]},
         {"idx": 2, "rank": "대리", "nickname": "bravo", "interests": [
-            "영화보기", "축구", "러닝"], "answers": [3, 2, 2, 2, 2, 2, 2]},
+            "축구", "러닝", "보드게임"], "answers": [3, 2, 2, 2, 2, 2, 2]},
         {"idx": 3, "rank": "과장", "nickname": "charlie", "interests": [
-            "영화보기", "헬스", "요리"], "answers": [2, 3, 2, 2, 2, 2, 2]},
+            "축구", "헬스", "요리"], "answers": [2, 3, 2, 2, 2, 2, 2]},
         {"idx": 4, "rank": "차장", "nickname": "delta", "interests": [
-            "영화보기", "사진", "등산"], "answers": [2, 2, 3, 2, 2, 2, 2]},
+            "축구", "사진", "등산"], "answers": [2, 2, 3, 2, 2, 2, 2]},
+        {"idx": 5, "rank": "부장", "nickname": "echo", "interests": [
+            "축구", "러닝", "보드게임"], "answers": [2, 2, 2, 3, 2, 2, 2]},
     ]
     for pd in peer_defs:
         name_peer = f"demo_peer{pd['idx']}"
@@ -109,7 +111,7 @@ def render_demo_sidebar(context: str = ""):
     demo_cluster = [u for u in users if u.get('id') == 'demo_user' or str(
         u.get('name', '')).startswith('demo_peer')]
     demo_count = len(demo_cluster)
-    st.sidebar.write(f"demo cohort: {demo_count}/5")
+    st.sidebar.write(f"demo cohort: {demo_count}/6")
     # Region fallback from existing demo_user or nemo else 서울
     raw_region = next((u.get('region')
                       for u in users if u.get('id') == 'demo_user'), None)
@@ -118,12 +120,12 @@ def render_demo_sidebar(context: str = ""):
                           for u in users if u.get('name') == 'nemo'), '서울')
     region = raw_region if isinstance(raw_region, str) and raw_region else '서울'
     if 'demo_seed_done' not in st.session_state:
-        st.session_state.demo_seed_done = demo_count >= 5
-    seed_disabled = st.session_state.demo_seed_done and demo_count >= 5
+        st.session_state.demo_seed_done = demo_count >= 6
+    seed_disabled = st.session_state.demo_seed_done and demo_count >= 6
     from domain.constants import DEMO_USER
     col_seed, col_match, col_reset = st.sidebar.columns(3)
     with col_seed:
-        if st.button("Seed", key="btn_seed_all", disabled=seed_disabled, help="데모 사용자(+존재시 skip) + 고정 4 peers + 추가 25 랜덤"):
+        if st.button("Seed", key="btn_seed_all", disabled=seed_disabled, help="데모 사용자(+존재시 skip) + 고정 5 peers + 추가 25 랜덤"):
             users_local = persistence.load_list('users')
             # Ensure canonical demo_user or accept manually created one named 데모사용자
             has_canonical = any(
@@ -172,7 +174,7 @@ def render_demo_sidebar(context: str = ""):
             users_local = persistence.load_list('users')
             demo_cluster = [u for u in users_local if u.get('id') == 'demo_user' or str(
                 u.get('name', '')).startswith('demo_peer') or u.get('name') == '데모사용자']
-            st.session_state.demo_seed_done = len(demo_cluster) >= 5
+            st.session_state.demo_seed_done = len(demo_cluster) >= 6
             st.sidebar.success(f"Seed 완료: peers 확보 + 추가 {added}명")
             st.rerun()
     with col_match:
@@ -314,16 +316,16 @@ def render_demo_sidebar_floating(context: str = ""):
                       for u in users if u.get('id') == 'demo_user'), None)
     region = raw_region if isinstance(raw_region, str) and raw_region else '서울'
     if 'demo_seed_done' not in st.session_state:
-        st.session_state.demo_seed_done = demo_count >= 5
-    seed_disabled = st.session_state.demo_seed_done or demo_count >= 5
+        st.session_state.demo_seed_done = demo_count >= 6
+    seed_disabled = st.session_state.demo_seed_done or demo_count >= 6
     box = st.sidebar.container()
     with box:
         st.markdown('<div class="demo-floating-box">', unsafe_allow_html=True)
         st.markdown(
             f"<h4>🧪 Demo Cohort</h4><div class='small'>Context: {context or 'global'}</div>", unsafe_allow_html=True)
-        st.progress(min(demo_count, 5)/5.0)
-        st.caption(f"demo peers: {demo_count}/5")
-        if st.button("Seed demo peers", key="float_seed_demo", disabled=seed_disabled, help="Create demo_peer1..4"):
+        st.progress(min(demo_count, 6)/6.0)
+        st.caption(f"demo peers: {demo_count}/6")
+        if st.button("Seed demo peers", key="float_seed_demo", disabled=seed_disabled, help="Create demo_peer1..5"):
             created = _seed_demo_peers(region)
             if created:
                 st.session_state.demo_seed_done = True

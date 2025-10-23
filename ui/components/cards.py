@@ -109,18 +109,29 @@ def report_card(report: Dict[str, Any]):
     Expects keys: id, date, status, points_awarded?, club_id, formatted_report, photo_filename?, verification_metrics?
     """
     inject_base_css()
-    rid = report.get('id')
+    rid = report.get('id')  # retained for possible future deep-link actions
     status_html = status_badge(report.get('status', 'Pending'))
     points = report.get('points_awarded', 0)
     date = report.get('date', '?')
     club_id = report.get('club_id', '?')
+    # Resolve canonical club name (fallback to club_id)
+    club_name = club_id
+    try:
+        from services import persistence as _p
+        clubs_all = _p.load_list('clubs')
+        club_rec = next((c for c in clubs_all if c.get('id') == club_id), None)
+        if club_rec:
+            club_name = club_rec.get('name') or club_name
+    except Exception:
+        pass
     photo = report.get('photo_filename') or '—'
     summary = report.get('formatted_report', '')
     metrics = report.get('verification_metrics') or {}
     with st.container(border=True):
         top_cols = st.columns([4, 2, 2])
         with top_cols[0]:
-            st.markdown(f"**{rid}**  |  {date}  |  클럽: `{club_id}`")
+            # Display concise header: Date | Club Name
+            st.markdown(f"**{date}**  |  {club_name}")
         with top_cols[1]:
             st.markdown(status_html, unsafe_allow_html=True)
         with top_cols[2]:

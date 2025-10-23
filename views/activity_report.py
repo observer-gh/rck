@@ -46,6 +46,8 @@ def view():
         if not choice:
             st.stop()
         club_id = str(choice).split()[0]
+        # Persist selected club id in session for later use outside this block
+        st.session_state.selected_club_id = club_id
         # Prefill support via session state keys
         import datetime as _dt
         if 'prefill_date' not in st.session_state:
@@ -58,25 +60,60 @@ def view():
         st.session_state.setdefault(
             'report_participants', st.session_state.prefill_participants)
 
+    # File uploader outside form for immediate preview
+    photo = st.file_uploader("사진 업로드 (시뮬레이션)", key="report_photo")
+    if photo is not None:
+        try:
+            from PIL import Image
+            image = Image.open(photo)
+            # Target half of typical content width (~600px if full ~1200px)
+            target_width = 600
+            w, h = image.size
+            if w > target_width:
+                ratio = target_width / float(w)
+                image = image.resize((int(w * ratio), int(h * ratio)))
+            col_prev, col_spacer = st.columns([1, 1])
+            with col_prev:
+                st.image(image, caption=f"업로드된 사진: {photo.name}")
+        except Exception as _e:
+            st.warning(f"이미지 미리보기 실패: {_e}")
+
     # Keep form values after submission so auto-fill results remain visible
     with st.form("activity_report_form", clear_on_submit=False):
         date = st.date_input("활동 날짜", key="report_date",
                              value=st.session_state.prefill_date)
-        photo = st.file_uploader("사진 업로드 (시뮬레이션)", key="report_photo")
         # Auto-fill trigger (button always visible now)
         autofill_triggered = False
         if st.form_submit_button("사진 기반 자동 채우기", type="secondary"):
             import time
             with st.spinner("사진 분석 중…"):
-                # Simulated incremental progress over ~3s
+                # Simulated incremental progress over ~2.3s (faster UX but still perceptible)
                 prog = st.progress(0)
-                steps = 30  # finer increments
+                total_seconds = 2.3
+                steps = 23  # 0.1s per step
                 for i in range(steps):
-                    time.sleep(3/steps)
+                    time.sleep(total_seconds/steps)
                     prog.progress(int((i+1)/steps*100))
-            # Hard-coded demo values (independent of photo)
-            st.session_state.prefill_report_text = "영화 감상 후 토론 진행. 공통 관심사 확장 및 다음 활동(실외 러닝) 아이디어 도출."
-            st.session_state.prefill_participants = 5
+            # Hard-coded demo values (updated narrative reflecting team speed/agility drill)
+            st.session_state.prefill_report_text = (
+                "야외 잔디에서 스피드·코디네이션 드릴 진행. 동시 스타트 스프린트와 페이스 맞추기 반복으로 집중도 상승, "
+                "구성원 간 콜과 격려 자연스럽게 형성. 마무리 후 다음 모임에 미니게임+회복 스트레칭 블록 추가 계획.")
+            # Dynamic participant count based on current club membership (fallback 6 for demo baseline)
+            club_id = st.session_state.get('selected_club_id')
+            member_count = 0
+            if club_id:
+                try:
+                    clubs_all = persistence.load_list('clubs')
+                    club_obj = next(
+                        (c for c in clubs_all if c.get('id') == club_id), None)
+                    if club_obj:
+                        member_count = len(
+                            club_obj.get('member_ids', []) or [])
+                except Exception:
+                    member_count = 0
+            if member_count <= 0:
+                member_count = 6  # demo fallback size
+            st.session_state.prefill_participants = member_count
             st.session_state.prefill_date = date  # keep chosen date
             # Synchronize widget-bound keys so values appear immediately after rerun
             st.session_state.report_raw_text = st.session_state.prefill_report_text

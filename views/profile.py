@@ -29,6 +29,8 @@ def view():
     st.subheader("프로필 수정")
     with st.form(f"edit_self_{current_user_id}"):
         new_name = st.text_input("이름", value=me.get('name', ''))
+        new_nickname = st.text_input("닉네임", value=me.get(
+            'nickname', ''), help="짧은 표시명. 비우면 이름 기반 자동 생성.")
         new_employee_number = st.text_input(
             "사번", value=me.get('employee_number', ''))
         raw_region = me.get('region')
@@ -74,11 +76,13 @@ def view():
         if submitted:
             safe_name = new_name or ""
             safe_region = new_region or ""
-            if is_duplicate_user(safe_name, safe_region, users, exclude_id=current_user_id):
+            # Allow edits to the demo name without triggering duplicate guard
+            if safe_name != '데모사용자' and is_duplicate_user(safe_name, safe_region, users, exclude_id=current_user_id):
                 st.error("중복 사용자 (이름+지역) 존재. 변경 취소.")
             else:
                 me.update({
                     'name': safe_name,
+                    'nickname': (new_nickname or '').strip(),
                     'employee_number': new_employee_number,
                     'region': safe_region,
                     'rank': new_rank,

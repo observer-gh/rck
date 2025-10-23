@@ -90,9 +90,26 @@ def main():
 
     # Display a prominent banner at the top of the page if in admin mode
     if is_admin:
-        st.info("관리자 모드가 활성화되었습니다. 모든 관리자 전용 메뉴를 볼 수 있습니다.", icon="👑")
-        visible_pages = PAGE_REGISTRY
+        st.info("관리자 모드: 대시보드가 열렸습니다.", icon="👑")
+        # Remember last non-admin selection (once) to restore after exit
+        if 'last_non_admin_page' not in st.session_state:
+            # If a radio selection exists and it's non-admin, store it
+            current_label = st.session_state.get('navigation_radio')
+            if current_label:
+                # Find key by label
+                for _k, _v in PAGE_REGISTRY.items():
+                    if _v['label'] == current_label and not _v.get('admin'):
+                        st.session_state.last_non_admin_page = current_label
+                        break
+        # In admin mode we only show non-admin pages in radio (dashboard auto renders)
+        visible_pages = {k: v for k,
+                         v in PAGE_REGISTRY.items() if not v['admin']}
     else:
+        # Leaving admin mode: restore previous non-admin page label if stored
+        if 'last_non_admin_page' in st.session_state:
+            st.session_state.navigation_radio = st.session_state.last_non_admin_page
+            st.query_params['page'] = st.session_state.last_non_admin_page
+            del st.session_state.last_non_admin_page
         visible_pages = {k: v for k,
                          v in PAGE_REGISTRY.items() if not v["admin"]}
 
@@ -128,8 +145,12 @@ def main():
 
     # --- Page Rendering ---
     # Retrieve the render function from the registry and call it
-    page_to_render = visible_pages[selected_page_key]["render_func"]
-    page_to_render()
+    # Render admin dashboard automatically if admin mode is active
+    if is_admin:
+        admin_dashboard.view()
+    else:
+        page_to_render = visible_pages[selected_page_key]["render_func"]
+        page_to_render()
 
     # --- Footer ---
     st.sidebar.markdown("---")

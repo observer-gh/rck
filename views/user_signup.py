@@ -88,6 +88,14 @@ def view():
         with st.form("form_basic", clear_on_submit=False):
             st.subheader("1단계: 기본 정보")
             name = st.text_input("이름", key="new_name", value=default_name)
+            # Nickname: show previously typed, existing demo base nickname, or fallback 'nemo'
+            existing_nick = st.session_state.get('new_nickname')
+            base_nick = (demo_base.get('nickname')
+                         if demo_base else None) or 'nemo'
+            nickname_val = existing_nick if existing_nick not in (
+                None, '') else base_nick
+            nickname = st.text_input(
+                "닉네임", key="new_nickname", value=nickname_val, help="프로필에 표시될 짧은 핸들. 미입력 시 자동 생성.")
             employee_number = st.text_input(
                 "사번", key="new_employee_number", value=default_emp, placeholder="8자리 숫자 (예: 10150000)")
             region = st.selectbox(
@@ -113,6 +121,7 @@ def view():
                     else:
                         st.session_state.new_user_draft = {
                             'name': name,
+                            'nickname': nickname.strip() if nickname else '',
                             'employee_number': employee_number,
                             'region': region,
                             'rank': rank,
@@ -149,7 +158,7 @@ def view():
                 uid = create_id_with_prefix('u')
                 d = draft
                 user = User(id=uid, name=d['name'], employee_number=d['employee_number'], region=d['region'], rank=d['rank'],
-                            interests=d['interests'], personality_trait=personality_trait, survey_answers=answers)
+                            interests=d['interests'], personality_trait=personality_trait, survey_answers=answers, nickname=d.get('nickname'))
                 users.append(asdict(user))
                 save_users(users)
                 st.session_state.current_user_id = uid

@@ -4,6 +4,8 @@ from utils.ids import create_id_with_prefix
 import datetime as _dt
 from collections import defaultdict
 import random
+# for existing club lookup to avoid duplicate demo fallback
+from services import persistence
 
 
 from collections import Counter
@@ -49,7 +51,7 @@ def get_common_interests(users: List[User]) -> set[str]:
     return common
 
 
-def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[str] = None) -> List[Club]:
+def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[str] = None, seed: Optional[int] = None) -> List[Club]:
     """
     Computes matches based on hard constraints and greedy grouping.
     1. Buckets users by (region, personality_trait).
@@ -61,6 +63,12 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
         return []
     assert len(users) >= 5, "Matching requires at least 5 users"
 
+    # Deterministic randomness for demo: seed precedence -> explicit seed param -> run_id hash
+    if seed is not None:
+        random.seed(seed)
+    elif run_id is not None:
+        random.seed(run_id)
+
     user_map = {u.id: u for u in users}
     buckets = defaultdict(list)
     for user in users:
@@ -68,6 +76,7 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
 
     all_clubs = []
 
+    club_seq = 0  # for canonical naming
     for (region, personality), bucket_users in buckets.items():
         if len(bucket_users) < target_size:
             continue
@@ -126,8 +135,11 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
                 if get_common_interests(final_group_users):
                     leader_id = group_ids[0]
                     primary_interest = get_primary_interest(final_group_users)
-
-                    club_name = f"{region} {primary_interest} {personality} 팀"
+                    # Canonical deterministic club name sequence (A, B, C ...)
+                    club_label = chr(ord('A') + (club_seq % 26))
+                    club_seq += 1
+                    # keep simple / demo friendly
+                    club_name = f"매칭 클럽 {club_label}"
 
                     new_club = Club(
                         id=create_id_with_prefix('club'),
@@ -170,8 +182,14 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
         club.match_score_breakdown = {}  # Clear obsolete scores
 
     # Fallback: ensure demo_user is in at least one club when possible.
-    # If no existing club contains demo_user and enough compatible users exist, build one.
-    if not any('demo_user' in c.member_ids for c in all_clubs):
+    # Also check persisted clubs to avoid creating a duplicate demo club across runs.
+    existing_clubs = []
+    try:
+        existing_clubs = persistence.load_list('clubs')
+    except Exception:
+        existing_clubs = []
+    if not any('demo_user' in c.member_ids for c in all_clubs) and not any(
+            'demo_user' in (ec.get('member_ids') or []) for ec in existing_clubs):
         demo_user = next((u for u in users if u.id == 'demo_user'), None)
         if demo_user:
             def _pick_candidates(predicate):
@@ -212,7 +230,7 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
                 if common_interests:  # safety check
                     leader_id = demo_user.id
                     primary_interest = get_primary_interest(group_users)
-                    club_name = f"{demo_user.region} {primary_interest} 데모 팀"
+                    club_name = "데모 매칭 클럽"
                     fallback_club = Club(
                         id=create_id_with_prefix('club'),
                         name=club_name,

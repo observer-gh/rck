@@ -43,22 +43,22 @@ def view():
         fixed_members = []
         for c in clubs_existing:
             mids = c.get('member_ids', [])
-            if 'demo_user' in mids and len([m for m in mids if str(m).startswith('demo_peer')]) >= 4:
+            if 'demo_user' in mids and len([m for m in mids if str(m).startswith('demo_peer')]) >= 5:
                 fixed_members = mids
                 break
         if not fixed_members:
             demo_user_rec = next((u for u in users_all if u.get(
                 'id') == 'demo_user' or u.get('name') == '데모사용자'), None)
             peer_ids = [u.get('id') for u in users_all if str(
-                u.get('name', '')).startswith('demo_peer')][:4]
-            if demo_user_rec and len(peer_ids) == 4:
+                u.get('name', '')).startswith('demo_peer')][:5]
+            if demo_user_rec and len(peer_ids) == 5:
                 fixed_members = [demo_user_rec['id']] + peer_ids
                 fixed_club = Club(
                     id=create_id_with_prefix('club'),
-                    name=f"{demo_user_rec.get('region', '서울')} 영화보기 · 데모 팀",
+                    name=f"{demo_user_rec.get('region', '서울')} 축구 · 데모 팀",
                     member_ids=fixed_members,
                     leader_id=demo_user_rec['id'],
-                    primary_interest='영화보기',
+                    primary_interest='축구',
                     status='Active'
                 )
                 fc_dict = _asdict(fixed_club)
