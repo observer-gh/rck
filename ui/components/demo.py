@@ -176,53 +176,7 @@ def render_demo_sidebar(context: str = ""):
             st.sidebar.success(f"Seed 완료: peers 확보 + 추가 {added}명")
             st.rerun()
     with col_match:
-        from domain.models import user_from_dict
-        if st.button("Match Clubs", key="btn_match_clubs", disabled=len(users) < 5, help="고정 데모 클럽 + 나머지 매칭"):
-            users_all = persistence.load_list('users')
-            # Ensure fixed club exists; _seed_demo_peers already does this, but re-run to be safe
-            _seed_demo_peers(region)
-            users_all = persistence.load_list('users')
-            clubs_existing = persistence.load_list('clubs')
-            fixed_member_ids = []
-            # Find existing fixed club (leader demo_user and contains 4 peers)
-            for c in clubs_existing:
-                if c.get('leader_id') in ['demo_user'] or any(str(n).startswith('demo_peer') for n in c.get('member_ids', [])):
-                    peers = [m for m in c.get('member_ids', []) if str(
-                        m).startswith('demo_peer')]
-                    if 'demo_user' in c.get('member_ids', []) and len(peers) >= 4:
-                        fixed_member_ids = c.get('member_ids', [])
-                        break
-            if not fixed_member_ids:
-                # Attempt to construct manually if missing
-                demo_user_rec = next(
-                    (u for u in users_all if u.get('id') == 'demo_user'), None)
-                peer_ids = [u.get('id') for u in users_all if str(
-                    u.get('name', '')).startswith('demo_peer')][:4]
-                if demo_user_rec and len(peer_ids) == 4:
-                    fixed_member_ids = [demo_user_rec['id']] + peer_ids
-            # Prepare users excluding fixed members for algorithmic matching
-            algo_users = [user_from_dict(u) for u in users_all if u.get(
-                'id') not in fixed_member_ids]
-            run_id = create_id_with_prefix('run')
-            clubs_new = matching.compute_matches(
-                algo_users, target_size=5, run_id=run_id)
-            clubs_dicts = []
-            for c in clubs_new:
-                cd = asdict(c)
-                cd['status'] = cd.get('status') or 'Active'
-                clubs_dicts.append(cd)
-            existing_clubs = persistence.load_list('clubs')
-            existing_clubs.extend(clubs_dicts)
-            persistence.replace_all('clubs', existing_clubs)
-            runs = persistence.load_list('match_runs')
-            run_meta = MatchRun(id=run_id, created_at=_dt.datetime.now(_dt.timezone.utc).isoformat().replace(
-                '+00:00', 'Z'), target_size=5, user_count=len(users_all), club_count=len(clubs_dicts))
-            runs.append(asdict(run_meta))
-            persistence.replace_all('match_runs', runs)
-            st.sidebar.success(
-                f"추가 매칭 완료: {len(clubs_dicts)} 클럽 (Run {run_id})")
-            st.session_state.nav_target = "👥 내 클럽"
-            st.rerun()
+        st.caption("매칭 기능은 '내 클럽' 페이지로 이동되었습니다.")
     with col_reset:
         if st.button("Reset", key="btn_demo_wipe_simple"):
             from services import persistence as _p
