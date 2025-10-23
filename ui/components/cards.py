@@ -49,7 +49,8 @@ def club_card(club: Dict[str, Any], user_map: Dict[str, Any], points: int, curre
     leader_name = _handle(user_map.get(str(leader_id), {}), current_user_id)
 
     with st.container(border=True):
-        st.subheader(f"Club: {leader_name}'s Team")
+        display_name = club.get('name') or f"{leader_name} 팀"
+        st.subheader(display_name)
 
         c1, c2, c3 = st.columns(3)
         c1.metric("Status", club.get('status', 'N/A'))
@@ -75,12 +76,21 @@ def club_card(club: Dict[str, Any], user_map: Dict[str, Any], points: int, curre
             expl = build_ai_match_explanation(club, user_map)
             st.markdown("### AI 매칭 설명")
             # Pastel blue container styling
+            # Convert bullets to separate lines; add Shannon tooltip marks
+            shannon_help = "다양성 지수(Shannon): 값↑ → 분포가 한쪽에 치우치지 않고 고르게 퍼져 있음"
+            bullet_lines = []
+            for b in expl['bullets']:
+                # inject tooltip span for lines containing 'Shannon'
+                if 'Shannon' in b:
+                    b = b.replace(
+                        'Shannon', f'<span title="{shannon_help}">Shannon</span>')
+                bullet_lines.append(f"<div style='margin:2px 0'>{b}</div>")
             st.markdown(
                 f"""
                 <div style="background:#eef6ff;border:1px solid #d2e6fb;padding:14px 18px;border-radius:12px;font-size:14px;line-height:1.55;">
                     <p style="margin:0 0 8px;font-weight:600;">{expl['summary']}</p>
-                    <p style="margin:0 0 6px;white-space:normal;">{' '.join(expl['bullets'])}</p>
-                    <p style="margin:8px 0 0;">{expl.get('narrative', '')}</p>
+                    {''.join(bullet_lines)}
+                    <p style="margin:10px 0 0;">{expl.get('narrative', '')}</p>
                 </div>
                 """,
                 unsafe_allow_html=True

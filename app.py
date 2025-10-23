@@ -105,7 +105,8 @@ def main():
         target_label = st.session_state.nav_target
         if target_label in [v['label'] for v in PAGE_REGISTRY.values()]:
             st.session_state.navigation_radio = target_label
-            st.experimental_set_query_params(page=target_label)
+            # Use unified production API only
+            st.query_params['page'] = target_label
         del st.session_state.nav_target
     elif 'page' in qs and 'navigation_radio' not in st.session_state:
         raw_param = qs.get('page')

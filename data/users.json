@@ -2,6 +2,7 @@
   {
     "id": "demo_user",
     "name": "데모사용자",
+    "nickname": "nemo",
     "employee_number": "D0000001",
     "region": "서울",
     "rank": "사원",
@@ -21,7 +22,30 @@
     ]
   },
   {
-    "id": "u_1761196160033_oxs8",
+    "id": "u_1761202340014_4qrp",
+    "name": "데모사용자",
+    "employee_number": "10150000",
+    "region": "서울",
+    "rank": "사원",
+    "interests": [
+      "축구",
+      "영화보기"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:20Z"
+  },
+  {
+    "id": "u_1761202346360_3btt",
     "name": "demo_peer1",
     "employee_number": "DEMO-P1",
     "region": "서울",
@@ -42,10 +66,10 @@
       2
     ],
     "nickname": "alpha",
-    "created_at": "2025-10-23T05:09:20Z"
+    "created_at": "2025-10-23T06:52:26Z"
   },
   {
-    "id": "u_1761196160033_7hva",
+    "id": "u_1761202346360_te8y",
     "name": "demo_peer2",
     "employee_number": "DEMO-P2",
     "region": "서울",
@@ -66,10 +90,10 @@
       2
     ],
     "nickname": "bravo",
-    "created_at": "2025-10-23T05:09:20Z"
+    "created_at": "2025-10-23T06:52:26Z"
   },
   {
-    "id": "u_1761196160033_s2wy",
+    "id": "u_1761202346360_u9ib",
     "name": "demo_peer3",
     "employee_number": "DEMO-P3",
     "region": "서울",
@@ -90,10 +114,10 @@
       2
     ],
     "nickname": "charlie",
-    "created_at": "2025-10-23T05:09:20Z"
+    "created_at": "2025-10-23T06:52:26Z"
   },
   {
-    "id": "u_1761196160033_7bi9",
+    "id": "u_1761202346360_88lq",
     "name": "demo_peer4",
     "employee_number": "DEMO-P4",
     "region": "서울",
@@ -114,588 +138,516 @@
       2
     ],
     "nickname": "delta",
-    "created_at": "2025-10-23T05:09:20Z"
+    "created_at": "2025-10-23T06:52:26Z"
   },
   {
-    "id": "u_1761196160042_wsyk",
+    "id": "u_1761202346364_umxh",
     "name": "auto25_1",
     "employee_number": "AUTO25-01",
-    "region": "울산",
-    "rank": "부장",
-    "interests": [
-      "헬스",
-      "사진",
-      "독서"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      2,
-      2,
-      1,
-      2,
-      2,
-      3,
-      2
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_ez11",
-    "name": "auto25_2",
-    "employee_number": "AUTO25-02",
-    "region": "경남",
-    "rank": "부장",
-    "interests": [
-      "사진",
-      "축구",
-      "요리"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      3,
-      1,
-      2,
-      1,
-      2,
-      3,
-      2
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_3j9w",
-    "name": "auto25_3",
-    "employee_number": "AUTO25-03",
-    "region": "제주",
+    "region": "충북",
     "rank": "사원",
     "interests": [
       "등산",
-      "영화보기"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      1,
-      3,
-      3,
-      1,
-      3,
-      1,
-      2
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_aak1",
-    "name": "auto25_4",
-    "employee_number": "AUTO25-04",
-    "region": "경기",
-    "rank": "과장",
-    "interests": [
-      "축구",
-      "등산",
-      "독서",
-      "보드게임"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      3,
-      1,
-      1,
-      3,
-      1,
-      1,
-      3
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_44t7",
-    "name": "auto25_5",
-    "employee_number": "AUTO25-05",
-    "region": "광주",
-    "rank": "대리",
-    "interests": [
-      "보드게임",
-      "사진",
-      "헬스",
-      "요리"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      3,
-      2,
-      3,
-      2,
-      1,
-      2,
-      3
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_fgg6",
-    "name": "auto25_6",
-    "employee_number": "AUTO25-06",
-    "region": "경기",
-    "rank": "대리",
-    "interests": [
-      "보드게임",
-      "사진",
-      "헬스"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      3,
-      2,
-      2,
-      1,
-      1,
-      3,
-      3
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_qsle",
-    "name": "auto25_7",
-    "employee_number": "AUTO25-07",
-    "region": "울산",
-    "rank": "부장",
-    "interests": [
-      "독서",
-      "축구",
-      "러닝",
-      "보드게임"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      3,
-      2,
-      1,
-      3,
-      2,
-      1,
-      1
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_c64q",
-    "name": "auto25_8",
-    "employee_number": "AUTO25-08",
-    "region": "울산",
-    "rank": "사원",
-    "interests": [
-      "등산",
-      "사진",
-      "헬스",
-      "독서"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      3,
-      2,
-      2,
-      2,
-      1,
-      3,
-      2
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_wrk4",
-    "name": "auto25_9",
-    "employee_number": "AUTO25-09",
-    "region": "대구",
-    "rank": "부장",
-    "interests": [
-      "러닝",
-      "영화보기"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      3,
-      1,
-      3,
-      2,
-      1,
-      2,
-      1
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_f9m5",
-    "name": "auto25_10",
-    "employee_number": "AUTO25-10",
-    "region": "세종",
-    "rank": "사원",
-    "interests": [
-      "축구",
-      "독서"
-    ],
-    "personality_trait": "내향",
-    "survey_answers": [
-      2,
-      2,
-      2,
-      1,
-      1,
-      1,
-      1
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_v25o",
-    "name": "auto25_11",
-    "employee_number": "AUTO25-11",
-    "region": "대구",
-    "rank": "과장",
-    "interests": [
-      "보드게임",
-      "영화보기"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      3,
-      2,
-      2,
-      2,
-      2,
-      1,
-      1
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_s7c4",
-    "name": "auto25_12",
-    "employee_number": "AUTO25-12",
-    "region": "전남",
-    "rank": "과장",
-    "interests": [
-      "헬스",
-      "요리",
-      "사진"
-    ],
-    "personality_trait": "외향",
-    "survey_answers": [
-      3,
-      3,
-      3,
-      2,
-      1,
-      3,
-      3
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_hmp9",
-    "name": "auto25_13",
-    "employee_number": "AUTO25-13",
-    "region": "인천",
-    "rank": "과장",
-    "interests": [
-      "요리",
-      "독서"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      3,
-      2,
-      2,
-      1,
-      3,
-      3,
-      2
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_vi1m",
-    "name": "auto25_14",
-    "employee_number": "AUTO25-14",
-    "region": "대전",
-    "rank": "대리",
-    "interests": [
-      "독서",
-      "요리"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      1,
-      2,
-      1,
-      2,
-      2,
-      3,
-      3
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_l8cw",
-    "name": "auto25_15",
-    "employee_number": "AUTO25-15",
-    "region": "부산",
-    "rank": "대리",
-    "interests": [
-      "헬스",
-      "축구",
-      "사진",
-      "독서"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      3,
-      3,
-      2,
-      2,
-      3,
-      1,
-      2
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_ef5g",
-    "name": "auto25_16",
-    "employee_number": "AUTO25-16",
-    "region": "경북",
-    "rank": "과장",
-    "interests": [
-      "독서",
-      "헬스",
-      "러닝",
-      "축구"
-    ],
-    "personality_trait": "내향",
-    "survey_answers": [
-      2,
-      1,
-      3,
-      1,
-      1,
-      2,
-      1
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_xtju",
-    "name": "auto25_17",
-    "employee_number": "AUTO25-17",
-    "region": "경남",
-    "rank": "사원",
-    "interests": [
-      "독서",
-      "러닝",
-      "등산"
-    ],
-    "personality_trait": "내향",
-    "survey_answers": [
-      1,
-      2,
-      2,
-      1,
-      3,
-      1,
-      1
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_no64",
-    "name": "auto25_18",
-    "employee_number": "AUTO25-18",
-    "region": "광주",
-    "rank": "대리",
-    "interests": [
-      "등산",
-      "독서",
       "영화보기",
       "러닝"
     ],
     "personality_trait": "중간",
     "survey_answers": [
       3,
+      3,
+      1,
       2,
-      1,
       3,
-      1,
       3,
-      2
+      1
     ],
     "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
+    "created_at": "2025-10-23T06:52:26Z"
   },
   {
-    "id": "u_1761196160042_btlh",
-    "name": "auto25_19",
-    "employee_number": "AUTO25-19",
-    "region": "전남",
-    "rank": "과장",
+    "id": "u_1761202346364_6vzs",
+    "name": "auto25_2",
+    "employee_number": "AUTO25-02",
+    "region": "강원",
+    "rank": "대리",
     "interests": [
-      "등산",
-      "러닝",
       "사진",
-      "요리"
+      "보드게임"
     ],
     "personality_trait": "중간",
     "survey_answers": [
       3,
       3,
-      1,
       2,
-      1,
+      2,
+      2,
       3,
-      3
+      1
     ],
     "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
+    "created_at": "2025-10-23T06:52:26Z"
   },
   {
-    "id": "u_1761196160042_1wgh",
-    "name": "auto25_20",
-    "employee_number": "AUTO25-20",
-    "region": "부산",
-    "rank": "과장",
-    "interests": [
-      "등산",
-      "독서"
-    ],
-    "personality_trait": "외향",
-    "survey_answers": [
-      2,
-      2,
-      2,
-      2,
-      3,
-      3,
-      3
-    ],
-    "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
-  },
-  {
-    "id": "u_1761196160042_9j4r",
-    "name": "auto25_21",
-    "employee_number": "AUTO25-21",
-    "region": "대전",
+    "id": "u_1761202346364_l3h6",
+    "name": "auto25_3",
+    "employee_number": "AUTO25-03",
+    "region": "인천",
     "rank": "부장",
     "interests": [
-      "러닝",
+      "사진",
+      "축구",
+      "요리"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      1,
+      3,
+      2,
+      1,
+      2,
+      1,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_bnyt",
+    "name": "auto25_4",
+    "employee_number": "AUTO25-04",
+    "region": "울산",
+    "rank": "차장",
+    "interests": [
+      "보드게임",
       "요리",
-      "축구"
+      "헬스"
     ],
     "personality_trait": "내향",
     "survey_answers": [
       1,
+      1,
+      1,
+      3,
+      2,
+      1,
+      1
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_gpox",
+    "name": "auto25_5",
+    "employee_number": "AUTO25-05",
+    "region": "경남",
+    "rank": "부장",
+    "interests": [
+      "사진",
+      "독서"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
       3,
       1,
       1,
+      3,
+      3,
+      1,
+      2
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_qobu",
+    "name": "auto25_6",
+    "employee_number": "AUTO25-06",
+    "region": "서울",
+    "rank": "대리",
+    "interests": [
+      "사진",
+      "러닝",
+      "요리",
+      "축구"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      3,
+      1,
+      2,
+      3,
+      1,
+      2,
+      1
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_slzj",
+    "name": "auto25_7",
+    "employee_number": "AUTO25-07",
+    "region": "전남",
+    "rank": "부장",
+    "interests": [
+      "러닝",
+      "헬스",
+      "축구",
+      "영화보기"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      1,
+      2,
+      3,
+      3,
+      3,
+      2,
+      2
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_eka1",
+    "name": "auto25_8",
+    "employee_number": "AUTO25-08",
+    "region": "경남",
+    "rank": "대리",
+    "interests": [
+      "영화보기",
+      "사진",
+      "축구"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      1,
+      3,
+      3,
+      3,
+      2,
+      2,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_za1s",
+    "name": "auto25_9",
+    "employee_number": "AUTO25-09",
+    "region": "울산",
+    "rank": "사원",
+    "interests": [
+      "등산",
+      "사진"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      2,
+      2,
+      1,
+      3,
+      2,
+      1
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_bzwk",
+    "name": "auto25_10",
+    "employee_number": "AUTO25-10",
+    "region": "대전",
+    "rank": "과장",
+    "interests": [
+      "사진",
+      "보드게임"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      1,
+      2,
+      2,
+      3,
+      2,
+      2,
+      1
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_nj00",
+    "name": "auto25_11",
+    "employee_number": "AUTO25-11",
+    "region": "제주",
+    "rank": "대리",
+    "interests": [
+      "등산",
+      "사진",
+      "독서"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      2,
+      1,
+      3,
+      1,
+      1,
+      1,
+      1
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_otyn",
+    "name": "auto25_12",
+    "employee_number": "AUTO25-12",
+    "region": "전남",
+    "rank": "대리",
+    "interests": [
+      "러닝",
+      "영화보기",
+      "등산",
+      "보드게임"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      3,
+      2,
+      2,
+      3,
+      1,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_x1j0",
+    "name": "auto25_13",
+    "employee_number": "AUTO25-13",
+    "region": "제주",
+    "rank": "과장",
+    "interests": [
+      "사진",
+      "러닝",
+      "축구"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      1,
+      1,
+      3,
+      3,
+      3,
+      3,
+      1
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_jkrb",
+    "name": "auto25_14",
+    "employee_number": "AUTO25-14",
+    "region": "대전",
+    "rank": "부장",
+    "interests": [
+      "헬스",
+      "사진",
+      "영화보기",
+      "요리"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      1,
+      3,
+      3,
+      2,
       1,
       3,
       1
     ],
     "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
+    "created_at": "2025-10-23T06:52:26Z"
   },
   {
-    "id": "u_1761196160042_33n1",
-    "name": "auto25_22",
-    "employee_number": "AUTO25-22",
-    "region": "대구",
-    "rank": "차장",
+    "id": "u_1761202346364_s4o1",
+    "name": "auto25_15",
+    "employee_number": "AUTO25-15",
+    "region": "서울",
+    "rank": "대리",
     "interests": [
-      "축구",
-      "러닝"
+      "요리",
+      "보드게임"
     ],
     "personality_trait": "중간",
     "survey_answers": [
+      1,
+      1,
+      2,
       3,
       3,
       1,
-      2,
-      1,
-      2,
-      3
+      2
     ],
     "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
+    "created_at": "2025-10-23T06:52:26Z"
   },
   {
-    "id": "u_1761196160042_9xdj",
-    "name": "auto25_23",
-    "employee_number": "AUTO25-23",
-    "region": "경북",
-    "rank": "차장",
+    "id": "u_1761202346364_l8q5",
+    "name": "auto25_16",
+    "employee_number": "AUTO25-16",
+    "region": "충남",
+    "rank": "과장",
     "interests": [
-      "보드게임",
-      "등산",
-      "축구"
+      "러닝",
+      "요리"
     ],
     "personality_trait": "중간",
     "survey_answers": [
+      2,
       3,
-      2,
+      3,
       1,
-      2,
       1,
       1,
       2
     ],
     "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
+    "created_at": "2025-10-23T06:52:26Z"
   },
   {
-    "id": "u_1761196160042_cytv",
-    "name": "auto25_24",
-    "employee_number": "AUTO25-24",
+    "id": "u_1761202346364_k7vx",
+    "name": "auto25_17",
+    "employee_number": "AUTO25-17",
     "region": "울산",
-    "rank": "과장",
+    "rank": "대리",
     "interests": [
-      "축구",
-      "러닝"
+      "요리",
+      "러닝",
+      "헬스"
     ],
     "personality_trait": "중간",
     "survey_answers": [
       2,
       1,
-      2,
+      3,
       1,
       2,
+      1,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_bgwf",
+    "name": "auto25_18",
+    "employee_number": "AUTO25-18",
+    "region": "울산",
+    "rank": "과장",
+    "interests": [
+      "러닝",
+      "영화보기",
+      "등산",
+      "축구"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      1,
+      3,
+      3,
+      1,
+      2,
+      3,
+      1
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_5d8o",
+    "name": "auto25_19",
+    "employee_number": "AUTO25-19",
+    "region": "서울",
+    "rank": "부장",
+    "interests": [
+      "헬스",
+      "축구",
+      "영화보기"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      2,
+      3,
+      1,
+      1,
+      1
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_eerx",
+    "name": "auto25_20",
+    "employee_number": "AUTO25-20",
+    "region": "인천",
+    "rank": "과장",
+    "interests": [
+      "보드게임",
+      "러닝",
+      "헬스"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      1,
+      3,
+      1,
+      2,
+      3,
+      3,
+      2
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_cueu",
+    "name": "auto25_21",
+    "employee_number": "AUTO25-21",
+    "region": "제주",
+    "rank": "차장",
+    "interests": [
+      "축구",
+      "러닝",
+      "요리"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      3,
+      1,
+      1,
+      2,
+      1,
       2,
       3
     ],
     "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
+    "created_at": "2025-10-23T06:52:26Z"
   },
   {
-    "id": "u_1761196160042_yb7x",
-    "name": "auto25_25",
-    "employee_number": "AUTO25-25",
-    "region": "경북",
+    "id": "u_1761202346364_5fub",
+    "name": "auto25_22",
+    "employee_number": "AUTO25-22",
+    "region": "대전",
     "rank": "사원",
     "interests": [
       "사진",
@@ -703,15 +655,88 @@
     ],
     "personality_trait": "중간",
     "survey_answers": [
+      2,
+      1,
+      1,
+      1,
+      3,
+      3,
+      3
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_lu74",
+    "name": "auto25_23",
+    "employee_number": "AUTO25-23",
+    "region": "서울",
+    "rank": "차장",
+    "interests": [
+      "보드게임",
+      "헬스",
+      "등산"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      1,
+      3,
+      3,
+      3,
+      3,
+      2,
+      1
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_xaln",
+    "name": "auto25_24",
+    "employee_number": "AUTO25-24",
+    "region": "충북",
+    "rank": "사원",
+    "interests": [
+      "헬스",
+      "등산",
+      "보드게임",
+      "사진"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      1,
+      1,
       1,
       2,
       2,
       3,
-      3,
-      3,
       2
     ],
     "nickname": null,
-    "created_at": "2025-10-23T05:09:20Z"
+    "created_at": "2025-10-23T06:52:26Z"
+  },
+  {
+    "id": "u_1761202346364_3xfd",
+    "name": "auto25_25",
+    "employee_number": "AUTO25-25",
+    "region": "울산",
+    "rank": "과장",
+    "interests": [
+      "등산",
+      "요리",
+      "사진"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      2,
+      1,
+      3,
+      1,
+      2,
+      1
+    ],
+    "nickname": null,
+    "created_at": "2025-10-23T06:52:26Z"
   }
 ]
