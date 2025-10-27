@@ -122,6 +122,9 @@ def main():
                 st.session_state.navigation_radio = target_label
                 st.session_state.active_page = next(
                     k for k, v in non_admin_pages.items() if v['label'] == target_label)
+                # Scroll to top when navigating programmatically to profile
+                if target_label == PAGE_REGISTRY['profile']['label']:
+                    st.session_state.focus_anchor = 'app-top'
             st.query_params['page'] = target_label
         del st.session_state.nav_target
     elif 'page' in qs and 'navigation_radio' not in st.session_state and 'active_page' in st.session_state:
@@ -147,6 +150,8 @@ def main():
         st.session_state.active_page = next(
             k for k, v in non_admin_pages.items() if v['label'] == selected_page_label)
         st.query_params['page'] = selected_page_label
+        if selected_page_label == PAGE_REGISTRY['profile']['label']:
+            st.session_state.focus_anchor = 'app-top'
 
     # (Demo panel already rendered at top)
 

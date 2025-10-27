@@ -79,8 +79,9 @@ def render_clubs_tab():
             st.write(f"**리더:** {leader_full}")
             st.write(f"**멤버:** {', '.join(members_full)}")
 
-            # UI for activating a newly matched club.
-            if c.get('status') == 'Matched':
+            # Activation / Deactivation UI
+            club_status = c.get('status')
+            if club_status == 'Matched':
                 leader_input = st.text_input(
                     "리더 이름 확인", key=f"leader_check_{c['id']}", help=f"'{leader_disp}'을(를) 입력하세요.")
                 if leader_input.strip() == leader_disp:
@@ -89,6 +90,15 @@ def render_clubs_tab():
                     if st.button("클럽 활성화", key=f"activate_{c['id']}"):
                         admin_svc.activate_club(c['id'], chat_url, clubs_all)
                         modified = True
+            elif club_status == 'Active':
+                if st.button("비활성화", key=f"deactivate_{c['id']}"):
+                    # Revert to Matched state (retain chat_link, but could clear if desired)
+                    c['status'] = 'Matched'
+                    c['updated_at'] = admin_svc.utc_now_iso() if hasattr(
+                        admin_svc, 'utc_now_iso') else c.get('updated_at')
+                    persistence.replace_all('clubs', clubs_all)
+                    st.info("클럽이 비활성화(Matched) 상태로 되돌려졌습니다.")
+                    st.rerun()
 
     if modified:
         st.success("클럽 상태 변경사항이 저장되었습니다.")

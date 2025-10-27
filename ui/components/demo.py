@@ -105,6 +105,14 @@ def _build_deterministic_extras(count: int, region: str):
 
     # Interest pool (each user gets 축구 + one variant)
     interest_pool = ["영화보기", "보드게임", "러닝", "독서", "헬스", "요리", "사진", "등산"]
+    # Diversification strategy (Option A): demo peers (seeded elsewhere) remain 축구 anchor.
+    # Deterministic extras intentionally avoid making 축구 the universal intersection.
+    # We create two personality buckets (외향/내향) each split into groups of 6 users with a shared
+    # non-축구 anchor interest to allow club formation on that anchor without defaulting to 축구.
+    # This yields clubs labeled with varying primary interests once matching runs after seeding extras.
+    # cycle if more than 24 requested
+    extro_anchor_sequence = ["보드게임", "러닝", "독서", "헬스"]
+    intro_anchor_sequence = ["영화보기", "요리", "사진", "등산"]
     # Existing names: ensure no collisions with already persisted users.
     from services import persistence as _p
     existing_users = _p.load_list('users')
@@ -117,8 +125,18 @@ def _build_deterministic_extras(count: int, region: str):
     for i in range(count):
         personality = "외향" if (i % 2 == 0) else "내향"
         rank = RANKS[i % len(RANKS)]
-        second_interest = interest_pool[i % len(interest_pool)]
-        interests = ["축구", second_interest]
+        # Determine anchor interest based on personality bucket and group index (groups of 6 per personality)
+        if personality == "외향":
+            group_index = (i // 2) // 6  # even indices group into sizes of 6
+            anchor = extro_anchor_sequence[group_index % len(
+                extro_anchor_sequence)]
+        else:
+            group_index = ((i - 1) // 2) // 6  # odd indices grouping
+            anchor = intro_anchor_sequence[group_index % len(
+                intro_anchor_sequence)]
+        # Second interest rotates for diversity but keeps anchor common across the 6 in group
+        second_interest = interest_pool[(i + 1) % len(interest_pool)]
+        interests = [anchor, second_interest]
         # Deterministic survey answers pattern keeps classify_personality unused; set trait directly.
         answers = [3, 3, 3, 3, 3, 3, 3]
         # Numeric employee number format (e.g., 10150001, 10150002, ...)
@@ -172,34 +190,41 @@ def render_demo_sidebar(context: str = ""):
     col_seed_full, col_reset = st.sidebar.columns(2)
     full_disabled = len(persistence.load_list('users')) >= 30
     with col_seed_full:
-        if st.button("Seed", key="btn_seed_full", disabled=full_disabled, help="전체 데모 코호트(30명) 생성 (매칭은 어드민에서 실행)"):
-            users_local = persistence.load_list('users')
-            # Ensure demo base cohort present (demo_user + peers)
-            if not any(u.get('id') == 'demo_user' for u in users_local):
-                users_local.append(get_demo_user_defaults())
-                persistence.replace_all('users', users_local)
-            _seed_demo_peers(region)
-            users_local = persistence.load_list('users')
-            existing_det = [u for u in users_local if str(
-                u.get('name', '')).startswith('det_extra_')]
-            if len(existing_det) < 24:
-                need = 24 - len(existing_det)
-                extras = _build_deterministic_extras(need, region)
-                users_local.extend([asdict(u) for u in extras])
-                persistence.replace_all('users', users_local)
-            total_users = len(persistence.load_list('users'))
-            st.session_state.demo_seed_done = True
-            st.sidebar.success(f"시드 완료: 총 {total_users}명")
-            st.rerun()
+        if st.button("Seed", key="btn_seed_full", disabled=full_disabled, help="프리셋 30명 사용자 로드 (5개 버킷 × 6명)"):
+            # Hard-coded seed set ensures 5 buckets of 6 users → 5 clubs when target_size=6.
+            import os
+            import json
+            base_dir = os.path.abspath(os.path.join(
+                os.path.dirname(__file__), '..', '..'))
+            seed_path = os.path.join(base_dir, 'data', 'seed_users.json')
+            seed_users = []
+            try:
+                with open(seed_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    if isinstance(data, list):
+                        seed_users = data
+            except Exception as e:
+                st.sidebar.error(f"시드 파일 로드 실패: {e}")
+            if not seed_users:
+                st.sidebar.error("seed_users.json 비어있거나 로드 불가")
+            else:
+                persistence.replace_all('users', seed_users)
+                st.session_state.demo_seed_done = True
+                st.sidebar.success(f"시드 완료: 총 {len(seed_users)}명 (예상 클럽 5개)")
+                st.rerun()
     # Reset button (third column)
     with col_reset:
-        if st.button("Reset", key="btn_demo_wipe_simple", help="모든 데모 데이터 초기화"):
+        if st.button("Reset", key="btn_demo_wipe_simple", help="데모 전체 초기화 (사용자/클럽/매칭/상태 파일)"):
             from services import persistence as _p
+            from domain.constants import reset_demo_user_state
             for _k in ['users', 'clubs', 'match_runs', 'activity_reports']:
                 _p.replace_all(_k, [])
-            st.session_state.pop('current_user_id', None)
-            st.session_state.pop('demo_seed_done', None)
-            st.success("데모 상태 초기화 완료")
+            defaults = reset_demo_user_state()  # resets demo_user_state.json
+            _p.replace_all('users', [defaults])
+            st.session_state.clear()
+            st.session_state.current_user_id = 'demo_user'
+            st.session_state.demo_seed_done = False
+            st.success("데모 데이터 & 상태 기본값으로 초기화 완료")
             st.rerun()
     # Removed legacy auto-seed+match button; consolidated in Seed + Match Clubs flows.
     st.sidebar.markdown("---")

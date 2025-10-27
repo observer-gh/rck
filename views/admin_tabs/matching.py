@@ -12,7 +12,9 @@ def render_matching_tab():
         st.warning("매칭을 실행할 사용자가 없습니다. 먼저 사용자를 등록하거나 생성해주세요.")
         return
 
-    st.info(f"현재 등록된 총 사용자: **{len(users_raw)}명**")
+    effective_count = 0 if (len(users_raw) == 1 and users_raw[0].get(
+        'id') == 'demo_user') else len(users_raw)
+    st.info(f"현재 등록된 총 사용자: **{effective_count}명**")
 
     target_size = st.number_input(
         "클럽당 인원 (기본 6)", min_value=3, max_value=10, value=6)

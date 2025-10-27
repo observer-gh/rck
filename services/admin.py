@@ -53,8 +53,14 @@ def get_system_analytics():
     club_points = get_club_points_map()
     total_points = sum(club_points.values())
 
+    # Exclude demo_user from count when it is the only user (requested behavior)
+    if len(users_all) == 1 and users_all[0].get('id') == 'demo_user':
+        total_users_effective = 0
+    else:
+        total_users_effective = len(users_all)
+
     analytics = {
-        "total_users": len(users_all),
+        "total_users": total_users_effective,
         "total_clubs": len(clubs_all),
         "active_clubs": active_clubs,
         "total_match_runs": len(runs_all),

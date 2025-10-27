@@ -101,7 +101,10 @@ def render_analytics_tab():
     # Quick Actions / Summary strip
     with st.container(border=True):
         cqa1, cqa2, cqa3, cqa4, cqa5 = st.columns(5)
-        cqa1.metric("사용자", len(users_all))
+        # Show 0 when only demo_user exists (align with modular analytics tab logic)
+        effective_user_count = 0 if (len(users_all) == 1 and users_all[0].get(
+            'id') == 'demo_user') else len(users_all)
+        cqa1.metric("사용자", effective_user_count)
         cqa2.metric("클럽", f"{len(clubs_all)} / 활성 {active_clubs}")
         cqa3.metric("보고서 대기", pending_reports)
         cqa4.metric("보고서 검증", verified_reports)
@@ -156,7 +159,9 @@ def render_matching_tab():
     if not users_raw:
         st.warning("매칭을 실행할 사용자가 없습니다. 먼저 사용자를 등록하거나 생성해주세요.")
         return
-    st.info(f"현재 등록된 총 사용자: **{len(users_raw)}명**")
+    effective_count = 0 if (len(users_raw) == 1 and users_raw[0].get(
+        'id') == 'demo_user') else len(users_raw)
+    st.info(f"현재 등록된 총 사용자: **{effective_count}명**")
     target_size = st.number_input(
         "클럽당 인원 (기본 6)", min_value=3, max_value=10, value=6)
     st.write("---")

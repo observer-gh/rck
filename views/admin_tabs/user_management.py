@@ -9,26 +9,6 @@ from domain.constants import REGIONS, RANKS, INTERESTS
 def render_user_management_tab():
     """Provides UI for managing users, including editing and deleting."""
     st.subheader("👤 사용자 관리")
-    # Demo user reset (defaults/state synchronization)
-    from domain.constants import reset_demo_user_state, get_demo_user
-    from services import persistence as _p
-    with st.expander("🔄 데모 사용자 상태/기본값 관리", expanded=False):
-        st.caption(
-            "데모 사용자(nemo)의 필드가 변경되었을 때 기본 상태 파일(data/demo_user_state.json)에 반영됩니다. 아래 버튼으로 기본값으로 되돌릴 수 있습니다.")
-        if st.button("Reset Demo User to Defaults", key="btn_reset_demo_user", help="demo_user_state.json을 defaults로 재설정합니다"):
-            defaults = reset_demo_user_state()
-            users_all = _p.load_list('users')
-            found = False
-            for u in users_all:
-                if u.get('id') == 'demo_user':
-                    u.update(defaults)
-                    found = True
-                    break
-            if not found:
-                users_all.append(defaults)
-            _p.replace_all('users', users_all)
-            st.success("데모 사용자 상태가 기본값으로 초기화되었습니다.")
-            st.rerun()
 
     users = persistence.load_list('users')
     if not users:
