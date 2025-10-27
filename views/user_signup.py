@@ -1,17 +1,16 @@
 import streamlit as st
 from services import persistence
+from domain.constants import get_demo_user, REGIONS, RANKS, INTERESTS
 from domain.models import User
 from utils.ids import create_id_with_prefix
 from services.survey import QUESTIONS, classify_personality
 from dataclasses import asdict
 from typing import Optional, List, Dict, Any
 
-REGION_OPTIONS = [
-    "서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종",
-    "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"
-]
-RANK_OPTIONS = ["사원", "대리", "과장", "차장", "부장"]
-INTEREST_OPTIONS = ["축구", "영화보기", "보드게임", "러닝", "독서", "헬스", "요리", "사진", "등산"]
+# Use centralized constants to prevent drift; local aliases retained for readability.
+REGION_OPTIONS = REGIONS
+RANK_OPTIONS = RANKS
+INTEREST_OPTIONS = INTERESTS
 
 
 def is_duplicate_user(name: str, region: str, users: List[Dict[str, Any]], exclude_id: Optional[str] = None) -> bool:
@@ -65,33 +64,24 @@ def view():
 
     # Step 1: Basic info form if draft not present
     if 'new_user_draft' not in st.session_state:
-        # Determine default demo-based values
-        demo_base = next(
-            (u for u in users if u.get('id') == 'demo_user'), None)
-        if not demo_base:
-            demo_base = next(
-                (u for u in users if u.get('name') == 'nemo'), None)
-        # Default name always "데모사용자" for convenience (user can change)
-        default_name = "데모사용자"
-        # Fixed default employee number irrespective of demo_base
-        default_emp = '10150000'
-        reg_val = demo_base.get('region') if demo_base else None
+        # Load mutable demo state each render (live values)
+        demo_state = get_demo_user()
+        default_name = demo_state.get('name', "데모사용자")
+        default_emp = demo_state.get('employee_number', '10150000')
+        reg_val = demo_state.get('region')
         default_region = reg_val if isinstance(
             reg_val, str) and reg_val in REGION_OPTIONS else REGION_OPTIONS[0]
-        # Rank default: demo base rank if valid else '사원'
-        # Fixed default rank
-        default_rank = '사원'
-        ints_val = demo_base.get('interests') if demo_base else []
-        # 관심사 기본값: 데모 사용자/네모의 관심사 없으면 대표 2개 자동 선택
+        default_rank = demo_state.get('rank', '사원') if demo_state.get(
+            'rank') in RANK_OPTIONS else '사원'
+        ints_val = demo_state.get('interests') or []
         default_interests = ints_val if isinstance(
             ints_val, list) and ints_val else ["축구", "영화보기"]
         with st.form("form_basic", clear_on_submit=False):
             st.subheader("1단계: 기본 정보")
             name = st.text_input("이름", key="new_name", value=default_name)
-            # Nickname: show previously typed, existing demo base nickname, or fallback 'nemo'
+            # Nickname: show previously typed or defaults nickname, fallback 'nemo'
             existing_nick = st.session_state.get('new_nickname')
-            base_nick = (demo_base.get('nickname')
-                         if demo_base else None) or 'nemo'
+            base_nick = demo_state.get('nickname') or 'nemo'
             nickname_val = existing_nick if existing_nick not in (
                 None, '') else base_nick
             nickname = st.text_input(
@@ -119,7 +109,7 @@ def view():
                     if is_dup and not allow_demo_dup:
                         st.error("중복 사용자 (이름+지역) 존재. 저장 취소.")
                     else:
-                        st.session_state.new_user_draft = {
+                        draft_payload = {
                             'name': name,
                             'nickname': nickname.strip() if nickname else '',
                             'employee_number': employee_number,
@@ -127,8 +117,15 @@ def view():
                             'rank': rank,
                             'interests': interests,
                         }
+                        st.session_state.new_user_draft = draft_payload
+                        # Persist into demo_user_state.json for live reflection when editing demo user later
+                        try:
+                            from domain.constants import save_demo_user
+                            save_demo_user(draft_payload)
+                        except Exception:
+                            pass
                         st.session_state.signup_first_visit = False
-                        st.success("기본 정보가 임시 저장되었습니다. 성향 설문을 완료하세요.")
+                        st.success("기본 정보가 저장되었습니다. 성향 설문을 완료하세요.")
                         st.rerun()
     else:
         draft = st.session_state.new_user_draft
@@ -152,7 +149,7 @@ def view():
                                   key=f"q_{i}", index=1, horizontal=True)
                 answers.append(OPTION_MAP[choice])
             finish = st.form_submit_button(
-                "최종 저장", disabled=registration_locked)
+                "가입하기", disabled=registration_locked)
             if finish and not registration_locked:
                 personality_trait = classify_personality(answers)
                 uid = create_id_with_prefix('u')
@@ -173,5 +170,20 @@ def view():
                     st.session_state[k] = "" if k != "new_interests" else []
                 st.session_state.clear_survey_answers = True
                 st.session_state.signup_first_visit = False
-                st.success(f"저장 완료: {d['name']} (성향: {personality_trait})")
+                # Update demo state again with final personality if registering as demo baseline
+                try:
+                    from domain.constants import save_demo_user
+                    save_demo_user({
+                        'name': d['name'],
+                        'nickname': d.get('nickname'),
+                        'employee_number': d['employee_number'],
+                        'region': d['region'],
+                        'rank': d['rank'],
+                        'interests': d['interests'],
+                        'personality_trait': personality_trait,
+                        'survey_answers': answers,
+                    })
+                except Exception:
+                    pass
+                st.success(f"가입 완료: {d['name']} (성향: {personality_trait})")
                 st.rerun()

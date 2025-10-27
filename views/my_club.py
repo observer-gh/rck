@@ -49,13 +49,10 @@ def view():
             demo_region_raw, str) and demo_region_raw else '서울'
         # Ensure canonical demo user exists before seeding peers
         if not any(u.get('id') == 'demo_user' for u in users_all):
-            try:
-                from domain.constants import DEMO_USER
-                users_all.append(DEMO_USER.copy())
-                _p.replace_all('users', users_all)
-                users_all = _p.load_list('users')
-            except Exception:
-                pass
+            from domain.constants import get_demo_user_defaults
+            users_all.append(get_demo_user_defaults())
+            _p.replace_all('users', users_all)
+            users_all = _p.load_list('users')
         _seed_demo_peers(demo_region)
         users_all = _p.load_list('users')
         clubs_existing = _p.load_list('clubs')

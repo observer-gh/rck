@@ -3,7 +3,7 @@ import datetime as dt
 from urllib.parse import unquote
 from ui.components.demo import render_demo_sidebar
 from services import persistence
-from domain.constants import DEMO_USER
+from domain.constants import get_demo_user
 
 # Import the page rendering functions from the new modules
 from views import user_signup, my_club, activity_report, demo_script, admin_dashboard, profile
@@ -72,7 +72,7 @@ def main():
     def ensure_demo_user():
         users_local = persistence.load_list('users')
         if not any(u.get('id') == 'demo_user' for u in users_local):
-            users_local.append(DEMO_USER.copy())
+            users_local.append(get_demo_user())
             persistence.replace_all('users', users_local)
         return users_local
 

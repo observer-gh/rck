@@ -7,13 +7,13 @@ from typing import List, Dict, Any, Optional
 from dataclasses import asdict
 from domain.models import User
 from services import persistence
-from domain.constants import DEMO_USER
+from domain.constants import get_demo_user, save_demo_user
 
 
 def ensure_demo_user(users: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Ensure demo user exists only if missing. Does NOT overwrite existing demo record."""
-    if not any(u.get('id') == DEMO_USER['id'] for u in users):
-        users.append(DEMO_USER.copy())
+    if not any(u.get('id') == 'demo_user' for u in users):
+        users.append(get_demo_user())
         persistence.replace_all('users', users)
     return users
 
@@ -28,8 +28,8 @@ def save_users(users: List[Dict[str, Any]]):
 
     If demo user missing entirely, seed baseline; otherwise keep current demo fields.
     """
-    if not any(u.get('id') == DEMO_USER['id'] for u in users):
-        users.append(DEMO_USER.copy())
+    if not any(u.get('id') == 'demo_user' for u in users):
+        users.append(get_demo_user())
     persistence.replace_all('users', users)
 
 
@@ -48,3 +48,9 @@ def append_user(user: User):
     users = load_users()
     users.append(asdict(user))
     save_users(users)
+
+
+def persist_demo_user_if_changed(updated: Dict[str, Any]):
+    """If updated user is demo_user, sync state JSON."""
+    if updated.get('id') == 'demo_user':
+        save_demo_user(updated)

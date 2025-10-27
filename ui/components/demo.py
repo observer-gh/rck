@@ -160,17 +160,14 @@ def render_demo_sidebar(context: str = ""):
         'id') == 'demo_user' or u.get('name') in _PEER_NAMES]
     demo_count = len(demo_cluster)
     st.sidebar.write(f"demo cohort: {demo_count}/6")
-    # Region fallback from existing demo_user or nemo else 서울
+    # Region fallback: demo_user region else 서울
     raw_region = next((u.get('region')
                       for u in users if u.get('id') == 'demo_user'), None)
-    if not raw_region:
-        raw_region = next((u.get('region')
-                          for u in users if u.get('name') == 'nemo'), '서울')
     region = raw_region if isinstance(raw_region, str) and raw_region else '서울'
     if 'demo_seed_done' not in st.session_state:
         st.session_state.demo_seed_done = demo_count >= 6
     seed_disabled = st.session_state.demo_seed_done and demo_count >= 6
-    from domain.constants import DEMO_USER
+    from domain.constants import get_demo_user_defaults
     # Arrange buttons now as: Seed (full cohort) | Reset
     col_seed_full, col_reset = st.sidebar.columns(2)
     full_disabled = len(persistence.load_list('users')) >= 30
@@ -179,7 +176,7 @@ def render_demo_sidebar(context: str = ""):
             users_local = persistence.load_list('users')
             # Ensure demo base cohort present (demo_user + peers)
             if not any(u.get('id') == 'demo_user' for u in users_local):
-                users_local.append(DEMO_USER.copy())
+                users_local.append(get_demo_user_defaults())
                 persistence.replace_all('users', users_local)
             _seed_demo_peers(region)
             users_local = persistence.load_list('users')

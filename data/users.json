@@ -2,10 +2,10 @@
   {
     "id": "demo_user",
     "name": "데모사용자",
-    "nickname": "nemo",
+    "nickname": "nemos",
     "employee_number": "15000001",
     "region": "서울",
-    "rank": "사원",
+    "rank": "대리",
     "interests": [
       "축구",
       "영화보기"
@@ -20,5 +20,28 @@
       2,
       2
     ]
+  },
+  {
+    "id": "u_1761569441143_z0hh",
+    "name": "데모사용자",
+    "employee_number": "15000001",
+    "region": "서울",
+    "rank": "사원",
+    "interests": [
+      "축구",
+      "영화보기"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      2,
+      3,
+      3,
+      3,
+      3,
+      2,
+      2
+    ],
+    "nickname": "nemossadf",
+    "created_at": "2025-10-27T12:50:41Z"
   }
 ]

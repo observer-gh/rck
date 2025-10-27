@@ -111,7 +111,11 @@ def update_user_profile(user_id, updates, all_users):
         raise ValueError("User not found")
 
     # Validate for duplicates before updating
-    if user_svc.is_duplicate_user(updates['name'], updates['region'], all_users, exclude_id=user_id):
+    name_changed = updates.get('name', user.get('name')) != user.get('name')
+    region_changed = updates.get(
+        'region', user.get('region')) != user.get('region')
+    # Only enforce duplicate check if attempting to change name or region. Allow rank/other field-only edits.
+    if (name_changed or region_changed) and user_svc.is_duplicate_user(updates['name'], updates['region'], all_users, exclude_id=user_id):
         raise ValueError("중복 사용자 (이름+지역) 존재. 변경 취소.")
 
     new_answers = updates.get('survey_answers', user.get('survey_answers'))
@@ -119,6 +123,8 @@ def update_user_profile(user_id, updates, all_users):
 
     user.update(updates)
     persistence.replace_all('users', all_users)
+    # Sync demo user state JSON if applicable
+    user_svc.persist_demo_user_if_changed(user)
     return user
 
 

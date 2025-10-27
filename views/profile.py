@@ -1,6 +1,7 @@
 import streamlit as st
 from typing import Dict, Any
 from services import users as user_svc
+from domain.constants import get_demo_user, save_demo_user
 from services.survey import QUESTIONS, classify_personality
 from domain.constants import REGIONS, RANKS, INTERESTS
 
@@ -22,6 +23,14 @@ def view():
         st.info("선택/생성된 사용자가 없습니다. 먼저 사용자 등록을 완료하세요.")
         return
     me = next((u for u in users if u['id'] == current_user_id), None)
+    # Refresh demo user from state file for live values
+    if me and me.get('id') == 'demo_user':
+        try:
+            state_demo = get_demo_user()
+            # merge state into in-memory record without dropping unknown keys
+            me.update(state_demo)
+        except Exception:
+            pass
     if not me:
         st.warning("세션 사용자 ID로 사용자를 찾을 수 없습니다. 다시 등록이 필요할 수 있습니다.")
         return
@@ -91,5 +100,10 @@ def view():
                     'survey_answers': new_answers
                 })
                 save_users(users)
+                if me.get('id') == 'demo_user':
+                    try:
+                        save_demo_user(me)
+                    except Exception:
+                        pass
                 st.success("업데이트 완료")
                 st.rerun()
