@@ -65,7 +65,8 @@ def view():
     # Step 1: Basic info form if draft not present
     if 'new_user_draft' not in st.session_state:
         # Load mutable demo state each render (live values)
-        demo_state = get_demo_user()
+        from domain.constants import get_demo_user as _get_demo_user
+        demo_state = _get_demo_user()
         default_name = demo_state.get('name', "데모사용자")
         default_emp = demo_state.get('employee_number', '10150000')
         reg_val = demo_state.get('region')
@@ -152,13 +153,53 @@ def view():
                 "가입하기", disabled=registration_locked)
             if finish and not registration_locked:
                 personality_trait = classify_personality(answers)
-                uid = create_id_with_prefix('u')
                 d = draft
-                user = User(id=uid, name=d['name'], employee_number=d['employee_number'], region=d['region'], rank=d['rank'],
-                            interests=d['interests'], personality_trait=personality_trait, survey_answers=answers, nickname=d.get('nickname'))
-                users.append(asdict(user))
-                save_users(users)
-                st.session_state.current_user_id = uid
+                # Demo-user update mode: if demo_user exists (id == 'demo_user') and same employee_number OR same name, update it in place.
+                from domain.constants import get_demo_user
+                demo_current = get_demo_user()
+                demo_ids = [u for u in users if u.get('id') == 'demo_user']
+                should_update_demo = bool(demo_ids) and (
+                    d['name'] == demo_current.get('name') or d['employee_number'] == demo_current.get('employee_number') or d['name'] == '데모사용자')
+                if should_update_demo:
+                    # Update existing demo_user record fields
+                    for u in users:
+                        if u.get('id') == 'demo_user':
+                            u['name'] = d['name']
+                            u['nickname'] = d.get('nickname')
+                            u['employee_number'] = d['employee_number']
+                            u['region'] = d['region']
+                            u['rank'] = d['rank']
+                            u['interests'] = d['interests']
+                            u['personality_trait'] = personality_trait
+                            u['survey_answers'] = answers
+                    # Persist state & users
+                    save_users(users)
+                    try:
+                        from domain.constants import save_demo_user
+                        save_demo_user({
+                            'name': d['name'],
+                            'nickname': d.get('nickname'),
+                            'employee_number': d['employee_number'],
+                            'region': d['region'],
+                            'rank': d['rank'],
+                            'interests': d['interests'],
+                            'personality_trait': personality_trait,
+                            'survey_answers': answers,
+                        })
+                    except Exception:
+                        pass
+                    st.session_state.current_user_id = 'demo_user'
+                    st.success(
+                        f"데모 사용자 업데이트 완료: {d['name']} (성향: {personality_trait})")
+                else:
+                    # Fallback: create a new non-demo user (regular registration)
+                    uid = create_id_with_prefix('u')
+                    user = User(id=uid, name=d['name'], employee_number=d['employee_number'], region=d['region'], rank=d['rank'],
+                                interests=d['interests'], personality_trait=personality_trait, survey_answers=answers, nickname=d.get('nickname'))
+                    users.append(asdict(user))
+                    save_users(users)
+                    st.session_state.current_user_id = uid
+                    st.success(f"가입 완료: {d['name']} (성향: {personality_trait})")
                 # Defer navigation to profile page via nav_target (handled in app before radio instantiation)
                 st.session_state.nav_target = "🙍 내 프로필"
                 # Request focus on top anchor next load
@@ -170,20 +211,5 @@ def view():
                     st.session_state[k] = "" if k != "new_interests" else []
                 st.session_state.clear_survey_answers = True
                 st.session_state.signup_first_visit = False
-                # Update demo state again with final personality if registering as demo baseline
-                try:
-                    from domain.constants import save_demo_user
-                    save_demo_user({
-                        'name': d['name'],
-                        'nickname': d.get('nickname'),
-                        'employee_number': d['employee_number'],
-                        'region': d['region'],
-                        'rank': d['rank'],
-                        'interests': d['interests'],
-                        'personality_trait': personality_trait,
-                        'survey_answers': answers,
-                    })
-                except Exception:
-                    pass
-                st.success(f"가입 완료: {d['name']} (성향: {personality_trait})")
+                # Success message already emitted inside branches above
                 st.rerun()
