@@ -258,3 +258,104 @@ def compute_matches(users: List[User], target_size: int = 5, run_id: Optional[st
                     all_clubs.append(fallback_club)
 
     return all_clubs
+
+
+def compute_matches_demo_30(target_size: int = 6) -> List[Club]:
+    """Deterministic demo matching for the full seeded cohort (up to 30 users).
+
+    Behavior:
+      1. Loads data/seed_users.json (demo_user + seed_u1..seed_u29).
+      2. Forms a fixed initial demo club: demo_user + seed_u1..seed_u5 (Seoul cohort) if not already present.
+      3. Runs compute_matches on remaining users (excluding fixed members) with a stable seed derived from sorted user IDs
+         ensuring deterministic grouping across runs.
+      4. Returns list of newly formed Club objects (includes fixed demo club if it had to be created).
+
+    Notes:
+      - Does NOT persist clubs; caller should persist results (e.g., append to persistence.load_list('clubs')).
+      - Ignores existing persisted clubs except to avoid recreating the fixed demo club.
+      - Uses same explanation format as compute_matches; fixed demo club uses a concise label.
+    """
+    import os
+    import json
+    from domain.models import user_from_dict, Club
+    from dataclasses import asdict as _asdict
+
+    # Resolve seed file path
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    seed_path = os.path.join(base_dir, 'data', 'seed_users.json')
+    try:
+        with open(seed_path, 'r', encoding='utf-8') as f:
+            seed_data = json.load(f)
+    except Exception:
+        return []
+
+    # Convert to User domain instances
+    all_seed_users: List[User] = [user_from_dict(
+        r) for r in seed_data if isinstance(r, dict)]
+    demo_user = next((u for u in all_seed_users if u.id == 'demo_user'), None)
+    initial_peer_ids = {f'seed_u{i}' for i in range(1, 6)}
+    peer_users = [u for u in all_seed_users if u.id in initial_peer_ids]
+
+    new_clubs: List[Club] = []
+    # Build user map for explanation generation later
+    user_map = {u.id: u for u in all_seed_users}
+
+    # Detect existing fixed demo club in persisted storage (optional avoidance)
+    existing_clubs = []
+    try:
+        existing_clubs = persistence.load_list('clubs')
+    except Exception:
+        existing_clubs = []
+    expected_name_prefix = (
+        demo_user.region if demo_user and demo_user.region else '서울') + ' 축구 클럽 A (demo)'
+    fixed_members_present = any(
+        demo_user and demo_user.id in (c.get('member_ids') or []) and
+        len({mid for mid in c.get('member_ids') or []
+            if mid in initial_peer_ids}) == len(initial_peer_ids)
+        for c in existing_clubs
+    )
+
+    fixed_member_ids: List[str] = []
+    if not fixed_members_present and demo_user and len(peer_users) == len(initial_peer_ids):
+        fixed_member_ids = [demo_user.id] + [p.id for p in peer_users]
+        fixed_club = Club(
+            id=create_id_with_prefix('club'),
+            name=f"{demo_user.region} 축구 클럽 A (demo)",
+            member_ids=fixed_member_ids,
+            leader_id=demo_user.id,
+            primary_interest='축구',
+            status='Active'
+        )
+        # Simple explanation tag for fixed demo club
+        fixed_club.explanations = {mid: {"그룹": "고정 데모 팀 A"}
+                                   for mid in fixed_member_ids}
+        now = _dt.datetime.now(
+            _dt.timezone.utc).isoformat().replace('+00:00', 'Z')
+        fixed_club.created_at = now
+        fixed_club.updated_at = now
+        new_clubs.append(fixed_club)
+    else:
+        # If already present, collect its member_ids to exclude from further matching
+        for c in existing_clubs:
+            mids = c.get('member_ids') or []
+            if demo_user and demo_user.id in mids and len({m for m in mids if m in initial_peer_ids}) == len(initial_peer_ids):
+                fixed_member_ids = list(mids)
+                break
+
+    # Remaining users after fixed club exclusion
+    remaining = [u for u in all_seed_users if u.id not in fixed_member_ids]
+    if len(remaining) >= 5:  # Respect minimum requirement for compute_matches
+        # Stable deterministic seed from sorted remaining IDs
+        import hashlib
+        seed_basis = ','.join(sorted(u.id for u in remaining))
+        stable_seed = int(hashlib.sha256(
+            seed_basis.encode()).hexdigest()[:8], 16)
+        # Delegate to existing algorithm (note: pass seed, omit run_id for determinism)
+        matched_clubs = compute_matches(
+            remaining, target_size=target_size, seed=stable_seed)
+        # Mark each produced club as Active explicitly (compute_matches sets explanation & timestamps)
+        for c in matched_clubs:
+            c.status = 'Active'
+        new_clubs.extend(matched_clubs)
+
+    return new_clubs

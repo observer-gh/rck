@@ -17,12 +17,16 @@ def render_matching_tab():
     st.info(f"현재 등록된 총 사용자: **{effective_count}명**")
 
     target_size = st.number_input(
-        "클럽당 인원 (기본 6)", min_value=3, max_value=10, value=6)
+        "클럽당 인원 (기본 6)", min_value=3, max_value=10, value=6, help="새 매칭 실행 시 한 클럽에 배정할 인원 수")
+    # Execute button moved up into primary section (before separator)
+    c_run, c_sep = st.columns([1, 5])
+    with c_run:
+        run_clicked = st.button("🚀 매칭 실행 / 새 버전 생성",
+                                help="현재 사용자 목록으로 새로운 매칭 Run을 생성합니다.")
     st.write("---")
-    st.subheader("전체 재매칭")
-    st.warning("주의: 이 작업은 기존 클럽에 영향을 주지 않고 새로운 클럽들을 추가 생성합니다.")
+    # Removed redundant header '전체 재매칭' per request.
 
-    if st.button("매칭 실행 / 새 버전 생성"):
+    if run_clicked:
         try:
             run_id, count = admin_svc.run_new_matching(target_size)
             st.success(f"새 매칭 실행 완료. Run ID: {run_id}, 생성된 클럽 수: {count}")

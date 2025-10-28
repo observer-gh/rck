@@ -8,6 +8,7 @@ import datetime as dt
 import time
 import csv
 import io
+from utils.explanations import build_ai_match_explanation
 
 
 def _user_map():
@@ -165,8 +166,7 @@ def render_matching_tab():
     target_size = st.number_input(
         "클럽당 인원 (기본 6)", min_value=3, max_value=10, value=6)
     st.write("---")
-    st.subheader("전체 재매칭")
-    st.warning("주의: 이 작업은 기존 클럽에 영향을 주지 않고 새로운 클럽들을 추가 생성합니다.")
+    # Removed redundant header '전체 재매칭' per request.
     if st.button("매칭 실행 / 새 버전 생성"):
         if len(users_raw) < target_size:
             st.error(f"매칭을 실행하려면 최소 {target_size}명의 사용자가 필요합니다.")
@@ -241,6 +241,25 @@ def render_clubs_tab():
             members_disp = [_disp(n) for n in member_names]
             st.write(f"**리더:** {leader_disp}")
             st.write(f"**멤버:** {', '.join(members_disp)}")
+            # AI Explanation Section (admin view)
+            member_ids = c.get('member_ids', []) or []
+            if member_ids:
+                try:
+                    expl = build_ai_match_explanation(c, user_map)
+                    with st.expander("AI 매칭 설명", expanded=False):
+                        st.markdown(f"**요약:** {expl['summary']}")
+                        for b in expl['bullets']:
+                            st.markdown(f"- {b}")
+                        if expl.get('narrative'):
+                            st.markdown(
+                                f"<div style='margin-top:8px;padding:10px;border-left:3px solid #4a90e2;background:#f5f9ff;border-radius:4px;font-size:13px;'>{expl['narrative']}</div>",
+                                unsafe_allow_html=True
+                            )
+                        if st.checkbox("멤버별 상세 보기", key=f"ai_member_details_{c['id']}"):
+                            for line in expl.get('member_details', []):
+                                st.markdown(f"  * {line}")
+                except Exception as e:
+                    st.caption(f"AI 설명 생성 실패: {e}")
             if c.get('status') == 'Matched':
                 leader_input = st.text_input(
                     "리더 이름 확인", key=f"leader_check_{c['id']}", help=f"'{leader_disp}'을(를) 입력하세요.")
