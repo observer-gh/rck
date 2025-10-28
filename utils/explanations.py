@@ -51,9 +51,9 @@ def build_ai_match_explanation(club: Dict[str, Any], user_map: Dict[str, Any]) -
         rank = u.get('rank', 'N/A')
         trait = u.get('personality_trait', 'N/A')
         ints = u.get('interests', []) or []
-        shared = [i for i in ints if i in shared_interest_set]
+        # Removed explicit shared-interest segment per request
         member_details.append(
-            f"{nick} | 지역:{region} | 직급:{rank} | 성향:{trait} | 관심사:{', '.join(ints) or '없음'} | 공유 관심사({len(shared)}): {', '.join(shared) or '-'}"
+            f"{nick} | 지역:{region} | 직급:{rank} | 성향:{trait} | 관심사:{', '.join(ints) or '없음'}"
         )
 
     summary = (

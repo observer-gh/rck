@@ -42,6 +42,11 @@ def view():
         # Load users via user service to ensure demo_user reflects demo_user_state.json
         from services import users as user_svc
         users_all = user_svc.load_users()
+        # Diagnostics counters
+        added_peer_count = 0
+        created_demo_club = False
+        match_run_id = None
+        created_club_count = 0
         # pick region from existing demo_user or default 서울
         demo_region_raw = next(
             (u.get('region') for u in users_all if u.get('id') == 'demo_user'), '서울')
@@ -51,56 +56,58 @@ def view():
         # This replaces prior dynamic creation via _seed_demo_peers to keep cohort consistent with seed file.
         import os
         import json
+        # base_dir should resolve to project root (parent of 'views'); one level up is sufficient
         base_dir = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', '..'))
+            os.path.dirname(__file__), '..'))
         seed_path = os.path.join(base_dir, 'data', 'seed_users.json')
-        PEER_NAMES = {"김서준", "이민준", "박서연", "최지후", "정하윤"}
+        INITIAL_PEER_IDS = ["seed_u1", "seed_u2",
+                            "seed_u3", "seed_u4", "seed_u5"]
         try:
             with open(seed_path, 'r', encoding='utf-8') as f:
                 seed_data = json.load(f)
         except Exception as e:
             seed_data = []
             st.warning(f"시드 사용자 로드 실패: {e}")
-        # Filter for demo_user + peer cohort from seed file
-        cohort_seed_records = [r for r in seed_data if (
-            r.get('id') == 'demo_user' or r.get('name') in PEER_NAMES)]
+        # Addition logic: ONLY add initial peers if users.json currently has only demo_user matching state file
         existing_ids = {u.get('id') for u in users_all}
-        existing_names = {u.get('name') for u in users_all}
-        to_add = []
-        for r in cohort_seed_records:
-            # Allow overwrite of demo_user if different (by id), else skip peers by name
-            if r.get('id') == 'demo_user':
-                # If demo_user already exists, we preserve existing (state-driven) values; do not overwrite
-                if 'demo_user' not in existing_ids:
-                    to_add.append(r)
-            else:
-                if r.get('name') not in existing_names:
-                    # Set region to current demo region for consistency
-                    new_r = dict(r)
-                    new_r['region'] = demo_region
-                    to_add.append(new_r)
-        if to_add:
-            users_all_extended = users_all + to_add
+        from domain.constants import get_demo_user as _get_demo_state
+        demo_state_file = _get_demo_state()
+        demo_in_users = next(
+            (u for u in users_all if u.get('id') == 'demo_user'), None)
+
+        def _same_demo(a: dict, b: dict):
+            return a and b and all(a.get(k) == b.get(k) for k in ['name', 'employee_number', 'region', 'rank', 'personality_trait'])
+        if len(users_all) == 1 and demo_in_users and _same_demo(demo_in_users, demo_state_file):
+            peers_records = [r for r in seed_data if r.get(
+                'id') in INITIAL_PEER_IDS]
+            normalized = []
+            for r in peers_records:
+                nr = dict(r)
+                # enforce same region for deterministic demo
+                nr['region'] = demo_region
+                normalized.append(nr)
+            users_all_extended = users_all + normalized
             _p.replace_all('users', users_all_extended)
-            # Reload via service to keep consistency with state overwrites
             users_all = user_svc.load_users()
+            added_peer_count = len(normalized)
         clubs_existing = _p.load_list('clubs')
         # Detect or create fixed 6-member demo club using Korean peer names (PEER_NAMES defined above)
         demo_user_rec = next((u for u in users_all if u.get(
             'id') == 'demo_user' or u.get('name') == '데모사용자'), None)
-        peer_user_recs = [u for u in users_all if u.get('name') in PEER_NAMES]
+        peer_user_recs = [u for u in users_all if u.get(
+            'id') in INITIAL_PEER_IDS]
         fixed_members = []
         expected_name = f"{demo_region} 축구 클럽 A (demo)"
         for c in clubs_existing:
             mids = c.get('member_ids', []) or []
             # Detect by exact name OR by composition (demo user + 5 peers)
             comp_ok = demo_user_rec and demo_user_rec['id'] in mids and len(
-                {m for m in mids if any(p['id'] == m for p in peer_user_recs)}) == 5
+                {m for m in mids if any(p['id'] == m for p in peer_user_recs)}) == len(INITIAL_PEER_IDS)
             name_ok = c.get('name') == expected_name
             if comp_ok or name_ok:
                 fixed_members = mids
                 break
-        if not fixed_members and demo_user_rec and len(peer_user_recs) >= 5:
+        if not fixed_members and demo_user_rec and len(peer_user_recs) == len(INITIAL_PEER_IDS):
             fixed_members = [demo_user_rec['id']] + [p['id']
                                                      for p in peer_user_recs]
             fixed_club = Club(
@@ -117,7 +124,7 @@ def view():
                 mid: {"그룹": "고정 데모 팀 A"} for mid in fixed_members}
             clubs_existing.append(fc_dict)
             _p.replace_all('clubs', clubs_existing)
-            # Removed info bar per request (club created silently)
+            created_demo_club = True
         # Ensure session selects demo user for immediate render
         if demo_user_rec and (getattr(st.session_state, 'current_user_id', None) not in fixed_members):
             st.session_state['current_user_id'] = demo_user_rec['id']
@@ -145,7 +152,22 @@ def view():
                 '+00:00', 'Z'), target_size=6, user_count=len(remaining_users), club_count=len(new_cd))
             runs.append(_asdict(run_meta))
             _p.replace_all('match_runs', runs)
+            match_run_id = run_id
+            created_club_count = len(new_cd)
             st.success(f"매칭 완료: 새 클럽 {len(new_cd)}개 생성 (Run {run_id})")
+        # Feedback messages when no broad matching occurred
+        if match_run_id is None:
+            if created_demo_club and len(remaining_users) < 6:
+                st.info(
+                    "고정 데모 클럽을 생성했지만 추가 매칭할 남은 사용자가 6명 미만입니다 (현재: 0명 또는 부족). 다른 사용자를 더 추가하면 추가 클럽 매칭이 가능합니다.")
+            elif not created_demo_club and len(fixed_members) == 6:
+                st.info("이미 고정 데모 클럽이 존재합니다. 매칭할 추가 사용자가 6명 이상 되면 새 클럽을 만들 수 있습니다.")
+            elif not created_demo_club and len(fixed_members) < 6:
+                st.warning(
+                    "데모 클럽을 만들기 위한 데모 구성원이 부족합니다. seed 버튼으로 피어를 먼저 추가하세요.")
+        # Show peer addition diagnostics (only first run typically)
+        if added_peer_count:
+            st.caption(f"데모 피어 {added_peer_count}명 추가됨.")
         # Unconditional rerun to refresh view (covers both creation-only and full match cases)
         st.rerun()
     current_user_id = getattr(st.session_state, 'current_user_id', None)

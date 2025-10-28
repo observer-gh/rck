@@ -20,5 +20,619 @@
       2,
       2
     ]
+  },
+  {
+    "id": "seed_u1",
+    "name": "김서준",
+    "nickname": "Alex",
+    "employee_number": "15000002",
+    "region": "서울",
+    "rank": "대리",
+    "interests": [
+      "축구",
+      "보드게임"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "id": "seed_u2",
+    "name": "박서연",
+    "nickname": "Grace",
+    "employee_number": "15000003",
+    "region": "서울",
+    "rank": "과장",
+    "interests": [
+      "축구",
+      "독서"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "id": "seed_u3",
+    "name": "최지후",
+    "nickname": "Leo",
+    "employee_number": "15000004",
+    "region": "서울",
+    "rank": "차장",
+    "interests": [
+      "축구",
+      "사진"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "id": "seed_u4",
+    "name": "정하윤",
+    "nickname": "Hailey",
+    "employee_number": "15000005",
+    "region": "서울",
+    "rank": "부장",
+    "interests": [
+      "축구",
+      "러닝"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u5",
+    "name": "이민준",
+    "nickname": "Min",
+    "employee_number": "15000006",
+    "region": "서울",
+    "rank": "사원",
+    "interests": [
+      "축구",
+      "요리"
+    ],
+    "personality_trait": "중간",
+    "survey_answers": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  {
+    "id": "seed_u6",
+    "name": "장도윤",
+    "employee_number": "15010001",
+    "region": "부산",
+    "rank": "사원",
+    "interests": [
+      "보드게임",
+      "독서"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u7",
+    "name": "오서현",
+    "employee_number": "15010002",
+    "region": "부산",
+    "rank": "대리",
+    "interests": [
+      "보드게임",
+      "영화보기"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u8",
+    "name": "윤하준",
+    "employee_number": "15010003",
+    "region": "부산",
+    "rank": "과장",
+    "interests": [
+      "보드게임",
+      "사진"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u9",
+    "name": "한지민",
+    "employee_number": "15010004",
+    "region": "부산",
+    "rank": "차장",
+    "interests": [
+      "보드게임",
+      "헬스"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u10",
+    "name": "최예린",
+    "employee_number": "15010005",
+    "region": "부산",
+    "rank": "부장",
+    "interests": [
+      "보드게임",
+      "요리"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u11",
+    "name": "박도현",
+    "employee_number": "15010006",
+    "region": "부산",
+    "rank": "사원",
+    "interests": [
+      "보드게임",
+      "등산"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u12",
+    "name": "이준서",
+    "employee_number": "15020001",
+    "region": "대구",
+    "rank": "사원",
+    "interests": [
+      "러닝",
+      "독서"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u13",
+    "name": "김하윤",
+    "employee_number": "15020002",
+    "region": "대구",
+    "rank": "대리",
+    "interests": [
+      "러닝",
+      "요리"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u14",
+    "name": "정민재",
+    "employee_number": "15020003",
+    "region": "대구",
+    "rank": "과장",
+    "interests": [
+      "러닝",
+      "사진"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u15",
+    "name": "박시후",
+    "employee_number": "15020004",
+    "region": "대구",
+    "rank": "차장",
+    "interests": [
+      "러닝",
+      "영화보기"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u16",
+    "name": "최서아",
+    "employee_number": "15020005",
+    "region": "대구",
+    "rank": "부장",
+    "interests": [
+      "러닝",
+      "헬스"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u17",
+    "name": "윤지우",
+    "employee_number": "15020006",
+    "region": "대구",
+    "rank": "사원",
+    "interests": [
+      "러닝",
+      "보드게임"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u18",
+    "name": "강민지",
+    "employee_number": "15030001",
+    "region": "인천",
+    "rank": "사원",
+    "interests": [
+      "독서",
+      "영화보기"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u19",
+    "name": "배지훈",
+    "employee_number": "15030002",
+    "region": "인천",
+    "rank": "대리",
+    "interests": [
+      "독서",
+      "보드게임"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u20",
+    "name": "서하준",
+    "employee_number": "15030003",
+    "region": "인천",
+    "rank": "과장",
+    "interests": [
+      "독서",
+      "사진"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u21",
+    "name": "문예린",
+    "employee_number": "15030004",
+    "region": "인천",
+    "rank": "차장",
+    "interests": [
+      "독서",
+      "헬스"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u22",
+    "name": "조민서",
+    "employee_number": "15030005",
+    "region": "인천",
+    "rank": "부장",
+    "interests": [
+      "독서",
+      "요리"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u23",
+    "name": "황지안",
+    "employee_number": "15030006",
+    "region": "인천",
+    "rank": "사원",
+    "interests": [
+      "독서",
+      "등산"
+    ],
+    "personality_trait": "외향",
+    "survey_answers": [
+      3,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ]
+  },
+  {
+    "id": "seed_u24",
+    "name": "신도율",
+    "employee_number": "15040001",
+    "region": "광주",
+    "rank": "사원",
+    "interests": [
+      "요리",
+      "영화보기"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u25",
+    "name": "류가은",
+    "employee_number": "15040002",
+    "region": "광주",
+    "rank": "대리",
+    "interests": [
+      "요리",
+      "보드게임"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u26",
+    "name": "홍서온",
+    "employee_number": "15040003",
+    "region": "광주",
+    "rank": "과장",
+    "interests": [
+      "요리",
+      "사진"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u27",
+    "name": "임채윤",
+    "employee_number": "15040004",
+    "region": "광주",
+    "rank": "차장",
+    "interests": [
+      "요리",
+      "헬스"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u28",
+    "name": "표하람",
+    "employee_number": "15040005",
+    "region": "광주",
+    "rank": "부장",
+    "interests": [
+      "요리",
+      "독서"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  {
+    "id": "seed_u29",
+    "name": "노세빈",
+    "employee_number": "15040006",
+    "region": "광주",
+    "rank": "사원",
+    "interests": [
+      "요리",
+      "등산"
+    ],
+    "personality_trait": "내향",
+    "survey_answers": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
   }
 ]
