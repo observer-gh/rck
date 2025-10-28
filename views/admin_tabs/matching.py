@@ -6,6 +6,8 @@ from services import persistence, admin as admin_svc
 def render_matching_tab():
     """Handles UI for running the matching algorithm."""
     st.subheader("⚙️ 매칭 실행")
+    st.caption(
+        "현재 활성/배정되지 않은(클럽 미소속) 사용자만 대상으로 신규 매칭을 수행합니다. 이미 클럽에 속한 사용자는 이번 실행에서 제외됩니다.")
 
     users_raw = persistence.load_list('users')
     if not users_raw:
