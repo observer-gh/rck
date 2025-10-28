@@ -39,25 +39,53 @@ def view():
         from utils.ids import create_id_with_prefix
         from dataclasses import asdict as _asdict
         import datetime as _dt
-        users_all = _p.load_list('users')
-        # Ensure fixed demo peers exist
-        from ui.components.demo import _seed_demo_peers  # reuse existing logic
+        # Load users via user service to ensure demo_user reflects demo_user_state.json
+        from services import users as user_svc
+        users_all = user_svc.load_users()
         # pick region from existing demo_user or default 서울
         demo_region_raw = next(
             (u.get('region') for u in users_all if u.get('id') == 'demo_user'), '서울')
         demo_region = demo_region_raw if isinstance(
             demo_region_raw, str) and demo_region_raw else '서울'
-        # Ensure canonical demo user exists before seeding peers
-        if not any(u.get('id') == 'demo_user' for u in users_all):
-            from domain.constants import get_demo_user_defaults
-            users_all.append(get_demo_user_defaults())
-            _p.replace_all('users', users_all)
-            users_all = _p.load_list('users')
-        _seed_demo_peers(demo_region)
-        users_all = _p.load_list('users')
-        clubs_existing = _p.load_list('clubs')
-        # Detect or create fixed 6-member demo club using Korean peer names
+        # Ensure demo cohort (demo_user + 5 peers) by importing from seed_users.json (append-only)
+        # This replaces prior dynamic creation via _seed_demo_peers to keep cohort consistent with seed file.
+        import os
+        import json
+        base_dir = os.path.abspath(os.path.join(
+            os.path.dirname(__file__), '..', '..'))
+        seed_path = os.path.join(base_dir, 'data', 'seed_users.json')
         PEER_NAMES = {"김서준", "이민준", "박서연", "최지후", "정하윤"}
+        try:
+            with open(seed_path, 'r', encoding='utf-8') as f:
+                seed_data = json.load(f)
+        except Exception as e:
+            seed_data = []
+            st.warning(f"시드 사용자 로드 실패: {e}")
+        # Filter for demo_user + peer cohort from seed file
+        cohort_seed_records = [r for r in seed_data if (
+            r.get('id') == 'demo_user' or r.get('name') in PEER_NAMES)]
+        existing_ids = {u.get('id') for u in users_all}
+        existing_names = {u.get('name') for u in users_all}
+        to_add = []
+        for r in cohort_seed_records:
+            # Allow overwrite of demo_user if different (by id), else skip peers by name
+            if r.get('id') == 'demo_user':
+                # If demo_user already exists, we preserve existing (state-driven) values; do not overwrite
+                if 'demo_user' not in existing_ids:
+                    to_add.append(r)
+            else:
+                if r.get('name') not in existing_names:
+                    # Set region to current demo region for consistency
+                    new_r = dict(r)
+                    new_r['region'] = demo_region
+                    to_add.append(new_r)
+        if to_add:
+            users_all_extended = users_all + to_add
+            _p.replace_all('users', users_all_extended)
+            # Reload via service to keep consistency with state overwrites
+            users_all = user_svc.load_users()
+        clubs_existing = _p.load_list('clubs')
+        # Detect or create fixed 6-member demo club using Korean peer names (PEER_NAMES defined above)
         demo_user_rec = next((u for u in users_all if u.get(
             'id') == 'demo_user' or u.get('name') == '데모사용자'), None)
         peer_user_recs = [u for u in users_all if u.get('name') in PEER_NAMES]

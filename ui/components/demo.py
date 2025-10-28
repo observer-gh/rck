@@ -170,28 +170,31 @@ def render_demo_sidebar(context: str = ""):
     from demo import sample_data
     import datetime as _dt
     st.sidebar.markdown("#### 🧪 Demo")
-    st.sidebar.markdown("<div style='font-size:11px; padding:4px 8px; background:#f5f7fa; border:1px solid #d0d7e2; border-radius:6px; display:inline-block; margin-bottom:6px;'>✏️ 데모 전용 영역</div>", unsafe_allow_html=True)
     users = persistence.load_list('users')
     clubs = persistence.load_list('clubs')
     _PEER_NAMES = {"김서준", "이민준", "박서연", "최지후", "정하윤"}
     demo_cluster = [u for u in users if u.get(
         'id') == 'demo_user' or u.get('name') in _PEER_NAMES]
-    demo_count = len(demo_cluster)
-    st.sidebar.write(f"demo cohort: {demo_count}/6")
+    demo_seeded = len(demo_cluster) >= 6
+    # Simplified indicator (removed cohort count/progress bar)
+    st.sidebar.markdown(
+        f"<div style='font-size:11px; padding:4px 8px; background:#eef5ff; border:1px solid #c2d5f3; border-radius:6px; display:inline-block; margin-bottom:6px;'>"
+        f"Seeded: <strong>{'YES' if demo_seeded else 'NO'}</strong></div>",
+        unsafe_allow_html=True
+    )
     # Region fallback: demo_user region else 서울
     raw_region = next((u.get('region')
                       for u in users if u.get('id') == 'demo_user'), None)
     region = raw_region if isinstance(raw_region, str) and raw_region else '서울'
     if 'demo_seed_done' not in st.session_state:
-        st.session_state.demo_seed_done = demo_count >= 6
-    seed_disabled = st.session_state.demo_seed_done and demo_count >= 6
+        st.session_state.demo_seed_done = demo_seeded
+    seed_disabled = st.session_state.demo_seed_done and demo_seeded
     from domain.constants import get_demo_user_defaults
     # Arrange buttons now as: Seed (full cohort) | Reset
     col_seed_full, col_reset = st.sidebar.columns(2)
     full_disabled = len(persistence.load_list('users')) >= 30
     with col_seed_full:
-        if st.button("Seed", key="btn_seed_full", disabled=full_disabled, help="프리셋 30명 사용자 로드 (5개 버킷 × 6명)"):
-            # Hard-coded seed set ensures 5 buckets of 6 users → 5 clubs when target_size=6.
+        if st.button("Seed", key="btn_seed_full", disabled=full_disabled, help="프리셋 사용자 추가 (이미 존재하는 사용자는 건너뜀)"):
             import os
             import json
             base_dir = os.path.abspath(os.path.join(
@@ -208,9 +211,22 @@ def render_demo_sidebar(context: str = ""):
             if not seed_users:
                 st.sidebar.error("seed_users.json 비어있거나 로드 불가")
             else:
-                persistence.replace_all('users', seed_users)
+                existing = persistence.load_list('users')
+                existing_ids = {u.get('id') for u in existing}
+                existing_names = {u.get('name') for u in existing}
+                to_add = []
+                for su in seed_users:
+                    sid = su.get('id')
+                    sname = su.get('name')
+                    # Skip if id or name already present (covers demo_user & cohort)
+                    if sid in existing_ids or sname in existing_names:
+                        continue
+                    to_add.append(su)
+                if to_add:
+                    persistence.replace_all('users', existing + to_add)
                 st.session_state.demo_seed_done = True
-                st.sidebar.success(f"시드 완료: 총 {len(seed_users)}명 (예상 클럽 5개)")
+                st.sidebar.success(
+                    f"시드 추가 완료: 신규 {len(to_add)}명 / 총 {len(existing) + len(to_add)}명")
                 st.rerun()
     # Reset button (third column)
     with col_reset:

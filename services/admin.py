@@ -18,7 +18,9 @@ from demo import sample_data
 
 def get_user_map():
     """Returns a dictionary mapping user IDs to user objects."""
-    return {u['id']: u for u in persistence.load_list('users')}
+    # Use user service loader to ensure demo_user is refreshed from state file.
+    users = user_svc.load_users()
+    return {u['id']: u for u in users}
 
 
 def get_user_name(user_id, user_map):

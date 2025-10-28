@@ -14,6 +14,7 @@ import json
 _BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 _DATA_DIR = os.path.join(_BASE_DIR, 'data')
 _SEED_USERS_PATH = os.path.join(_DATA_DIR, 'seed_users.json')
+_DEMO_STATE_PATH = os.path.join(_DATA_DIR, 'demo_user_state.json')
 
 
 def _load_seed_users():
@@ -28,15 +29,46 @@ def _load_seed_users():
 
 
 def ensure_demo_user(users: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Ensure demo user exists only if missing. Does NOT overwrite existing demo record."""
+    """Ensure demo user exists and force its content to match demo_user_state.json if available.
+
+    Steps:
+    1. If users list empty, attempt bootstrap from seed_users.json.
+    2. Load demo_user_state.json; fallback to get_demo_user() if missing/invalid.
+    3. Overwrite existing demo_user entry or insert it (at front) if absent.
+    4. Persist only if a change was applied.
+    """
+    changed = False
     if not users:
-        # If completely empty, bootstrap from seed set (includes demo_user at index 0)
         seed_set = _load_seed_users()
         if seed_set:
-            persistence.replace_all('users', seed_set)
-            return seed_set
-    if not any(u.get('id') == 'demo_user' for u in users):
-        users.append(get_demo_user())
+            users = seed_set
+            changed = True
+
+    # Load state file
+    demo_state: Dict[str, Any] = {}
+    try:
+        with open(_DEMO_STATE_PATH, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            if isinstance(data, dict) and data.get('id') == 'demo_user':
+                demo_state = data
+    except Exception:
+        demo_state = {}
+    if not demo_state:  # fallback
+        demo_state = get_demo_user()
+
+    # Find existing demo_user index
+    idx = next((i for i, u in enumerate(users)
+               if u.get('id') == 'demo_user'), None)
+    if idx is None:
+        users.insert(0, demo_state)
+        changed = True
+    else:
+        # Only overwrite if different
+        if users[idx] != demo_state:
+            users[idx] = demo_state
+            changed = True
+
+    if changed:
         persistence.replace_all('users', users)
     return users
 
