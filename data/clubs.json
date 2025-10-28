@@ -1,1 +1,43 @@
-[]
+[
+  {
+    "id": "club_1761616678852_ealt",
+    "member_ids": [
+      "demo_user",
+      "seed_u1",
+      "seed_u2",
+      "seed_u3",
+      "seed_u4",
+      "seed_u5"
+    ],
+    "leader_id": "demo_user",
+    "name": "서울 축구 클럽 A (demo)",
+    "primary_interest": "축구",
+    "status": "Active",
+    "chat_link": null,
+    "match_score_breakdown": {},
+    "explanations": {
+      "demo_user": {
+        "그룹": "고정 데모 팀 A"
+      },
+      "seed_u1": {
+        "그룹": "고정 데모 팀 A"
+      },
+      "seed_u2": {
+        "그룹": "고정 데모 팀 A"
+      },
+      "seed_u3": {
+        "그룹": "고정 데모 팀 A"
+      },
+      "seed_u4": {
+        "그룹": "고정 데모 팀 A"
+      },
+      "seed_u5": {
+        "그룹": "고정 데모 팀 A"
+      }
+    },
+    "match_run_id": null,
+    "created_at": "2025-10-28T01:57:58Z",
+    "updated_at": "2025-10-28T01:57:58Z",
+    "is_demo_fixed": true
+  }
+]

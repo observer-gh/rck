@@ -1,36 +1,13 @@
 import streamlit as st
-import logging
-import os
 import time
 
 from services import persistence, admin as admin_svc
 from utils.explanations import build_ai_match_explanation
 
-# Ensure logs directory exists for optional debug logging
-_LOG_DIR = os.path.join(os.getcwd(), 'logs')
-os.makedirs(_LOG_DIR, exist_ok=True)
-_LOG_PATH = os.path.join(_LOG_DIR, 'admin_clubs_debug.log')
-if not logging.getLogger('admin_clubs').handlers:
-    _handler = logging.FileHandler(_LOG_PATH, encoding='utf-8')
-    _fmt = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-    _handler.setFormatter(_fmt)
-    logger = logging.getLogger('admin_clubs')
-    logger.setLevel(logging.INFO)
-    logger.addHandler(_handler)
-else:
-    logger = logging.getLogger('admin_clubs')
-
 
 def render_clubs_tab():
     """Displays all clubs, filterable by match run, and allows activation."""
     st.subheader("📊 클럽 관리")
-    # Debug toggle (session persisted)
-    dbg_col, _ = st.columns([1, 4])
-    with dbg_col:
-        debug_enabled = st.checkbox(
-            "🛠 Debug", key='clubs_debug_enabled', help='AI 설명 생성 관련 내부 데이터를 로그로 기록합니다.')
-    if debug_enabled:
-        st.caption(f"Debug log: `{_LOG_PATH}`")
 
     clubs_all = persistence.load_list('clubs')
     if not clubs_all:
@@ -107,13 +84,8 @@ def render_clubs_tab():
             # AI Explanation Section (admin view parity with legacy fallback)
             member_ids = c.get('member_ids', []) or []
             if member_ids:
-                start_ts = time.time()
                 try:
                     expl = build_ai_match_explanation(c, user_map)
-                    elapsed = (time.time() - start_ts) * 1000
-                    if debug_enabled:
-                        logger.info(
-                            f"club_id={c.get('id')} members={member_ids} leader={c.get('leader_id')} expl_time_ms={elapsed:.2f} bullets={len(expl.get('bullets', []))} member_details={len(expl.get('member_details', []))}")
                     with st.expander("AI 매칭 설명", expanded=False):
                         st.markdown(f"**요약:** {expl['summary']}")
                         for b in expl['bullets']:
@@ -127,9 +99,6 @@ def render_clubs_tab():
                             for line in expl.get('member_details', []):
                                 st.markdown(f"  * {line}")
                 except Exception as e:
-                    if debug_enabled:
-                        logger.exception(
-                            f"Explanation failed club_id={c.get('id')}: {e}")
                     st.caption(f"AI 설명 생성 실패: {e}")
 
             # Activation / Deactivation UI
