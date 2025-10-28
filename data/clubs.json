@@ -1,6 +1,6 @@
 [
   {
-    "id": "club_1761616678852_ealt",
+    "id": "club_1761617157301_r9qb",
     "member_ids": [
       "demo_user",
       "seed_u1",
@@ -36,8 +36,8 @@
       }
     },
     "match_run_id": null,
-    "created_at": "2025-10-28T01:57:58Z",
-    "updated_at": "2025-10-28T01:57:58Z",
+    "created_at": "2025-10-28T02:05:57Z",
+    "updated_at": "2025-10-28T02:05:57Z",
     "is_demo_fixed": true
   }
 ]

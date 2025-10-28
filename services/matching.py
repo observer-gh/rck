@@ -279,10 +279,12 @@ def compute_matches_demo_30(target_size: int = 6) -> List[Club]:
     import json
     from domain.models import user_from_dict, Club
     from dataclasses import asdict as _asdict
+    from utils.paths import resolve_data_file
 
     # Resolve seed file path
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    seed_path = os.path.join(base_dir, 'data', 'seed_users.json')
+    seed_path = resolve_data_file('seed_users.json')
+    if not seed_path:
+        return []
     try:
         with open(seed_path, 'r', encoding='utf-8') as f:
             seed_data = json.load(f)

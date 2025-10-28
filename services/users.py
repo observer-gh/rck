@@ -10,14 +10,17 @@ from services import persistence
 from domain.constants import get_demo_user, save_demo_user
 import os
 import json
+from utils.paths import resolve_data_file
 
-_BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-_DATA_DIR = os.path.join(_BASE_DIR, 'data')
-_SEED_USERS_PATH = os.path.join(_DATA_DIR, 'seed_users.json')
-_DEMO_STATE_PATH = os.path.join(_DATA_DIR, 'demo_user_state.json')
+_SEED_USERS_PATH = resolve_data_file('seed_users.json') or os.path.join(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), '..')), 'data', 'seed_users.json')
+_DEMO_STATE_PATH = resolve_data_file('demo_user_state.json') or os.path.join(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), '..')), 'data', 'demo_user_state.json')
 
 
 def _load_seed_users():
+    if not _SEED_USERS_PATH or not os.path.exists(_SEED_USERS_PATH):
+        return []
     try:
         with open(_SEED_USERS_PATH, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -46,12 +49,15 @@ def ensure_demo_user(users: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
     # Load state file
     demo_state: Dict[str, Any] = {}
-    try:
-        with open(_DEMO_STATE_PATH, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            if isinstance(data, dict) and data.get('id') == 'demo_user':
-                demo_state = data
-    except Exception:
+    if _DEMO_STATE_PATH and os.path.exists(_DEMO_STATE_PATH):
+        try:
+            with open(_DEMO_STATE_PATH, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if isinstance(data, dict) and data.get('id') == 'demo_user':
+                    demo_state = data
+        except Exception:
+            demo_state = {}
+    else:
         demo_state = {}
     if not demo_state:  # fallback
         demo_state = get_demo_user()

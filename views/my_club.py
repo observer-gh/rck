@@ -56,10 +56,9 @@ def view():
         # This replaces prior dynamic creation via _seed_demo_peers to keep cohort consistent with seed file.
         import os
         import json
-        # base_dir should resolve to project root (parent of 'views'); one level up is sufficient
-        base_dir = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..'))
-        seed_path = os.path.join(base_dir, 'data', 'seed_users.json')
+        from utils.paths import resolve_data_file
+        seed_path = resolve_data_file('seed_users.json') or os.path.join(os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..')), 'data', 'seed_users.json')
         INITIAL_PEER_IDS = ["seed_u1", "seed_u2",
                             "seed_u3", "seed_u4", "seed_u5"]
         try:

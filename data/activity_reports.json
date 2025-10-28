@@ -1,9 +1,9 @@
 [
   {
-    "id": "rep_1761616690760_zr05",
-    "club_id": "club_1761616678852_ealt",
+    "id": "rep_1761617173875_1vnh",
+    "club_id": "club_1761617157301_r9qb",
     "date": "2025-10-28",
-    "photo_filename": "image.png",
+    "photo_filename": "이미지 (2).png",
     "raw_text": "야외 잔디에서 스피드·코디네이션 드릴 진행. 동시 스타트 스프린트와 페이스 맞추기 반복으로 집중도 상승, 구성원 간 콜과 격려 자연스럽게 형성. 마무리 후 다음 모임에 미니게임+회복 스트레칭 블록 추가 계획.",
     "formatted_report": "활동일자: 2025-10-28, 참여인원: 6, 활동내용: 야외 잔디에서 스피드·코디네이션 드릴 진행. 동시 스타트 스프린트와 페이스 맞추기 반복으로 집중도 상승, 구성원 간 콜과 격려 자연스럽게 형성. 마무리 후 다음 모임에 미니게임+회복 스트레칭 블록 추가 계획.",
     "participant_override": 6,
@@ -13,33 +13,33 @@
       "diversity": 1.0
     },
     "status": "Verified",
-    "verified_at": "2025-10-28T01:58:26.406316Z",
+    "verified_at": "2025-10-28T02:06:27.385698Z",
     "points_awarded": 10,
-    "created_at": "2025-10-28T01:58:10Z",
+    "created_at": "2025-10-28T02:06:13Z",
     "participant_ids": [
-      "seed_u1",
-      "seed_u5",
-      "seed_u4",
       "seed_u2",
+      "seed_u1",
+      "demo_user",
       "seed_u3",
-      "demo_user"
+      "seed_u4",
+      "seed_u5"
     ],
     "image_analysis": {
       "tags": [
+        "교류",
         "게임",
-        "활발",
-        "학습"
+        "전략"
       ],
       "relevance_score": 0.33,
       "safety": "OK",
       "image": {
-        "file": "image.png",
-        "exists": true,
-        "size_bytes": 1315248,
-        "width": 883,
-        "height": 561
+        "file": "이미지 (2).png",
+        "exists": false,
+        "size_bytes": null,
+        "width": null,
+        "height": null
       },
-      "commentary": "이미지에 추정 태그 게임, 활발, 학습 감지. 보고 내용과의 관련도 33%"
+      "commentary": "이미지에 추정 태그 교류, 게임, 전략 감지. 보고 내용과의 관련도 33%"
     }
   }
 ]

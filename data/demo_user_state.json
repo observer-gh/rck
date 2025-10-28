@@ -1,7 +1,7 @@
 {
   "id": "demo_user",
-  "name": "데모사용자",
-  "nickname": "nemos",
+  "name": "두범쓰",
+  "nickname": "nemo",
   "employee_number": "15000001",
   "region": "서울",
   "rank": "사원",
@@ -13,8 +13,8 @@
   "survey_answers": [
     2,
     2,
-    2,
-    2,
+    1,
+    1,
     2,
     2,
     2
