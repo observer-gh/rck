@@ -1,124 +1,14 @@
 [
   {
     "id": "demo_user",
-    "name": "두범쓰",
-    "nickname": "nemo",
+    "name": "데모사용자",
+    "nickname": "nemos",
     "employee_number": "15000001",
     "region": "서울",
     "rank": "사원",
     "interests": [
       "축구",
       "영화보기"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      2,
-      2,
-      1,
-      1,
-      2,
-      2,
-      2
-    ]
-  },
-  {
-    "id": "seed_u1",
-    "name": "김서준",
-    "nickname": "Alex",
-    "employee_number": "15000002",
-    "region": "서울",
-    "rank": "대리",
-    "interests": [
-      "축구",
-      "보드게임"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2
-    ]
-  },
-  {
-    "id": "seed_u2",
-    "name": "박서연",
-    "nickname": "Grace",
-    "employee_number": "15000003",
-    "region": "서울",
-    "rank": "과장",
-    "interests": [
-      "축구",
-      "독서"
-    ],
-    "personality_trait": "외향",
-    "survey_answers": [
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2
-    ]
-  },
-  {
-    "id": "seed_u3",
-    "name": "최지후",
-    "nickname": "Leo",
-    "employee_number": "15000004",
-    "region": "서울",
-    "rank": "차장",
-    "interests": [
-      "축구",
-      "사진"
-    ],
-    "personality_trait": "중간",
-    "survey_answers": [
-      2,
-      2,
-      2,
-      2,
-      2,
-      2,
-      2
-    ]
-  },
-  {
-    "id": "seed_u4",
-    "name": "정하윤",
-    "nickname": "Hailey",
-    "employee_number": "15000005",
-    "region": "서울",
-    "rank": "부장",
-    "interests": [
-      "축구",
-      "러닝"
-    ],
-    "personality_trait": "외향",
-    "survey_answers": [
-      1,
-      1,
-      1,
-      1,
-      1,
-      1,
-      1
-    ]
-  },
-  {
-    "id": "seed_u5",
-    "name": "이민준",
-    "nickname": "Min",
-    "employee_number": "15000006",
-    "region": "서울",
-    "rank": "사원",
-    "interests": [
-      "축구",
-      "요리"
     ],
     "personality_trait": "중간",
     "survey_answers": [

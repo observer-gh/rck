@@ -6,14 +6,14 @@ from services import persistence
 from domain.constants import get_demo_user
 
 # Import the page rendering functions from the new modules
-from views import user_signup, my_club, activity_report, demo_script, admin_dashboard, profile
+from views import registration, my_club, activity_report, demo_script, admin_dashboard, profile
 
 # --- Page Registry ---
 # Maps a page key to its label, rendering function from the imported module, and admin status.
 PAGE_REGISTRY = {
-    "user_signup": {
+    "registration": {
         "label": "📝 프로필/설문",
-        "render_func": user_signup.view,
+        "render_func": registration.view,
         "admin": False,
     },
     "profile": {
