@@ -3,9 +3,10 @@ from unittest.mock import patch, MagicMock
 
 # Mock streamlit before importing the app
 st_mock = MagicMock()
+pd_mock = MagicMock()
 
 def test_page_registry_structure():
-    with patch.dict("sys.modules", {"streamlit": st_mock}):
+    with patch.dict("sys.modules", {"streamlit": st_mock, "pandas": pd_mock}):
         from app import PAGE_REGISTRY
     """
     Tests that the PAGE_REGISTRY has the correct structure.
@@ -20,7 +21,7 @@ def test_page_registry_structure():
 
 
 def test_admin_pages_are_correctly_flagged():
-    with patch.dict("sys.modules", {"streamlit": st_mock}):
+    with patch.dict("sys.modules", {"streamlit": st_mock, "pandas": pd_mock}):
         from app import PAGE_REGISTRY
     """
     Tests that only the admin dashboard is flagged as an admin page.
@@ -31,7 +32,7 @@ def test_admin_pages_are_correctly_flagged():
 
 
 def test_user_pages_are_correctly_flagged():
-    with patch.dict("sys.modules", {"streamlit": st_mock}):
+    with patch.dict("sys.modules", {"streamlit": st_mock, "pandas": pd_mock}):
         from app import PAGE_REGISTRY
     """
     Tests that the correct pages are flagged as non-admin (user-facing).
@@ -39,13 +40,13 @@ def test_user_pages_are_correctly_flagged():
     user_pages = [key for key, value in PAGE_REGISTRY.items()
                   if not value["admin"]]
     # Updated to include newly added 'profile' page
-    expected_user_pages = ["user_signup", "profile",
+    expected_user_pages = ["registration", "profile",
                            "my_club", "activity_report", "demo_script"]
     assert sorted(user_pages) == sorted(expected_user_pages)
 
 
 def test_all_render_functions_are_callable():
-    with patch.dict("sys.modules", {"streamlit": st_mock}):
+    with patch.dict("sys.modules", {"streamlit": st_mock, "pandas": pd_mock}):
         from app import PAGE_REGISTRY
     """
     Ensures that every page in the registry points to a callable function.

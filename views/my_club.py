@@ -1,7 +1,7 @@
 import streamlit as st
 from services import persistence
 from typing import Dict
-from ui.components import club_card, styled_member_chips
+from ui.components import club_card
 
 
 def _user_map():

@@ -1,6 +1,6 @@
 import streamlit as st
 from services import activity, persistence
-from ui.components import report_card, status_badge, dataframe_with_status
+from ui.components import report_card, status_badge
 import pandas as pd
 from io import StringIO
 from typing import Optional  # Python 3.9 compatibility for Optional[str]
